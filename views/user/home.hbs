@@ -1,0 +1,356 @@
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        /* Desktop view */
+.single-slider-img img {
+    height: auto; /* Maintain aspect ratio */
+    max-width: 100%; /* Prevents overflow */
+}
+
+/* Mobile view */
+@media (max-width: 768px) {
+    .single-slider-img {
+        text-align: center; /* Center-align the image container */
+    }
+
+    .single-slider-img img {
+        width: 50%; /* Adjust image size for mobile */
+        height: auto; /* Maintain aspect ratio */
+        max-width: 100%; /* Ensure it doesn't exceed container width */
+        margin: 100px 100px; /* Center the image */
+        display: block; /* Ensure it's treated as a block element for centering */
+    }
+
+    /* Adjust text content layout */
+    .hero-slider-content-2 {
+        text-align: center; /* Center-align text on mobile */
+        padding: 10px; /* Add some padding for mobile */
+    }
+    
+    .hero-slider-content-2 h2, 
+    .hero-slider-content-2 h1, 
+    .hero-slider-content-2 p {
+        font-size: 90%; /* Slightly reduce text size on mobile */
+    }
+
+    .btn-brush {
+        padding: 10px 20px; /* Make buttons smaller */
+        font-size: 14px; /* Adjust button text size */
+    }
+}
+
+
+
+    </style>
+</head>
+
+    <main class="main">
+            <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/" rel="nofollow">Home</a>
+                {{!-- <span></span> Shop --}}
+            </div>
+        </div>
+    </div>   
+        <section class="home-slider position-relative pt-50">
+            <div class="hero-slider-1 dot-style-1 dot-style-1-position-1">
+                <div class="single-hero-slider single-animation-wrap">
+                    <div class="container">
+                        <div class="row align-items-center slider-animated-1">
+                            <div class="col-lg-5 col-md-6">
+                                <div class="hero-slider-content-2">
+                                    <h4 class="animated">Trade-in offer</h4>
+                                    <h2 class="animated fw-900">Supper value deals</h2>
+                                    <h1 class="animated fw-900 text-brand">On all products</h1>
+                                    <p class="animated">Save more with coupons & up to 70% off</p>
+                                    <a class="animated btn btn-brush btn-brush-3" href="shop-product-right.html"> Shop Now </a>
+                                </div>
+                            </div>
+                            <div class="col-lg-7 col-md-6">
+                                <div class="single-slider-img single-slider-img-1">
+                                    <img class="animated slider-1-1" src="images/banners/banner1.jpg" alt="">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="single-hero-slider single-animation-wrap">
+                    <div class="container">
+                        <div class="row align-items-center slider-animated-1">
+                            <div class="col-lg-5 col-md-6">
+                                <div class="hero-slider-content-2">
+                                    <h4 class="animated">Hot promotions</h4>
+                                    <h2 class="animated fw-900">Enrich knowledge</h2>
+                                    <h1 class="animated fw-900 text-7">Great Collection</h1>
+                                    <p class="animated">Save more with coupons & up to 20% off</p>
+                                    <a class="animated btn btn-brush btn-brush-2" href="shop-product-right.html"> Discover Now </a>
+                                </div>
+                            </div>
+                            <div class="col-lg-7 col-md-6">
+                                <div class="single-slider-img single-slider-img-1">
+                                    <img class="animated slider-1-2" src="images/banners/banner2.jpg" alt="">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slider-arrow hero-slider-1-arrow"></div>
+        </section>
+        <section class="featured section-padding position-relative">            
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-2 col-md-4 mb-md-3 mb-lg-0">
+                        <div class="banner-features wow fadeIn animated hover-up">
+                            <img src="assets/imgs/theme/icons/feature-1.png" alt="">
+                            <h4 class="bg-1">Free Shipping</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div style="height: 30px;"><br><br></div>
+        <section class="featured section-padding position-relative">            
+            {{#if coupons}}
+            <div class="container">
+                <div class="row">
+                    
+                    <h3 style= "text-align: center;">Available Coupons</h3>
+                    
+                    <div><br></div>
+                    {{#each coupons}}
+                    <div class="col-lg-2 col-md-4 mb-md-3 mb-lg-0" style="text-align: center;">
+                            <div class="banner-features wow fadeIn animated hover-up">
+                            <img src="assets/imgs/theme/icons/feature-{{increment @index}}.png" alt="">
+                            <h4 class="bg-1 coupon-code" onclick="copyCode('{{this.code}}')">{{this.code}}</h4>
+                    </div>
+                    </div>
+                    {{/each}}
+                </div>
+                
+            </div>
+            {{/if}}
+        </section>
+        <section class="product-tabs section-padding position-relative wow fadeIn animated">
+            <div class="bg-square"></div>
+            <div class="container">
+                <div class="tab-header">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="nav-tab-one" data-bs-toggle="tab" data-bs-target="#tab-one" type="button" role="tab" aria-controls="tab-one" aria-selected="true">Featured</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="nav-tab-two" data-bs-toggle="tab" data-bs-target="#tab-two" type="button" role="tab" aria-controls="tab-two" aria-selected="false">Popular</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="nav-tab-three" data-bs-toggle="tab" data-bs-target="#tab-three" type="button" role="tab" aria-controls="tab-three" aria-selected="false">New added</button>
+                        </li>
+                    </ul>
+                    <a href="/product" class="view-more d-none d-md-flex">View More<i class="fi-rs-angle-double-small-right"></i></a>
+                </div>
+                <!--End nav-tabs-->
+                <div class="tab-content wow fadeIn animated" id="myTabContent">
+                    <div class="tab-pane fade show active" id="tab-one" role="tabpanel" aria-labelledby="tab-one">
+                        <div class="row product-grid-4">
+
+                            {{#each loadProData}}
+                            <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                                <div class="product-cart-wrap mb-30">
+                                    <div class="product-img-action-wrap">
+                                        <div class="product-img product-img-zoom">
+                                            <a href="/productview?id={{this._id}}">
+                                                <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="">
+                                                <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="">
+                                            </a>
+                                        </div>
+                                        
+                                        <div class="product-badges product-badges-position product-badges-mrg">
+                                            <span class="hot">Hot</span>
+                                        </div>
+                                    </div>
+                                    <div class="product-content-wrap">
+                                        <div class="product-category">
+                                            <a >{{this.category.category}}</a>
+                                        </div>
+                                        <h2><a href="/productDetails/{{this._id}}">{{name}}</a></h2>
+                                        <div class="rating-result" title="90%">
+                                            <span>
+                                                <span>90%</span>
+                                            </span>
+                                        </div>
+                                        <div class="product-price">
+                                            <span>₹{{price}}</span>
+                                            <span class="old-price">₹{{price}}</span>
+                                        </div>
+                                        <div class="product-action-1 show">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{/each}}
+                        </div>
+                        
+                        <!--End product-grid-4-->
+                    </div>
+                    <!--En tab one (Featured)-->
+                    <div class="tab-pane fade" id="tab-two" role="tabpanel" aria-labelledby="tab-two">
+                        <div class="row product-grid-4">
+                            {{#each popularCakes}}
+                            <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                                <div class="product-cart-wrap mb-30">
+                                    <div class="product-img-action-wrap">
+                                        <div class="product-img product-img-zoom">
+                                            <a href="/productview?id={{this.productDetails._id}}">
+                                                <img class="default-img" src="/images/products/{{this.productDetails.imageUrl.[0]}}" alt="">
+                                                <img class="hover-img" src="/images/products/{{this.productDetails.imageUrl.[1]}}" alt="">
+                                            </a>
+                                        </div>
+                                       
+                                        <div class="product-badges product-badges-position product-badges-mrg">
+                                            <span class="hot">Hot</span>
+                                        </div>
+                                    </div>
+                                    <div class="product-content-wrap">
+                                        <div class="product-category">
+                                            <a >{{this.categoryDetails.category}} </a>
+                                        </div>
+                                        <h2><a >{{this.productDetails.name}}</a></h2>
+                                        <div class="rating-result" title="90%">
+                                            <span>
+                                                <span>90%</span>
+                                            </span>
+                                        </div>
+                                        <div class="product-price">
+                                            <span>{{this.productDetails.name}} </span>
+                                            <span class="old-price">₹245.8</span>
+                                        </div>
+                                        <div class="product-action-1 show">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{/each}}
+                        </div>
+                        <!--End product-grid-4-->
+                    </div>
+                    <!--En tab two (Popular)-->
+                    <div class="tab-pane fade" id="tab-three" role="tabpanel" aria-labelledby="tab-three">
+                        <div class="row product-grid-4">
+                            {{#each newProduct}}
+                            <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                                <div class="product-cart-wrap mb-30">
+                                    <div class="product-img-action-wrap">
+                                        <div class="product-img product-img-zoom">
+                                            <a href="/productview?id={{this._id}}">
+                                                <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="">
+                                                <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="">
+                                            </a>
+                                        </div>
+                                        
+                                        <div class="product-badges product-badges-position product-badges-mrg">
+                                            <span class="hot">Hot</span>
+                                        </div>
+                                    </div>
+                                    <div class="product-content-wrap">
+                                        <div class="product-category">
+                                            <a href="shop-grid-right.html">{{this.category.category}}</a>
+                                        </div>
+                                        <h2><a href="/productDetails/{{this._id}}">{{name}}</a></h2>
+                                        <div class="rating-result" title="90%">
+                                            <span>
+                                                <span>90%</span>
+                                            </span>
+                                        </div>
+                                        <div class="product-price">
+                                            <span>₹{{price}}</span>
+                                            <span class="old-price">₹{{price}}</span>
+                                        </div>
+                                        <div class="product-action-1 show">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{/each}}
+                        </div>
+                        <!--End product-grid-4-->
+                    </div>
+                    <!--En tab three (New added)-->
+                </div>
+                <!--End tab-content-->
+            </div>
+        </section>
+        <section class="banner-2 section-padding pb-0">
+            <div class="container">
+                <div class="banner-img banner-big wow fadeIn animated f-none">
+                    {{!-- <img src="/images/banners/mario1.jpg" alt=""> --}}
+                    <div class="banner-text d-md-block d-none">
+                        <h1 class="fw-600 mb-20">We're on Sale <br>Grab the oppurtunity</h1>
+                        <a href="/product" class="btn">Shop Now <i class="fi-rs-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="popular-categories section-padding mt-15 mb-25">
+            <div class="container wow fadeIn animated"><br>
+                <div class="carausel-6-columns-cover position-relative">
+                    <div class="slider-arrow slider-arrow-2 carausel-6-columns-arrow" id="carausel-6-columns-arrows"></div>
+                    <div class="carausel-6-columns" id="carausel-6-columns">
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+     <!-- Category Section Start -->
+    {{!-- <section class="popular-categories section-padding mt-15 mb-25">
+      <div class="container wow fadeIn animated">
+        <h3 class="section-title mb-20"><span>All Categories</span></h3>
+
+        <div class="carausel-6-columns-cover position-relative">
+          <div
+            class="slider-arrow slider-arrow-2 carausel-6-columns-arrow"
+            id="carausel-6-columns-arrows"
+          ></div>
+          <div class="carausel-6-columns" id="carausel-6-columns">
+            {{#each category}}
+              <div class="card-1">
+                <figure class="img-hover-scale overflow-hidden">
+                  <a ><img
+                      src="/assets/imgs/products/{{imageUrl}}"
+                      alt=""
+                    /></a>
+                </figure>
+                <h5><a >{{this.category}}</a></h5>
+              </div>
+            {{/each}}
+          </div>
+        </div>
+
+      </div>
+    </section> --}}
+    <!-- Category Section End -->       
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        window.copyCode = function(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                Swal.fire("Copied!", "Coupon code copied to clipboard!", "success");
+            }).catch(err => {
+                console.error('Could not copy code: ', err);
+                Swal.fire("Error!", "Failed to copy coupon code.", "error");
+            });
+        };
+    });
+</script>
+
+   
+</body>
+
+
+<!-- Mirrored from wp.alithemes.com/html/evara/evara-frontend// by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:25:49 GMT -->

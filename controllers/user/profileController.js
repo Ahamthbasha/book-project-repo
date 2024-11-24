@@ -21,16 +21,19 @@ const editDetails=async(req,res)=>{
     }
 }
 
+
+//changes
 const updateDetails=async(req,res)=>{
     try{
         const id=req.params.id
-        await User.findByIdAndUpdate(id,{
+        const updatedUser=await User.findByIdAndUpdate(id,{
             $set:{
               name:req.body.name,
               mobile:req.body.mobile,
               email:req.body.email,  
             }
-        })
+        },{new:true})
+        req.session.user=updatedUser
         res.redirect("/profile")
     }catch(error){
         console.log(error)

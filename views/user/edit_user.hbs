@@ -152,7 +152,7 @@
         var emailerror = document.getElementById('emailError')
         var phonenoerror = document.getElementById('phonenoError')
 
-        var userPattern = /^[a-zA-Z0-9]{3,}$/;
+        var userPattern = /^(?:[a-zA-Z]+(?: [a-zA-Z]+)*){5,}$/;
         var emailPattern = /^\S+@\S+\.\S+$/;
         var phonePattern = /^\d{10}$/;
 

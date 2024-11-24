@@ -1,5 +1,6 @@
 const User=require('../../models/userModel')
 const Category=require('../../models/categoryModel')
+const Product=require('../../models/productModel')
 const argon2 = require('argon2')
 const userHelper=require('../../helpers/userHelper')
 const mongoose=require('mongoose')
@@ -25,11 +26,27 @@ const loadHome = async (req, res) => {
           
       }
 
+      const loadProData = await Product.aggregate([
+        { $match: { is_blocked: false } },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "category",
+            foreignField: "_id",
+            as: "category",
+          },
+        },
+        {
+          $unwind: "$category",
+        },
+      ]);
+  
+
       const category=await Category.find({isListed:true})
   
       // console.log(userData);
      
-          res.render("user/home", { category, userData:user});
+          res.render("user/home", { category,loadProData, userData:user});
   
   
     } catch (error) {
@@ -311,6 +328,129 @@ const doLogout=async(req,res)=>{
     }
 }
 
+const getProduct = async (req, res) => {
+    let userData = false;
+    if (req.session.user) {
+
+        const user = req.session.user;
+        const id = user._id
+        userData = await User.findById(id).lean();
+        console.log(userData)
+
+    }
+
+
+
+    try {
+        let page = 1; // Initial page is always 1 for the GET request
+        const limit = 9;
+        const loadCatData = await Category.find({}).lean();
+        const proData = await Product.find({ is_blocked: false })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .populate('category', 'category')
+            .lean();
+        const count = await Product.countDocuments({ is_blocked: false });
+        const totalPages = Math.ceil(count / limit);
+        const proCount = count
+
+        const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+        //const newProduct = await Product.find({ is_blocked: false }).sort({ _id: -1 }).limit(3).lean()
+       // console.log(newProduct)
+
+        res.render('user/products', {
+            userData,
+            proData,
+            pages,
+            currentPage: page,
+            loadCatData,
+            // newProduct,
+            currentFunction: 'getProductsPage',
+            proCount
+
+        });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+const searchSortFilter = async (req, res) => {
+    const { searchQuery, sortOption, categoryFilter, page, limit } = req.body;
+    console.log(req.body);
+
+    // Construct the query object
+    const query = {};
+    if (searchQuery) {
+        console.log('searching...');
+        query.name = { $regex: searchQuery, $options: 'i' };
+        console.log(query.name);
+    }
+    if (categoryFilter) {
+        query.category = new mongoose.Types.ObjectId(categoryFilter);
+    }
+
+    // Construct the sort object
+    const sort = {};
+    switch (sortOption) {
+        case 'priceAsc':
+            sort.price = 1;
+            break;
+        case 'priceDesc':
+            sort.price = -1;
+            break;
+        case 'nameAsc':
+            sort.name = 1;
+            break;
+        case 'nameDesc':
+            sort.name = -1;
+            break;
+        case 'newArrivals':
+            sort.createdAt = -1;
+            break;
+        case 'popularity':
+            sort.popularity = -1; // Assuming there's a popularity field
+            break;
+        default:
+            sort.createdAt = -1; // Default sort by new arrivals
+    }
+
+    // Perform the query with pagination and sorting
+    const [products, totalProducts] = await Promise.all([
+        Product.find(query)
+            .populate('category')
+            .sort(sort)
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .lean(),
+        Product.countDocuments(query)
+    ]);
+
+    // Now you can work with products and totalProducts
+    // console.log(products);
+    // console.log(totalProducts);
+
+
+    res.json({ products, totalProducts });
+};
+
+
+const productDetails = async (req, res) => {
+    try {
+      const proId = req.query.id;
+      console.log(proId, "....");
+      const proData = await Product.findById(proId).lean();
+      console.log(proData);
+      let outOfStock;
+      if (proData.stock === 0) {
+        outOfStock = true;
+      }
+      res.render("user/productview", { proData, outOfStock });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
 
 
 module.exports={
@@ -323,5 +463,8 @@ module.exports={
     submitOtp,
     googleCallback,
     doLogin,
-    doLogout
+    doLogout,
+    getProduct,
+    productDetails,
+    searchSortFilter
 }

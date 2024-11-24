@@ -4,6 +4,7 @@ const adminController=require("../controllers/admin/adminController")
 const customerController=require("../controllers/admin/customerController")
 const categoryController=require("../controllers/admin/categoryController")
 const productController=require("../controllers/admin/productController")
+const orderController=require("../controllers/admin/orderController")
 const store=require("../middlewares/multer")
 const adminAuth=require('../middlewares/adminAuth')
 
@@ -38,5 +39,11 @@ router.post("/update_product/:id",store.array('image',5),adminAuth.isLogin,produ
 router.delete("/product_img_delete",adminAuth.isLogin,productController.deleteProImage)
 router.post("/block_product",adminAuth.isLogin,productController.blockProduct)
 router.get("/delete_product/:id",adminAuth.isLogin,productController.deleteProduct)
+
+//order management
+router.get('/orders', adminAuth.isLogin, orderController.getOrders)
+router.get('/order_details', adminAuth.isLogin, orderController.orderDetails)
+router.post('/change_status', orderController.changeOrderStatus)
+
 
 module.exports=router

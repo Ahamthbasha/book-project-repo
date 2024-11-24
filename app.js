@@ -8,10 +8,13 @@ const path=require("path")
 const logger = require('morgan');
 const hbs=require("hbs")
 const nocache=require("nocache")
+const multer=require("multer")
 const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter")
 const db=require("./config/db")
 db()
+const moment=require("moment")
+require('./helpers/handlebarsHelper')
 
 //configure handlebars
 app.set('views', path.join(__dirname, 'views'));

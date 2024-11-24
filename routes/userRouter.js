@@ -2,6 +2,8 @@ const express=require("express")
 const router=express.Router()
 const passport=require('passport')
 const userController=require('../controllers/user/userController')
+const profileController=require('../controllers/user/profileController')
+const addressController=require('../controllers/user/addressController')
 const auth=require('../middlewares/userAuth')
 const { isLogin, isLogout, isBlocked, logedin } = auth
 
@@ -27,5 +29,24 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
 router.get('/login', isLogout, userController.userLogin)
 router.post('/', userController.doLogin)
 router.get('/logout', userController.doLogout)
+
+//product detail page
+router.get("/product",userController.getProduct)
+router.post("/search",userController.searchSortFilter)
+router.get("/productview",userController.productDetails)
+
+//profile management
+router.get("/profile",logedin,isBlocked,profileController.loadProfile)
+router.get("/edit_details",logedin,isBlocked,profileController.editDetails)
+router.post("/update_details/:id",logedin,isBlocked,profileController.updateDetails)
+
+//address management in user profile side
+router.get('/adresses',logedin,isBlocked,addressController.manageAddress)
+router.get('/add_new_adress',logedin,isBlocked,addressController.addNewAddress)
+router.post('/add_new_adress',logedin,isBlocked,addressController.addNewAddressPost)
+router.get('/edit_address/:id',logedin,isBlocked,addressController.editAddress)
+router.post('/edit_address/:id',logedin,isBlocked,addressController.editAddressPost)
+router.get('/delete_address/:id',logedin,isBlocked,addressController.deleteAddress)
+
 
 module.exports=router

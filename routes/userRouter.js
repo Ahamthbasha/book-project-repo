@@ -4,6 +4,7 @@ const passport=require('passport')
 const userController=require('../controllers/user/userController')
 const profileController=require('../controllers/user/profileController')
 const addressController=require('../controllers/user/addressController')
+const forgetPasswordController=require('../controllers/user/forgetPasswordController')
 const auth=require('../middlewares/userAuth')
 const { isLogin, isLogout, isBlocked, logedin } = auth
 
@@ -48,5 +49,16 @@ router.get('/edit_address/:id',logedin,isBlocked,addressController.editAddress)
 router.post('/edit_address/:id',logedin,isBlocked,addressController.editAddressPost)
 router.get('/delete_address/:id',logedin,isBlocked,addressController.deleteAddress)
 
+//forgot password
+router.get('/forget_password',isLogout,forgetPasswordController.submitMail)
+router.post('/forget_password',forgetPasswordController.submitMailPost)
+
+//forgot password otp page
+router.get('/otp',isLogout,forgetPasswordController.submitOtp)
+router.post('/otp',forgetPasswordController.submitOtpPost)
+
+
+router.get("/reset_password",isLogout,forgetPasswordController.resetPassword)
+router.post("/reset_password",forgetPasswordController.resetPasswordpost)
 
 module.exports=router

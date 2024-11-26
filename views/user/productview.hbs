@@ -23,14 +23,13 @@
                                         <figure class="border-radius-10">
                                             <img src="/images/products/{{this}}" alt="product image">
                                         </figure>
-                                        {{/each}}
+                                        {{/each}}                                        
                                     </div>
                                     <!-- THUMBNAILS -->
-                                        <div class="slider-nav-thumbnails pl-15 pr-15">
+                                    <div class="slider-nav-thumbnails pl-15 pr-15">
                                         {{#each proData.imageUrl}}
-                                        <div><img src="/images/products/{{this}}" alt="product image"></div>
-                                        {{/each}}
-                                        
+                                        <div> <img src="/images/products/{{this}}" alt="product image"></div>
+                                        {{/each}}                                        
                                     </div>
                                 </div>
                                 <!-- End Gallery -->
@@ -38,12 +37,12 @@
                             <div class="col-md-6 col-sm-12 col-xs-12">
                                 <div class="detail-info">
                                     <h2 class="title-detail">{{proData.name}}</h2>
-
+                                     {{!-- <input name="product_name" value="{{product.name}}" type="hidden">                                     --}}
                                     <div class="clearfix product-price-cover">
                                         <div class="product-price primary-color float-left">
                                             <ins><span class="text-brand">₹{{proData.price}}</span></ins>
                                             <ins><span class="old-price font-md ml-15">₹{{proData.price}}</span></ins>
-                                            <span class="save-price font-md color3 ml-15">25% Off</span>
+                                            <span class="save-price  font-md color3 ml-15">25% Off</span>
                                         </div>
                                     </div>
                                     <div class="bt-1 border-color-1 mt-15 mb-15"></div>
@@ -52,30 +51,128 @@
                                     </div>
                                     <div class="product_sort_info font-xs mb-30">
                                         <ul>
-                                            <li class="mb-10"><i class="fi-rs-crown mr-5"></i> Books to enrich your knowledge and explore the unknown world</li>
-                                            <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> Return, if any damages</li>
+                                           
+                                            <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> Return, If any damages</li>
                                             <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery available</li>
                                         </ul>
                                     </div>
-                                    <span id="cart_btn">
-                                    <button class="button button-add-to-cart">Add to cart</button>
-                                    </span>
+                                    <div class="detail-extralink">
+                                        {{!-- <div class="border radius ">
+                                            <input class="order__quantity--input" type="number" placeholder="1"
+                                                name="quantity" value="1">
+                                        </div> --}}
+                                    <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+                                    
+                                    <div class="product-extra-link2">
+
+                                            {{#if outOfStock}}
+                                            <span id="outofstock">
+                                                <button id="outofstock-btn" class="btn btn-md "
+                                                    style="background-color: #dc3545;">Out of stock</button>
+                                            </span>
+                                            {{else}}
+                                            {{#if productExistInCart}}
+                                            <span id="gocart">
+                                                <button id="addcart-btn" onclick="window.location.href='/cart'"
+                                                    class="btn btn-md">Go to cart</button>
+                                            </span>
+                                            {{else}}
+                                            <span id="addcart">
+                                                <button id="addcart-btn" data-product-id="{{proData._id}}"
+                                                    class="button button-add-to-cart">Add to cart</button>
+                                            </span>
+                                            {{/if}}
+                                            {{/if}}
+                                            {{!-- <a aria-label="Add To Wishlist" class="action-btn hover-up"
+                                                href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>    --}}
+                                        </div>
                                     <ul class="product-meta font-xs color-grey mt-50">
-                                        <li class="mb-5">SKU: <a href="#">FWM15VKT</a></li>
-                                        <li class="mb-5">Tags: <a href="#" rel="tag">Book</a>, <a href="#" rel="tag">Learn</a>, <a href="#" rel="tag">Explore</a></li>
-                                        {{#if proData.stock}}
-                                        <li>Availability: <span class="in-stock text-success ml-5">{{proData.stock}} Items In Stock</span></li>
-                                        {{else}}
-                                        <li>Availability: <span class="in-stock text-success ml-5">Out of Stock</span></li>
+                                        <li class="mb-5">Tags: 
+                                            <a href="#" rel="tag">Comics</a>, 
+                                            <a href="#"rel="tag">Stories</a>, 
+                                            <a href="#" rel="tag">New world</a> 
+                                        </li>
+                                        {{#if proData.stock}}       
+                                        <li>Availability: <span class="in-stock text-success ml-5 " style="font-weight: bold !important; font-size: 15px;">{{proData.stock}} Items In Stock</span></li>
+						                {{else}}
+                                        <li>Availability:<span class="in-stock text-danger ml-5">Out of Stock</span></li>
                                         {{/if}}
                                     </ul>
-                                </div>
-                                <!-- Detail Info -->
+                                </div>                                
                             </div>
-                        </div>
+                        </div>                   
                     </div>
                 </div>
             </div>
         </div>
     </section>
 </main>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+    $(document).ready(function () {
+        $('.button.button-add-to-cart').on('click', function (e) {
+
+            var prodId = $(this).data('product-id');
+            //Suppose Need Input Field before Add to Cart Button in the product detail Page Use this
+            //var quantity = $('.order__quantity--input').length ? $('.order__quantity--input').val() : 1;
+            var quantity = 1;
+
+            $.ajax({
+                url: '/addtocart/' + prodId,
+
+                method: 'POST',
+                // contentType: 'application/json',
+                data: { prodId: prodId, quantity: quantity },
+                success: function (result) {
+                    if (result.success) {
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Added to cart',
+                            text: result.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                        $('#addcart').html('<button id="addcart-btn" onclick="window.location.href=\'/cart\'" class="button button-add-to-cart">Go to cart</button>');
+
+
+                    } else {
+                        if (result.message) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: result.message,
+
+                            })
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Login Required',
+                                showCancelButton: true,
+                                confirmButtonText: 'Login',
+
+
+                                confirmButtonColor: "#088178",
+                                cancelButtonColor: "#d33",
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/login';
+                                }
+                            })
+                        }
+
+                    }
+                },
+                error: function (error) {
+                    console.log('Error adding to cart', error)
+                }
+            })
+        })
+    })
+</script>

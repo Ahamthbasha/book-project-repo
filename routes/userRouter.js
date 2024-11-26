@@ -5,6 +5,7 @@ const userController=require('../controllers/user/userController')
 const profileController=require('../controllers/user/profileController')
 const addressController=require('../controllers/user/addressController')
 const forgetPasswordController=require('../controllers/user/forgetPasswordController')
+const cartController=require('../controllers/user/cartController')
 const auth=require('../middlewares/userAuth')
 const { isLogin, isLogout, isBlocked, logedin } = auth
 
@@ -34,7 +35,7 @@ router.get('/logout', userController.doLogout)
 //product detail page
 router.get("/product",userController.getProduct)
 router.post("/search",userController.searchSortFilter)
-router.get("/productview",userController.productDetails)
+router.get("/productview",userController.productView)
 
 //profile management
 router.get("/profile",logedin,isBlocked,profileController.loadProfile)
@@ -57,8 +58,14 @@ router.post('/forget_password',forgetPasswordController.submitMailPost)
 router.get('/otp',isLogout,forgetPasswordController.submitOtp)
 router.post('/otp',forgetPasswordController.submitOtpPost)
 
-
+//forgot password here we reset the password page
 router.get("/reset_password",isLogout,forgetPasswordController.resetPassword)
 router.post("/reset_password",forgetPasswordController.resetPasswordpost)
 
+//cart management
+router.get('/cart',logedin,isBlocked,cartController.loadCart)
+router.post("/addtocart/:id",logedin,isBlocked,cartController.addToCart)
+router.post("/removeFromCart",logedin,isBlocked,cartController.removeFromCart)
+router.post("/updatecart",cartController.updateCart)
+router.post('/checkOutOfStock', cartController.checkOutOfStock);
 module.exports=router

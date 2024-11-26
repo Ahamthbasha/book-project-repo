@@ -31,12 +31,6 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         required: true,
     },
-    // //changes
-    // googleId: {
-    //     type: String,
-    //     unique: true, // Google ID must be unique
-    //     sparse: true, // Allow for null or missing values
-    // },
 }, { timestamps: true })
 
 

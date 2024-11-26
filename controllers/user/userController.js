@@ -435,7 +435,7 @@ const searchSortFilter = async (req, res) => {
 };
 
 
-const productDetails = async (req, res) => {
+const productView = async (req, res) => {
     try {
       const proId = req.query.id;
       console.log(proId, "....");
@@ -446,6 +446,106 @@ const productDetails = async (req, res) => {
         outOfStock = true;
       }
       res.render("user/productview", { proData, outOfStock });
+
+
+
+    // let reviewed
+        // const proId = req.query.id
+        // const proData = await Product.findById(proId).lean()
+        // console.log(proData)
+        // const userData = req.session.user
+        // let reviewExist = true //variable to check review exist or not
+        // const reviews = await Review.aggregate([
+        //     {
+        //         $match: { isListed: true, productId: ObjectId(proId) }
+        //     }
+
+        // ]);
+        // console.log("Reviewsssssssss",reviews)
+
+        // if (reviews.length == 0) {
+        //     reviewExist = false
+        // }
+
+        // let userCanReview = false; //variable to check user can able to review or not
+
+
+        // let productExist  //store the user data if the product exist in the respective user's cart
+        // let productExistInCart //
+
+        // let totalRating = 0
+        // reviews.forEach((rev)=>{
+        //     totalRating = totalRating + rev.rating;
+        // })
+
+        // let avgRating = Math.round(totalRating / reviews.length)
+        // console.log(avgRating)
+
+        // if (userData) {
+
+        //     const userId = userData._id
+        //     console.log(userData)
+
+
+        //     // query
+        //     productExist = await User.find({ _id: userId, "cart.product": new ObjectId(proId) }).lean();
+
+        //     console.log(productExist)
+        //     if (productExist.length === 0) productExistInCart = false
+        //     else productExistInCart = true
+        //     console.log(productExistInCart)
+
+
+
+            // const orders = await Order.aggregate([
+            //     {
+            //         $match: {
+            //             userId: ObjectId(userId),
+            //             status: "Delivered"
+            //         }
+            //     },
+            //     {
+            //         $unwind: "$product"
+            //     },
+            //     {
+            //         $match: {
+            //             "product.id": proData._id
+            //         }
+            //     },
+            //     {
+            //         $project: {
+            //             _id: 0,
+            //             product: 1
+            //         }
+            //     }
+            // ]);
+            // console.log("Orders:", orders);
+
+            // reviewed = await Review.find({
+            //     userId: userData._id, 
+            //     productId : new ObjectId(proId)
+            // })
+
+        //     console.log("..................",reviewed)
+
+
+        //     if (orders.length > 0 && reviewed.length != 1 ) {
+        //         userCanReview = true;
+        //         // console.log("I found", orders[0].product.name);
+        //     }
+
+        //     console.log(userCanReview)
+
+//          }
+
+
+
+//         if (userData) {
+//             console.log(userCanReview)
+//             res.render('user/productview', { proData, userData, productExistInCart})
+//         } else {
+//             res.render('user/productview', {proData  })
+//         }
     } catch (error) {
       console.log(error);
     }
@@ -465,6 +565,6 @@ module.exports={
     doLogin,
     doLogout,
     getProduct,
-    productDetails,
+    productView,
     searchSortFilter
 }

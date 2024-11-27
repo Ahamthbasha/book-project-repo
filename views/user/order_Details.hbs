@@ -141,19 +141,19 @@
                                                                 <td>
                                                                     <a class="itemside" href="#">
                                                                         <div class="left">
-                                                                            <img src="/images/products/{{this.image}}"
+                                                                            <img src="/images/products/{{this.product.image}}"
                                                                                 width="40" height="40" class="img-xs"
                                                                                 alt="Item">
                                                                         </div>
-                                                                        <div class="info">{{this.name}}</div>
+                                                                        <div class="info">{{this.product.name}}</div>
                                                                     </a>
                                                                 </td>
-                                                                <td> ₹{{this.price}} </td>
-                                                                <td >{{this.quantity}}  </td>
+                                                                <td> ₹{{this.product.price}} </td>
+                                                                <td >{{this.product.quantity}}  </td>
                                                                 
                                                                 
-                                                                <td class="text-end">{{multiply this.quantity
-                                                                    this.price}}</td>
+                                                                <td class="text-end">{{multiply this.product.quantity
+                                                                    this.product.price}}</td>
                                                             </tr>
                                                             {{/each}}
 
@@ -172,12 +172,12 @@
                                                                                 value="{{myOrderDetails.paymentMethod}}">
                                                                             
                                                                         </dl>
-                                                                        {{#if myOrderDetails.coupon}}
+                                                                        {{!-- {{#if myOrderDetails.coupon}}
                                                                         <dl class="dlist">
                                                                             <dt>Coupon used:</dt>
                                                                             <dd>{{myOrderDetails.coupon}}</dd>
-                                                                        </dl>
-                                                                        <dl class="dlist">
+                                                                        </dl> --}}
+                                                                        {{!-- <dl class="dlist">
                                                                             <dt>Discount:</dt>
                                                                             <dd>{{myOrderDetails.discountAmt}}</dd>
                                                                             <input type="hidden" id="coupon"
@@ -191,7 +191,7 @@
                                                                                 <dd>None</dd>
                                                                             </dl>
                                                                             {{/if}}
-                                                                        </dl>
+                                                                        </dl> --}}
                                                                         <dl class="dlist">
                                                                             <dt>Grand total:</dt>
                                                                             {{#if myOrderDetails.amountAfterDscnt}}
@@ -227,7 +227,7 @@
                                                     </p>
                                                 </div>
                                                 <div class="mt-3">
-                                                    <a href="/my_orders" type="button"
+                                                    <a href="/myOrders" type="button"
                                                         class="btn btn-primary">Back</a>
                                                     {{#ifeq myOrderDetails.status 'pending'}}
                                                     <span id="cancel_btn">

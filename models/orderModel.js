@@ -33,27 +33,9 @@ const orderSchema = new mongoose.Schema({
     required: true,
   },
 
-  discountAmt: {
-    type: Number,
-  },
-
-  amountAfterDscnt: {
-    type: Number,
-  
-  },
-
-  coupon: {
-    type: String,
-  },
-
   paymentMethod: {
     type: String,
     required: true,
-  },
-
-  couponUsed: {
-    type: Boolean,
-    default: false,
   },
   deliveryCharge: {
     type: Number,

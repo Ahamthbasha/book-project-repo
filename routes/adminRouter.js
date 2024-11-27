@@ -41,8 +41,8 @@ router.post("/block_product",adminAuth.isLogin,productController.blockProduct)
 router.get("/delete_product/:id",adminAuth.isLogin,productController.deleteProduct)
 
 //order management
-router.get('/orders', adminAuth.isLogin, orderController.getOrders)
-router.get('/order_details', adminAuth.isLogin, orderController.orderDetails)
+router.get('/orders', adminAuth.isLogin, orderController.ordersPage)
+router.get('/order_details/:id', adminAuth.isLogin, orderController.orderDetails)
 router.post('/change_status', orderController.changeOrderStatus)
 
 

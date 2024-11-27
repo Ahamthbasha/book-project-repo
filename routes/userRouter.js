@@ -5,7 +5,9 @@ const userController=require('../controllers/user/userController')
 const profileController=require('../controllers/user/profileController')
 const addressController=require('../controllers/user/addressController')
 const forgetPasswordController=require('../controllers/user/forgetPasswordController')
+const orderController=require('../controllers/user/orderController')
 const cartController=require('../controllers/user/cartController')
+const checkoutController=require('../controllers/user/checkoutController')
 const auth=require('../middlewares/userAuth')
 const { isLogin, isLogout, isBlocked, logedin } = auth
 
@@ -62,10 +64,23 @@ router.post('/otp',forgetPasswordController.submitOtpPost)
 router.get("/reset_password",isLogout,forgetPasswordController.resetPassword)
 router.post("/reset_password",forgetPasswordController.resetPasswordpost)
 
+//Order page
+router.get('/myOrders',logedin,isBlocked,orderController.my_Orders)
+router.get("/orderDetails/:id",logedin,isBlocked,orderController.orderDetails)
+router.post("/cancel_order",logedin,isBlocked,orderController.cancelOrder)
+
+
 //cart management
 router.get('/cart',logedin,isBlocked,cartController.loadCart)
 router.post("/addtocart/:id",logedin,isBlocked,cartController.addToCart)
 router.post("/removeFromCart",logedin,isBlocked,cartController.removeFromCart)
 router.post("/updatecart",cartController.updateCart)
 router.post('/checkOutOfStock', cartController.checkOutOfStock);
+
+//checkout management
+
+router.get('/cart/checkout',logedin,isBlocked,checkoutController.loadCheckoutPage)
+router.post('/placeorder',checkoutController.placeorder)
+router.get("/orderPlaced",logedin,isBlocked,checkoutController.orderSuccess)
+
 module.exports=router

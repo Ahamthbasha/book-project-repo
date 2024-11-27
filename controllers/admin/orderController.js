@@ -1,68 +1,81 @@
-const Orders=require("../../models/orderModel")
+const Order=require("../../models/orderModel")
 const Address=require("../../models/addressModel")
+const Product=require("../../models/productModel")
+const Category=require("../../models/categoryModel")
+const Cart=require("../../models/cartModel")
+const User=require("../../models/userModel")
 const moment=require('moment')
+const mongoose=require("mongoose")
+const ObjectId=require("mongoose")
 
-
-const getOrders=async(req,res)=>{
-    try{
-        const PAGE_SIZE=5
-        const page=parseInt(req.query.page)||1
-        const skip=(page-1)*PAGE_SIZE
-
-        const orders=await Orders.find()
+const ordersPage=async(req,res)=>{
+    try {
+        const user=await User.findOne({_id:req.session.user_id})
+        var page=1
+        if(req.query.page){
+            page=req.query.page
+        }
+        console.log(page)
+        let limit=5
+        const ordersData=await Order.find()
         .sort({date:-1})
-        .skip(skip)
-        .limit(PAGE_SIZE)
-
-        const now=moment()
-
-        const ordersData=orders.map((order)=>{
-            const formattedDate=moment(order.date).format("MMMM D,YYYY")
-            
-            return{
-                ...order.toObject(),
-                date:formattedDate,
-            }
-        })
-
-        const totalPages=Math.ceil(await Orders.countDocuments()/PAGE_SIZE)
-
+        .skip((page-1) * limit)
+        .limit(limit*1)
+        .lean()
+        const count=await Order.find({}).countDocuments()
+        const totalPages=Math.ceil(count/limit)
         const pages=Array.from({length:totalPages},(_,i)=>i+1)
-
-        console.log(ordersData)
-
         res.render("admin/orders",{
-            ordersData,pages,
-            currentPage:page,
-            layout:'adminlayout'
+            pages,currentPage:page,ordersData,layout:"adminlayout"
         })
-
-    }catch(error){
+    } catch (error) {
         console.log(error)
     }
 }
+ 
 
-const orderDetails=async(req,res)=>{
-    try{
-        const userData=req.session.userData
-        const orderId=req.query.orderId
 
-        const myOrderDetails=await Orders.findById(orderId).lean()
-        const orderedProDet=myOrderDetails.product
-        const addressId=myOrderDetails.address
-        console.log(orderedProDet)
-        const address=await Address.findById(addressId).lean()
-        res.render("admin/order_Details",{
-            myOrderDetails,
-            orderedProDet,
-            userData,
-            address,
-            layout:'adminlayout'
-        })
-    }catch(error){
-        console.log(error)
+
+const orderDetails = async (req, res) => {
+    try {
+      const orderId = req.params.id;
+      const IDORDER = new mongoose.Types.ObjectId(orderId);
+  
+      const myOrderDetails = await Order.findOne({ _id: orderId }).lean();
+      const address = await Address.findOne({
+        _id: myOrderDetails.address,
+      }).lean();
+      console.log(address, "myOrderDetails");
+      const orderedProDet = await Order.aggregate([
+        {
+          $match: { _id: IDORDER },
+        },
+        {
+          $unwind: "$product",
+        },
+        {
+          $unwind: "$product", 
+        },
+        {
+          $project: {
+            _id: 0,
+            product: 1,
+          },
+        },
+      ]);
+      console.log(orderedProDet);
+      res.render("admin/order_Details", {
+        admin: true,
+        orderedProDet,
+        layout: "adminlayout",
+        address,
+        myOrderDetails,
+      });
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).send("Internal Server Error");
     }
-}
+  };
 
 const changeOrderStatus=async(req,res)=>{
     console.log(req.body)
@@ -71,7 +84,7 @@ const changeOrderStatus=async(req,res)=>{
         const id=req.query.id
         const status=req.body.status
         console.log(status)
-        const order=await Orders.findByIdAndUpdate(
+        const order=await Order.findByIdAndUpdate(
             id,
             {$set:{status:status}},
             {new:true}
@@ -83,9 +96,10 @@ const changeOrderStatus=async(req,res)=>{
 }
 
 
+
 module.exports=
 {
-    getOrders,
+    ordersPage,
     orderDetails,
     changeOrderStatus
 }

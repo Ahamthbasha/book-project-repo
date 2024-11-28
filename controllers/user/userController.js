@@ -375,65 +375,128 @@ const getProduct = async (req, res) => {
     }
 };
 
+// const searchSortFilter = async (req, res) => {
+//     const { searchQuery, sortOption, categoryFilter, page, limit } = req.body;
+//     console.log(req.body);
+
+//     // Construct the query object
+//     const query = {};
+//     if (searchQuery) {
+//         console.log('searching...');
+//         query.name = { $regex: searchQuery, $options: 'i' };
+//         console.log(query.name);
+//     }
+//     if (categoryFilter) {
+//         query.category = new mongoose.Types.ObjectId(categoryFilter);
+//     }
+
+//     // Construct the sort object
+//     const sort = {};
+//     switch (sortOption) {
+//         case 'priceAsc':
+//             sort.price = 1;
+//             break;
+//         case 'priceDesc':
+//             sort.price = -1;
+//             break;
+//         case 'nameAsc':
+//             sort.name = 1;
+//             break;
+//         case 'nameDesc':
+//             sort.name = -1;
+//             break;
+//         case 'newArrivals':
+//             sort.createdAt = -1;
+//             break;
+//         case 'popularity':
+//             sort.popularity = -1; // Assuming there's a popularity field
+//             break;
+//         default:
+//             sort.createdAt = -1; // Default sort by new arrivals
+//     }
+
+//    // Perform the query with pagination and sorting
+//     const [products, totalProducts] = await Promise.all([
+//         Product.find(query)
+//             .populate('category')
+//             .sort(sort)
+//             .skip((page - 1) * limit)
+//             .limit(limit)
+//             .lean(),
+//         Product.countDocuments(query)
+//     ]);
+
+
+
+
+//     res.json({ products, totalProducts });
+// };
+
 const searchSortFilter = async (req, res) => {
     const { searchQuery, sortOption, categoryFilter, page, limit } = req.body;
-    console.log(req.body);
-
-    // Construct the query object
-    const query = {};
+  
+    const matchStage = { $match: {} };
     if (searchQuery) {
-        console.log('searching...');
-        query.name = { $regex: searchQuery, $options: 'i' };
-        console.log(query.name);
+      matchStage.$match.name = { $regex: searchQuery, $options: "i" };
     }
     if (categoryFilter) {
-        query.category = new mongoose.Types.ObjectId(categoryFilter);
+      matchStage.$match.category = new mongoose.Types.ObjectId(categoryFilter);
     }
-
-    // Construct the sort object
-    const sort = {};
+  
+    // Construct the sort stage
+    const sortStage = { $sort: {} };
     switch (sortOption) {
-        case 'priceAsc':
-            sort.price = 1;
-            break;
-        case 'priceDesc':
-            sort.price = -1;
-            break;
-        case 'nameAsc':
-            sort.name = 1;
-            break;
-        case 'nameDesc':
-            sort.name = -1;
-            break;
-        case 'newArrivals':
-            sort.createdAt = -1;
-            break;
-        case 'popularity':
-            sort.popularity = -1; // Assuming there's a popularity field
-            break;
-        default:
-            sort.createdAt = -1; // Default sort by new arrivals
+      case "priceAsc":
+        sortStage.$sort.price = 1;
+        break;
+      case "priceDesc":
+        sortStage.$sort.price = -1;
+        break;
+      case "nameAsc":
+        sortStage.$sort.name = 1;
+        break;
+      case "nameDesc":
+        sortStage.$sort.name = -1;
+        break;
+      case "newArrivals":
+        sortStage.$sort.createdAt = -1;
+        break;
+      case "popularity":
+        sortStage.$sort.popularity = -1;
+        break;
+      default:
+        sortStage.$sort.createdAt = 1;
     }
-
-    // Perform the query with pagination and sorting
-    const [products, totalProducts] = await Promise.all([
-        Product.find(query)
-            .populate('category')
-            .sort(sort)
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .lean(),
-        Product.countDocuments(query)
+  
+    const skipStage = { $skip: (page - 1) * limit };
+    const limitStage = { $limit: limit };
+  
+    const products = await Product.aggregate([
+      matchStage,
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      {
+        $unwind: {
+          path: "$category",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      sortStage,
+      skipStage,
+      limitStage,
     ]);
-
-    // Now you can work with products and totalProducts
-    // console.log(products);
-    // console.log(totalProducts);
-
-
+    console.log(products);
+  
+    const totalProducts = await Product.countDocuments(matchStage.$match);
+  
     res.json({ products, totalProducts });
-};
-
+  };
 
 const productView = async (req, res) => {
     try {

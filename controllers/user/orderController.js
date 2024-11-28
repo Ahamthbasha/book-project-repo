@@ -1,4 +1,4 @@
-const Product=require("../../models/orderModel")
+const Product=require("../../models/productModel")
 const User=require("../../models/userModel")
 const Address=require("../../models/addressModel")
 const Order=require("../../models/orderModel")
@@ -63,42 +63,6 @@ const my_Orders=async(req,res)=>{
     }
 }
 
-// const cancelOrder=async(req,res)=>{
-//     try{
-//         const id=req.params.id
-//         console.log(id)
-//         if(!mongoose.Types.ObjectId.isValid(id)){
-//             return res.status(400).json({error:"Invalid order ID"})
-//         }
-//         const ID=new mongoose.Types.ObjectId(id)
-//         let notCancelledAmt=0
-//         let canceledOrder=await Order.findOne({_id:ID})
-//         if(!canceledOrder){
-//             return res.status(404).json({error:"order not found"})
-//         }
-//         await Order.updateOne({_id:ID},{$set:{status:'cancelled'}})
-
-//         for(const product of canceledOrder.product){
-
-//             if(!product.isCancelled){
-//                 await Product.updateOne(
-//                     {_id:product._id},
-//                     {$inc:{stock:product.quantity},$set:{isCancelled:true}}
-//                 )
-
-//                 await Order.updateOne(
-//                     {_d:ID,'product._id':product._id},
-//                     {$st:{"product.$.isCancelled":true}}
-//                 )
-//             }
-
-
-//         }
-//     }catch(error){
-//         console.log(error)
-//     }
-// }
-
 const orderDetails=async(req,res)=>{
     try {
         let ct=0
@@ -154,32 +118,34 @@ const orderDetails=async(req,res)=>{
     }
 }
 
-const cancelOrder=async(req,res)=>{
-    try{
-        const id=req.query.id
-        const userData=req.session.user
-        const userId=userData._id
+const cancelOrder = async (req, res) => {
+    try {
+        const id = req.query.id;
+        const userData = req.session.user;
+        const userId = userData._id;
 
-        const myOrderDetails=await Order.findOne({_id:id})
+        const myOrderDetails = await Order.findOne({ _id: id }, { total: 1, _id: 0 }).lean();
+        console.log('Order Details:', myOrderDetails);
 
-        console.log(myOrderDetails)
+        let canceledOrder = await Order.findOne({ _id: id });
 
-        let canceledOrder=await Order.findOne({_id:id})
-
-        for(const product of canceledOrder.product){
+        for (const product of canceledOrder.product) {
+            const productId = product.id || product._id; // Ensure the correct field is used
+            console.log('Updating product:', productId, 'Quantity:', product.quantity);
             await Product.updateOne(
-                {_id:product.id},
-                {$inc:{stock:product.quantity}}
-            )
+                { _id: productId },
+                { $inc: { stock: product.quantity } }
+            );
         }
 
-        await Order.findByIdAndUpdate(id,{$set:{status:'cancelled'}},{new:true})
-
-        res.json('success')
-    }catch(error){
-        console.log(error)
+        await Order.findByIdAndUpdate(id, { $set: { status: 'cancelled' } }, { new: true });
+        res.json('success');
+    } catch (error) {
+        console.log('Error in cancelOrder:', error);
+        res.status(500).json({ error: 'An error occurred while cancelling the order' });
     }
-}
+};
+
 
 module.exports=
 {

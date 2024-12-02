@@ -2,10 +2,7 @@ const Product=require("../../models/productModel")
 const User=require("../../models/userModel")
 const Address=require("../../models/addressModel")
 const Order=require("../../models/orderModel")
-const Category=require("../../models/categoryModel")
-const Cart=require("../../models/cartModel")
 const moment=require('moment')
-const userHelper=require("../../helpers/userHelper")
 const mongoose=require('mongoose')
 
 const my_Orders=async(req,res)=>{
@@ -65,26 +62,17 @@ const my_Orders=async(req,res)=>{
 
 const orderDetails=async(req,res)=>{
     try {
-        let ct=0
-        let ct2=0
+        
         const orderId=req.params.id
         const user=req.session.user
         const userId=user._id
-        let offerprice=0
+        let totalprice
         const userData=await User.findById(userId).lean()
         const myOrderDetails=await Order.findById(orderId).populate('address').lean()
         await myOrderDetails.product.forEach((product)=>{
-            if(product.isCancelled) ct2++
-            offerprice+=product.price * product.quantity
+            
+            totalprice=product.price * product.quantity
         })
-
-        let check=function(a,b){
-            if(a+b === myOrderDetails.product.length){
-                return true
-            }else{
-                return false
-            }
-        }
 
     if(!myOrderDetails){
         return res.status(400).send("order not found")
@@ -111,8 +99,8 @@ const orderDetails=async(req,res)=>{
 
     console.log("myorderDetails",myOrderDetails)
     console.log("orderedProDet",orderedProDet)
-    offerprice-=(myOrderDetails.total)
-    res.render("user/order_Details",{offerprice,address,orderedProDet,myOrderDetails,userData})
+    totalprice=(myOrderDetails.total)
+    res.render("user/order_Details",{totalprice,address,orderedProDet,myOrderDetails,userData})
     } catch (error) {
         console.log(error)
     }

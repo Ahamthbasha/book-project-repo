@@ -1,34 +1,22 @@
 const Address=require("../../models/addressModel")
 
 
-const manageAddress=async(req,res)=>{
-    try{
-        const userData=req.session.user
-        const id=userData._id
-        const page=parseInt(req.query.page) || 1
-        const limit=parseInt(req.query.limit)|| 4
-        const skip=(page-1) * limit
-
-        const [userAddress,totalAddress]=await Promise.all([
-            Address.find({userId:id}).skip(skip).limit(limit).lean(),
-            Address.find({userId:id}).countDocuments()
-        ])
-
-        const totalPages=Math.ceil(totalAddress/limit)
-        const pages=Array.from({length:totalPages},(_,i)=>i+1)
-
-        res.render('user/manage_address',{
-            currentPage:page,
-            totalPages,
-            pages,
-            userAddress,
-            userData
-        })
-
-    }catch(error){
-        console.log(error)
-    }
-}
+const manageAddress = async (req, res) => {  
+    try { 
+        const userData = req.session.user;
+         const id = userData._id; 
+        const page = parseInt(req.query.page) || 1;
+         const limit = parseInt(req.query.limit) || 4; const skip = (page - 1) * limit; 
+         const userAddress = await Address.find({ userId: id }).skip(skip).limit(limit).lean(); 
+         const totalAddress = await Address.countDocuments({ userId: id }); 
+         const totalPages = Math.ceil(totalAddress / limit); 
+         const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+         
+         res.render('user/manage_address', { currentPage: page, totalPages, pages, userAddress, userData });
+         } catch (error) {
+             console.log(error)
+         }
+        }
 
 const addNewAddress=async(req,res)=>{
     try{

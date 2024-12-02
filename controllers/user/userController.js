@@ -1,6 +1,7 @@
 const User=require('../../models/userModel')
 const Category=require('../../models/categoryModel')
 const Product=require('../../models/productModel')
+const Order=require("../../models/orderModel")
 const argon2 = require('argon2')
 const userHelper=require('../../helpers/userHelper')
 const mongoose=require('mongoose')
@@ -16,46 +17,6 @@ let userEmail
 let productSearched = false
 let message2
 
-const loadHome = async (req, res) => {
-    try {
-      const userData = req.session.user;
-  
-      if(userData){
-          var id = userData._id;
-          var user = await User.findById(id).lean();
-          
-      }
-
-      const loadProData = await Product.aggregate([
-        { $match: { is_blocked: false } },
-        {
-          $lookup: {
-            from: "categories",
-            localField: "category",
-            foreignField: "_id",
-            as: "category",
-          },
-        },
-        {
-          $unwind: "$category",
-        },
-      ]);
-  
-
-      const category=await Category.find({isListed:true})
-  
-      // console.log(userData);
-     
-          res.render("user/home", { category,loadProData, userData:user});
-  
-  
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("server error");
-    }
-  };
-  
-// //changes
 // const loadHome = async (req, res) => {
 //     try {
 //       const userData = req.session.user;
@@ -63,17 +24,66 @@ const loadHome = async (req, res) => {
 //       if(userData){
 //           var id = userData._id;
 //           var user = await User.findById(id).lean();
-//           res.render("user/home",{userData:user})
           
 //       }
-//       else{
-//         return res.render("user/home")
-//       }
+
+//       const loadProData = await Product.aggregate([
+//         { $match: { is_blocked: false } },
+//         {
+//           $lookup: {
+//             from: "categories",
+//             localField: "category",
+//             foreignField: "_id",
+//             as: "category",
+//           },
+//         },
+//         {
+//           $unwind: "$category",
+//         },
+//       ]);
+  
+
+//       const category=await Category.find({isListed:true})
+  
+//       // console.log(userData);
+     
+//           res.render("user/home", { category,loadProData, userData:user});
+  
+  
 //     } catch (error) {
 //       console.log(error);
 //       res.status(500).send("server error");
 //     }
 //   };
+
+const loadHome=async(req,res)=>{
+  try{
+    const loadProData=await Product.find({is_blocked:false}).limit(8).lean()
+    const newProduct=await Product.find({is_blocked:false}).sort({_id:-1}).limit(8).lean()
+    const loadCatData=await Category.find({isListed:true}).lean()
+    const popularCakes=await Product.find({popularity:{$gt:0}}).sort({popularity:-1}).limit(8).lean()
+    
+    console.log(popularCakes);
+    
+
+    console.log(loadProData)
+    console.log(newProduct)
+    console.log(loadCatData)
+    console.log(popularCakes)
+
+    const userData=req.session.user
+    console.log(userData)
+
+    if(userData){
+      res.render('user/home',{userData,loadProData,loadCatData,newProduct,popularCakes})
+    }else{
+      res.render('user/home',{userData,loadProData,loadCatData,newProduct,popularCakes})
+    }
+
+  }catch(error){
+    console.log(error)
+  }
+}
 
 const userLogin = (req, res) => {
 
@@ -356,8 +366,8 @@ const getProduct = async (req, res) => {
 
         const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-        //const newProduct = await Product.find({ is_blocked: false }).sort({ _id: -1 }).limit(3).lean()
-       // console.log(newProduct)
+        const newProduct = await Product.find({ is_blocked: false }).sort({ _id: -1 }).limit(3).lean()
+        console.log(newProduct)
 
         res.render('user/products', {
             userData,
@@ -365,7 +375,7 @@ const getProduct = async (req, res) => {
             pages,
             currentPage: page,
             loadCatData,
-            // newProduct,
+            newProduct,
             currentFunction: 'getProductsPage',
             proCount
 
@@ -375,62 +385,6 @@ const getProduct = async (req, res) => {
     }
 };
 
-// const searchSortFilter = async (req, res) => {
-//     const { searchQuery, sortOption, categoryFilter, page, limit } = req.body;
-//     console.log(req.body);
-
-//     // Construct the query object
-//     const query = {};
-//     if (searchQuery) {
-//         console.log('searching...');
-//         query.name = { $regex: searchQuery, $options: 'i' };
-//         console.log(query.name);
-//     }
-//     if (categoryFilter) {
-//         query.category = new mongoose.Types.ObjectId(categoryFilter);
-//     }
-
-//     // Construct the sort object
-//     const sort = {};
-//     switch (sortOption) {
-//         case 'priceAsc':
-//             sort.price = 1;
-//             break;
-//         case 'priceDesc':
-//             sort.price = -1;
-//             break;
-//         case 'nameAsc':
-//             sort.name = 1;
-//             break;
-//         case 'nameDesc':
-//             sort.name = -1;
-//             break;
-//         case 'newArrivals':
-//             sort.createdAt = -1;
-//             break;
-//         case 'popularity':
-//             sort.popularity = -1; // Assuming there's a popularity field
-//             break;
-//         default:
-//             sort.createdAt = -1; // Default sort by new arrivals
-//     }
-
-//    // Perform the query with pagination and sorting
-//     const [products, totalProducts] = await Promise.all([
-//         Product.find(query)
-//             .populate('category')
-//             .sort(sort)
-//             .skip((page - 1) * limit)
-//             .limit(limit)
-//             .lean(),
-//         Product.countDocuments(query)
-//     ]);
-
-
-
-
-//     res.json({ products, totalProducts });
-// };
 
 const searchSortFilter = async (req, res) => {
     const { searchQuery, sortOption, categoryFilter, page, limit } = req.body;
@@ -499,120 +453,29 @@ const searchSortFilter = async (req, res) => {
   };
 
 const productView = async (req, res) => {
-    try {
+  try {
       const proId = req.query.id;
       console.log(proId, "....");
       const proData = await Product.findById(proId).lean();
       console.log(proData);
-      let outOfStock;
-      if (proData.stock === 0) {
-        outOfStock = true;
+
+      if (!proData) {
+          return res.status(404).json({ message: 'Product not found' });
       }
-      res.render("user/productview", { proData, outOfStock });
+      const outOfStock = proData.stock === 0;
 
+      // Fetch related products based on the same category, excluding the current product
+      const relatedProducts = await Product.find({
+          category: proData.category,
+          _id: { $ne: proId } // Exclude the current product
+      }).limit(4).lean();
 
-
-    // let reviewed
-        // const proId = req.query.id
-        // const proData = await Product.findById(proId).lean()
-        // console.log(proData)
-        // const userData = req.session.user
-        // let reviewExist = true //variable to check review exist or not
-        // const reviews = await Review.aggregate([
-        //     {
-        //         $match: { isListed: true, productId: ObjectId(proId) }
-        //     }
-
-        // ]);
-        // console.log("Reviewsssssssss",reviews)
-
-        // if (reviews.length == 0) {
-        //     reviewExist = false
-        // }
-
-        // let userCanReview = false; //variable to check user can able to review or not
-
-
-        // let productExist  //store the user data if the product exist in the respective user's cart
-        // let productExistInCart //
-
-        // let totalRating = 0
-        // reviews.forEach((rev)=>{
-        //     totalRating = totalRating + rev.rating;
-        // })
-
-        // let avgRating = Math.round(totalRating / reviews.length)
-        // console.log(avgRating)
-
-        // if (userData) {
-
-        //     const userId = userData._id
-        //     console.log(userData)
-
-
-        //     // query
-        //     productExist = await User.find({ _id: userId, "cart.product": new ObjectId(proId) }).lean();
-
-        //     console.log(productExist)
-        //     if (productExist.length === 0) productExistInCart = false
-        //     else productExistInCart = true
-        //     console.log(productExistInCart)
-
-
-
-            // const orders = await Order.aggregate([
-            //     {
-            //         $match: {
-            //             userId: ObjectId(userId),
-            //             status: "Delivered"
-            //         }
-            //     },
-            //     {
-            //         $unwind: "$product"
-            //     },
-            //     {
-            //         $match: {
-            //             "product.id": proData._id
-            //         }
-            //     },
-            //     {
-            //         $project: {
-            //             _id: 0,
-            //             product: 1
-            //         }
-            //     }
-            // ]);
-            // console.log("Orders:", orders);
-
-            // reviewed = await Review.find({
-            //     userId: userData._id, 
-            //     productId : new ObjectId(proId)
-            // })
-
-        //     console.log("..................",reviewed)
-
-
-        //     if (orders.length > 0 && reviewed.length != 1 ) {
-        //         userCanReview = true;
-        //         // console.log("I found", orders[0].product.name);
-        //     }
-
-        //     console.log(userCanReview)
-
-//          }
-
-
-
-//         if (userData) {
-//             console.log(userCanReview)
-//             res.render('user/productview', { proData, userData, productExistInCart})
-//         } else {
-//             res.render('user/productview', {proData  })
-//         }
-    } catch (error) {
+      res.render('user/productview', { proData, relatedProducts, outOfStock });
+  } catch (error) {
       console.log(error);
-    }
-  };
+      res.status(500).json({ message: 'An error occurred while loading the product view' });
+  }
+};
 
 
 

@@ -203,17 +203,10 @@ const loadCart = async (req, res) => {
         "cartquant--------------------------------------------------------------"
       );
   
-      // if (req.body.newValue > 4) {
-      //   return res.json({
-      //     success: false,
-      //     message: "You can only choose up to 4 units of this product.",
-      //   });
-      // }
-  
-      if (req.body.newValue > cartquant.stock) {
+      if (req.body.newValue > 4) {
         return res.json({
           success: false,
-          message: "Product stock limit reached!",
+          message: "You can only choose up to 4 units of this product.",
         });
       }
   
@@ -250,12 +243,7 @@ const loadCart = async (req, res) => {
   
       updatedCart.forEach((data) => {
         const newDataItem = { ...data };
-  
-        // if (data.totalAmount) {
-        //   newDataItem.totalAmount = newValue;
-        // } else {
-        //   newDataItem.totalAmount = newValue;
-        // }
+
         if (data.stock <= 0) {
       newDataItem.totalAmount = "Out of Stock";  // Set totalAmount to a string if out of stock
       newDataItem.outOfStock = true; // Mark the product as out of stock

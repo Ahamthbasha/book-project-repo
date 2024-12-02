@@ -52,7 +52,7 @@
                                             </a>
                                         </div>
                                         <div class="product-badges product-badges-position product-badges-mrg">
-                                            <span class="hot">Hot</span>
+                                            <span class="hot">{{#if this.stock}}Hot{{else}}Out of Stock{{/if}}</span>
                                         </div>
                                     </div>
                                     <div class="product-content-wrap">
@@ -72,7 +72,10 @@
                                             <span>₹{{this.price}}</span>
                                             <span class="old-price">₹245.8</span>
                                         </div>
-                                        <div class="product-action-1 show">
+                                        <div class="product-stock">
+                                            <span>Stock:{{this.stock}}left</span>
+                                        </div>
+                                        {{!-- <div class="product-action-1 show">
                                             {{#if this.isWishlisted}}
                                             <span id="click{{this._id}}">
                                                 <a onclick="removeFromWishlist('{{this._id}}')" id="icon-1"
@@ -86,7 +89,7 @@
                                                     href="#"><i class="fi-rs-heart"></i></a>
                                             </span>
                                             {{/if}}
-                                        </div>
+                                        </div> --}}
                                     </div>
                                 </div>
                             </div>
@@ -152,14 +155,6 @@
                         </div>
                         {{/each}}
                     </div>
-                    {{!-- <div class="banner-img wow fadeIn mb-45 animated d-lg-block d-none">
-                        <img src="https://i.pinimg.com/originals/67/0c/f0/670cf04d08becb87bd248ed5ad6008e9.jpg" alt="">
-                        <div class="banner-text">
-                            <span>Cake Zone</span>
-                            <h4 style = "color: rgb(255, 255, 255);">Save 17% on <br>Special Cakes</h4>
-                            <a href="/product">Shop Now <i class="fi-rs-arrow-right"></i></a>
-                        </div>
-                    </div> --}}
                 </div>
             </div>
         </div>
@@ -331,59 +326,6 @@
 
     fetchProducts();
 </script>
-
-{{!-- <script>
-    
-/// Add to wishlist ////////////
-
-
-const addToWishlist = async (id) => {
-
-    const proName = document.getElementById('name' + id).value
-    document.getElementById('click' + id).innerHTML =
-        `<a aria-label="Add To Wishlist"
-    class="wish action-btn hover-up" href="#"><i class="fa-solid fa-heart"></i></a>`
-
-    let response = await fetch(`/add_to_wishlist?id=${id}`, {
-        headers: {
-            "Content-Type": "application/json"
-        },
-    })
-
-    let data = await response.json()
-    if (data) {
-        alertify.set('notifier', 'position', 'bottom-center');
-        alertify.success(`${proName} Added to wishlist`)
-        //.then(()=> window.location.reload())
-    }
-}
-
-
-/// remove from wishlist  ////////////
-
-
-const removeFromWishlist = async (id) => {
-    const proName = document.getElementById('name' + id).value
-
-    document.getElementById('click' + id).innerHTML =
-        `<a aria-label="Add To Wishlist" class="wish action-btn hover-up" href="#"><i class="fi-rs-heart"></i></a>`
-
-    let response = await fetch(`/remove_from_wishlist?id=${id}`, {
-        headers: {
-            "Content-Type": "application/json"
-        },
-    })
-
-    let data = await response.json()
-    if (data) {
-        alertify.set('notifier', 'position', 'bottom-center');
-        alertify.success(`${proName} Removed from wishlist`)
-    }
-}
-
-
-
-</script> --}}
 
 
 

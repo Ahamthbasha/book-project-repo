@@ -53,9 +53,9 @@ const orderDetails = async (req, res) => {
         {
           $unwind: "$product",
         },
-        {
-          $unwind: "$product", 
-        },
+        // {
+        //   $unwind: "$product", 
+        // },
         {
           $project: {
             _id: 0,
@@ -77,23 +77,58 @@ const orderDetails = async (req, res) => {
     }
   };
 
-const changeOrderStatus=async(req,res)=>{
-    console.log(req.body)
+// const changeOrderStatus=async(req,res)=>{
+//     console.log(req.body)
 
-    try{
-        const id=req.query.id
-        const status=req.body.status
-        console.log(status)
-        const order=await Order.findByIdAndUpdate(
-            id,
-            {$set:{status:status}},
-            {new:true}
-        )
-        res.redirect("/admin/orders")
-    }catch(error){
-        console.log(error)
-    }
-}
+//     try{
+//         const id=req.query.id
+//         const status=req.body.status
+//         console.log(status)
+//         const order=await Order.findByIdAndUpdate(
+//             id,
+//             {$set:{status:status}},
+//             {new:true}
+//         )
+//         res.redirect("/admin/orders")
+//     }catch(error){
+//         console.log(error)
+//     }
+// }
+
+const changeOrderStatus = async (req, res) => {
+  console.log(req.body);
+  try {
+      const id = req.query.id;
+      const status = req.body.status;
+      console.log(status);
+      const order = await Order.findById(id);
+      if (!order) {
+          return res.status(404).json({ message: "Order not found" });
+      }
+      order.status = status;
+
+      // Log the entire product array to inspect its structure
+      console.log('Order products:', order.product);
+
+      if (status === 'Delivered') {
+          for (const product of order.product) {
+              const productId = product.id || product._id; // Ensure we're using the correct field
+              console.log('Updating product:', productId);
+              const result = await Product.updateOne(
+                  { _id: productId },
+                  { $inc: { popularity: product.quantity } }
+              );
+              console.log(`Updated product ${productId}:`, result);
+          }
+      }
+
+      await order.save();
+      res.redirect("/admin/orders");
+  } catch (error) {
+      console.log('Error updating order status:', error);
+      res.status(500).json({ message: 'An error occurred while updating the order status' });
+  }
+};
 
 
 

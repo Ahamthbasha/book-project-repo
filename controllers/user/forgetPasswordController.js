@@ -1,6 +1,6 @@
 const userHelper=require("../../helpers/userHelper")
 const User=require("../../models/userModel")
-const argon=require('argon2')
+// const argon=require('argon2')
 
 let otp
 let email
@@ -8,6 +8,7 @@ let email
 const submitMail=(req,res)=>{
     try{
         const mailError='Invalid user'
+        //if the mail has error it store the error in the session
         if(req.session.mailError){
             res.render('user/forgetPassword/mailSubmit',{mailError})
         }else{
@@ -64,8 +65,6 @@ const submitOtpPost=(req,res)=>{
     }
 }
 
-
-
 const resetPassword=async(req,res)=>{
     try{
         res.render("user/forgetPassword/resetPassword")
@@ -74,17 +73,26 @@ const resetPassword=async(req,res)=>{
     }
 }
 
-const resetPasswordpost=async(req,res)=>{
-    try{
-        const newPassword=req.body.newPassword
-        const hashedpassword=await userHelper.hashPassword(newPassword)
-        await User.updateOne({email:email},{$set:{password:hashedpassword}})
-        req.session.newPas=true
-        res.redirect('/login')
-    }catch(error){
-        console.log(error)
+
+
+const resetPasswordpost = async (req, res) => {
+    try {
+        const email = req.body.email; 
+        const newPassword = req.body.newPassword;
+        console.log('New Password:', newPassword); 
+        const hashedPassword = await userHelper.hashPassword(newPassword);
+        console.log('Hashed Password:', hashedPassword);
+        
+        await User.updateOne({ email: email }, { $set: { password: hashedPassword } });
+
+        req.session.newPas = true;
+        res.redirect('/login');
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'An error occurred while resetting the password' });
     }
-}
+};
+
 
 module.exports=
 {
@@ -93,5 +101,5 @@ module.exports=
     submitOtp,
     submitOtpPost,
     resetPassword,
-    resetPasswordpost
+    resetPasswordpost,
 }

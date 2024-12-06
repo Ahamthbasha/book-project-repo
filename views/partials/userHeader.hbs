@@ -142,7 +142,7 @@
             <!-- Mobile-Friendly Navigation -->
             <div class="header-action-right d-block d-lg-none">
                 <div class="header-action-2">
-                    <div class="header-action-icon-2">
+                    {{!-- <div class="header-action-icon-2">
                         <a href="/wishlist?id={{userData._id}}">
                             <img alt="Evara" src="/assets/imgs/theme/icons/icon-heart.svg">
                             {{#if userData}}
@@ -151,16 +151,27 @@
                                 <span class="pro-count white">0</span>
                             {{/if}}
                         </a>
+                    </div> --}}
+
+                    <div class="header-action-icon-2">
+                        <a href="/wishlist?id={{userData._id}}">
+                            <img alt="Evara" src="/assets/imgs/theme/icons/icon-heart.svg">
+                            {{!-- {{#if userData}}
+                                <span class="pro-count white"></span>
+                            {{else}}
+                                <span class="pro-count white">0</span>
+                            {{/if}} --}}
+                        </a>
                     </div>
 
                     <div class="header-action-icon-2">
                         <a class="mini-cart-icon" href="/cart?id={{userData._id}}">
                             <img alt="Evara" src="/assets/imgs/theme/icons/icon-cart.svg">
-                            {{#if userData}}
+                            {{!-- {{#if userData}}
                                 <span class="pro-count white">{{userData.cart.length}}</span>
                             {{else}}
                                 <span class="pro-count white">0</span>
-                            {{/if}}
+                            {{/if}} --}}
                         </a>
                     </div>
 

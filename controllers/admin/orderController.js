@@ -22,6 +22,10 @@ const ordersPage=async(req,res)=>{
         .skip((page-1) * limit)
         .limit(limit*1)
         .lean()
+
+        ordersData.forEach(order => {
+          order.date = moment(order.date).format('MMM DD, YYYY'); // Format date here
+      });
         const count=await Order.find({}).countDocuments()
         const totalPages=Math.ceil(count/limit)
         const pages=Array.from({length:totalPages},(_,i)=>i+1)
@@ -32,8 +36,6 @@ const ordersPage=async(req,res)=>{
         console.log(error)
     }
 }
- 
-
 
 
 const orderDetails = async (req, res) => {
@@ -76,6 +78,8 @@ const orderDetails = async (req, res) => {
       res.status(500).send("Internal Server Error");
     }
   };
+
+
 
 // const changeOrderStatus=async(req,res)=>{
 //     console.log(req.body)

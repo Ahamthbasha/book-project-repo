@@ -103,7 +103,7 @@ const userLogin = (req, res) => {
         req.session.regSuccessMsg = false
     }
     else if (req.session.userBlocked) {
-        res.render('user/login', { blockMsg })
+        res.render('user/login', { blockMsg})
         req.session.userBlocked = false
     }
     else if (req.session.LoggedIn) {
@@ -115,7 +115,7 @@ const userLogin = (req, res) => {
         req.session.newPas = false
     }
     else {
-        res.render('user/login')
+      res.render('user/login',{hideSearchBox:true})
     }
 }
 
@@ -126,7 +126,7 @@ const userLogin = (req, res) => {
 
 const usersignup = (req, res) => {
     try {
-        res.render('user/signup')
+      res.render('user/signup')
     } catch (error) {
         console.log(error);
     }

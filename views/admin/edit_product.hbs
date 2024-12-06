@@ -291,58 +291,91 @@ function Validation() {
     }
 
 
-const deleteImage = async (productId, imageName) => {
-    try {
-        const response = await fetch(`/admin/product_img_delete?id=${productId}&image=${imageName}`, {
-            method: "DELETE",
-        });
-        const result = await response.json();
+//const deleteImage = async (productId, imageName) => {
+    //try {
+      //  const response = await fetch(`/admin/product_img_delete?id=${productId}&image=${imageName}`, {
+       //     method: "DELETE",
+       // });
+       // const result = await response.json();
 
-        if (response.ok) {
-            setImages(result.updatedImages); // Update UI
-            alert("Image deleted successfully!");
-        } else {
-            alert(result.error || "Failed to delete image");
-        }
-    } catch (error) {
-        console.error("Error:", error);
-    }
-};
-
-
+       // if (response.ok) {
+        //    setImages(result.updatedImages); // Update UI
+       //     alert("Image deleted successfully!");
+       // } else {
+        //    alert(result.error || "Failed to delete image");
+       // }
+   // } catch (error) {
+      //  console.error("Error:", error);
+    //}
+//};
 
 
 
-  const deleteProImg = () => {
 
-    const deleteButtons = document.querySelectorAll('.close-button')
-    const productId = document.getElementsByName('product-id')[0].value
 
-    deleteButtons.forEach((button )=> {
-      button.addEventListener('click', async (event) => {
-        const imageIndex = event.target.dataset.imageIndex;
-        deleteImage(productId, imageIndex);
-      });
+  //const deleteProImg = () => {
+
+    //const deleteButtons = document.querySelectorAll('.close-button')
+    //const productId = document.getElementsByName('product-id')[0].value
+
+    //deleteButtons.forEach((button )=> {
+      //button.addEventListener('click', async (event) => {
+      //  const imageIndex = event.target.dataset.imageIndex;
+    //    deleteImage(productId, imageIndex);
+   //   });
+   // });
+
+  //} 
+
+
+//changes
+//It works for removing the image
+
+const deleteImage = async (productId, imageName, imageElement) => {
+  try {
+    // Send the DELETE request to the server
+    const response = await fetch(`/admin/product_img_delete?id=${productId}&image=${imageName}`, {
+      method: 'DELETE',
     });
 
+    const result = await response.json();
+
+    if (response.ok) {
+      alert("Image deleted successfully!");
+      
+      // Remove the image from the DOM (fade out or directly remove)
+      imageElement.parentElement.style.transition = 'opacity 0.5s';
+      imageElement.parentElement.style.opacity = '0';  // Fade out
+      setTimeout(() => {
+        imageElement.parentElement.remove();  // Remove from DOM after fade
+      }, 500);
+      
+      // Optionally, update the image list if you have it displayed elsewhere
+      updateImageUI(result.updatedImages); // Update the images UI if required
+    } else {
+      alert(result.error || "Failed to delete image");
+    }
+  } catch (error) {
+    console.error("Error:", error);
   }
+};
 
+// Event listener for delete buttons
+const deleteProImg = () => {
+  const deleteButtons = document.querySelectorAll('.close-button');
+  const productId = document.getElementsByName('product-id')[0].value;
 
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-
+  deleteButtons.forEach((button) => {
+    button.addEventListener('click', async (event) => {
+      // Get the image name from the src or any relevant attribute
+      const imageName = event.target.closest('.image-container').querySelector('img').src.split('/').pop();
+      const imageElement = event.target.closest('.image-container').querySelector('img');
+      
+      // Call the delete function and pass the image element to remove it immediately
+      await deleteImage(productId, imageName, imageElement);
+    });
+  });
+};
 
 
 

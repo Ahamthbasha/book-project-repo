@@ -51,19 +51,37 @@ const submitOtp=async(req,res)=>{
     }
 }
 
-const submitOtpPost=(req,res)=>{
-    let enteredOtp=req.body.otp
 
-    if(enteredOtp === otp){
-        res.json({success:true,redirectUrl:'/reset_password'})
-    }else{
-        req.session.otpErr=true
+// const submitOtpPost=(req,res)=>{
+//     let enteredOtp=req.body.otp
 
-        otpError="incorrect otp"
+//     if(enteredOtp === otp){
+        
+//         res.json({success:true,redirectUrl:'/reset_password'})
+//     }else{
+//         req.session.otpErr=true
 
-        res.json({error:otpError})
+//         otpError="incorrect otp"
+
+//         res.json({error:otpError})
+//     }
+// }
+//changes
+const submitOtpPost = (req, res) => {
+    let enteredOtp = req.body.otp;
+
+    if (enteredOtp === otp) {
+        // Store the email in session after OTP verification
+        req.session.userEmail = email;
+        res.json({ success: true, redirectUrl: '/reset_password' });
+    } else {
+        req.session.otpErr = true;
+        otpError = "incorrect otp";
+        res.json({ error: otpError });
     }
-}
+};
+
+//reset page will be shown
 
 const resetPassword=async(req,res)=>{
     try{
@@ -75,15 +93,43 @@ const resetPassword=async(req,res)=>{
 
 
 
+// const resetPasswordpost = async (req, res) => {
+//     try {
+//         const email = req.body.email; 
+//         const newPassword = req.body.newPassword;
+//         console.log('New Password:', newPassword); 
+//         const hashedPassword = await userHelper.hashPassword(newPassword);
+//         console.log('Hashed Password:', hashedPassword);
+        
+//         await User.updateOne({ email: email }, { $set: { password: hashedPassword } });
+
+//         req.session.newPas = true;
+//         res.redirect('/login');
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).json({ message: 'An error occurred while resetting the password' });
+//     }
+// };
+
 const resetPasswordpost = async (req, res) => {
     try {
-        const email = req.body.email; 
+        // Retrieve email from session (it was stored after OTP verification)
+        const userEmail = req.session.userEmail; 
+
+        // If no email is found in session, redirect to forget password page (for security)
+        if (!userEmail) {
+            return res.redirect("/forget_password");
+        }
+
+        // Password reset logic
         const newPassword = req.body.newPassword;
-        console.log('New Password:', newPassword); 
         const hashedPassword = await userHelper.hashPassword(newPassword);
-        console.log('Hashed Password:', hashedPassword);
         
-        await User.updateOne({ email: email }, { $set: { password: hashedPassword } });
+        // Update password in the database
+        await User.updateOne({ email: userEmail }, { $set: { password: hashedPassword } });
+
+        // Optional: Clear OTP session or any sensitive data
+        delete req.session.userEmail;
 
         req.session.newPas = true;
         res.redirect('/login');
@@ -92,7 +138,6 @@ const resetPasswordpost = async (req, res) => {
         res.status(500).json({ message: 'An error occurred while resetting the password' });
     }
 };
-
 
 module.exports=
 {

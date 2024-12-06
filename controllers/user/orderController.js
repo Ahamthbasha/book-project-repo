@@ -62,13 +62,13 @@ const my_Orders=async(req,res)=>{
 
 const orderDetails=async(req,res)=>{
     try {
-        
         const orderId=req.params.id
         const user=req.session.user
         const userId=user._id
         let totalprice
         const userData=await User.findById(userId).lean()
         const myOrderDetails=await Order.findById(orderId).populate('address').lean()
+        myOrderDetails.date=moment(myOrderDetails.date).format('ddd MMM DD YYYY')
         await myOrderDetails.product.forEach((product)=>{
             
             totalprice=product.price * product.quantity

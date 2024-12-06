@@ -151,36 +151,89 @@ const editProduct = async (req, res) => {
 
   };
 
-  const deleteProImage=async(req,res)=>{
-    try{
-      const {id,image}=req.query;
-      console.log(`Id:${id} and image:${image}`)
-      const product=await Product.findById(id)
-      if(!product){
-        return res.status(404).send({error:"product not found"})
-      }
-      const deletedImage=product.imageUrl.splice(image,1)[0]
-      if(!deletedImage){
-        return res.status(400).send({error:"Image not found"})
-      }
-      console.log("deleted image:",deletedImage)
-      await product.save()
-      const imagePath=path.join(
-        __dirname,
-        `../../public/images/products/${deletedImage}`
-      )
-      console.log("Image path:",imagePath)
-      if(fs.existsSync(imagePath)){
-        fs.unlinkSync(imagePath)
-      }else{
-        return res.status(404).send({error:"Image file not found"})
-      }
-      res.status(200).send({message:"Image deleted successfully"})
-    }catch(error){
-      console.log(error)
-    }
-  }
+  // const deleteProImage=async(req,res)=>{
+  //   try{
+  //     const {id,image}=req.query;
+  //     console.log(`Id:${id} and image:${image}`)
+  //     const product=await Product.findById(id)
+  //     if(!product){
+  //       return res.status(404).send({error:"product not found"})
+  //     }
+  //     const deletedImage=product.imageUrl.splice(image,1)[0]
+  //     if(!deletedImage){
+  //       return res.status(400).send({error:"Image not found"})
+  //     }
+  //     console.log("deleted image:",deletedImage)
+  //     await product.save()
+  //     const imagePath=path.join(
+  //       __dirname,
+  //       `../../public/images/products/${deletedImage}`
+  //     )
+  //     console.log("Image path:",imagePath)
+  //     if(fs.existsSync(imagePath)){
+  //       fs.unlinkSync(imagePath)
+  //     }else{
+  //       return res.status(404).send({error:"Image file not found"})
+  //     }
+  //     res.status(200).send({message:"Image deleted successfully"})
+  //   }catch(error){
+  //     console.log(error)
+  //   }
+  // }
 
+
+
+
+  //changes
+  const deleteProImage = async (req, res) => {
+    try {
+      const { id, image } = req.query;
+  
+      // Check if product ID and image name are provided
+      if (!id || !image) {
+        return res.status(400).send({ error: "Product ID and image name must be provided" });
+      }
+  
+      console.log(`Id: ${id} and image: ${image}`);
+  
+      // Find the product by ID
+      const product = await Product.findById(id);
+      if (!product) {
+        return res.status(404).send({ error: "Product not found" });
+      }
+  
+      // Check if the image exists in the product's imageUrl array
+      const imageIndex = product.imageUrl.indexOf(image);
+      if (imageIndex === -1) {
+        return res.status(400).send({ error: "Image not found" });
+      }
+  
+      // Remove the image from the array
+      const deletedImage = product.imageUrl.splice(imageIndex, 1)[0];
+      console.log("Deleted image:", deletedImage);
+  
+      // Save the product after removing the image
+      await product.save();
+  
+      // Build the path to the image file
+      const imagePath = path.join(__dirname, `../../public/images/products/${deletedImage}`);
+      console.log("Image path:", imagePath);
+  
+      // Check if the image exists on the filesystem and delete it
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+        console.log("Image file deleted");
+      } else {
+        return res.status(404).send({ error: "Image file not found" });
+      }
+  
+      // Respond with success message
+      res.status(200).send({ message: "Image deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting image:", error);
+      res.status(500).send({ error: "Server error, could not delete image" });
+    }
+  };
   
   const blockProduct = async (req, res) => {
     const id = req.body.id

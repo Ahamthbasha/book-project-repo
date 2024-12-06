@@ -1,0 +1,261 @@
+<aside class="navbar-aside" id="offcanvas_aside">
+    <div class="aside-top">
+        <a href="/admin/home" class="brand-wrap">
+            <img src="/assetsAdmin/imgs/theme/logo.svg" class="logo" alt="Evara Dashboard">
+        </a>
+        <div>
+            <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i>
+            </button>
+        </div>
+    </div>
+    <nav>
+        <ul class="menu-aside">
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/home"> <i class="icon material-icons md-home"></i>
+                    <span class="text">Dashboard</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/product"> <i class="icon material-icons md-shopping_bag"></i>
+                    <span class="text">Products</span>
+                </a>
+
+            </li>
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/orders"> <i class="icon material-icons md-shopping_cart"></i>
+                    <span class="text">Orders</span>
+                </a>
+
+            </li>
+            {{!-- <li class="menu-item has-submenu">
+                <a class="menu-link" href="page-sellers-cards.html"> <i class="icon material-icons md-store"></i>
+                    <span class="text">Sellers</span>
+                </a>
+                <div class="submenu">
+                    <a href="page-sellers-cards.html">Sellers cards</a>
+                    <a href="page-sellers-list.html">Sellers list</a>
+                    <a href="page-seller-detail.html">Seller profile</a>
+                </div>
+            </li> --}}
+            {{!-- <li class="menu-item has-submenu">
+                <a class="menu-link" href="page-form-product-1.html"> <i class="icon material-icons md-add_box"></i>
+                    <span class="text">Add product</span>
+                </a>
+                <div class="submenu">
+                    <a href="page-form-product-1.html">Add product 1</a>
+                    <a href="page-form-product-2.html">Add product 2</a>
+                    <a href="page-form-product-3.html">Add product 3</a>
+                    <a href="page-form-product-4.html">Add product 4</a>
+                </div>
+            </li> --}}
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/category"> <i class="icon material-icons md-category"></i>
+                    <span class="text">Category</span>
+                </a>
+
+            </li>
+            
+
+             <li class="menu-item active">
+                    <a class="menu-link" href="/admin/coupons"><i class="icon fa-solid fa-ticket"></i>
+                        <span class="text">Coupons</span>
+                    </a>
+      </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/manage_users"> <i class="icon material-icons md-person"></i>
+                    <span class="text">Users</span>
+                </a>
+
+            </li>
+             <li class="menu-item">
+                    <a class="menu-link" href="/admin/banners"> <i class="icon material-icons md-local_offer"></i>
+                        <span class="text"> Banner </span>
+                    </a>
+                </li>
+                     <li class="menu-item">
+                <a class="menu-link" href="/admin/reviews"> <i class="icon material-icons md-comment"></i>
+                    <span class="text">Reviews</span>
+                </a>
+            </li>
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/brands"> <i class="icon material-icons md-stars"></i>
+                    <span class="text">Brands</span> </a>
+            </li>
+            {{!-- <li class="menu-item">
+                <a class="menu-link" href="/admin/reviews"> <i class="icon material-icons md-comment"></i>
+                    <span class="text">Reviews</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="page-brands.html"> <i class="icon material-icons md-stars"></i>
+                    <span class="text">Brands</span> </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
+                    <span class="text">Statistics</span>
+                </a>
+            </li> --}}
+        </ul>
+        <hr>
+        <ul class="menu-aside">
+            <li class="menu-item ">
+                <a class="menu-link" href="#"> <i class="icon material-icons md-settings"></i>
+                    <span class="text">Settings</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link btn btn-primary" href="/admin/logout"> <i
+                        class="icon material-icons md-exit_to_app"></i>
+                    Logout
+                </a>
+            </li>
+        </ul>
+        <br>
+        <br>
+    </nav>
+</aside>
+
+	<main class="main-wrap">
+    <section class="content-main">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-10">
+                <div class="content-header"></div>
+            </div>
+            <div class="col-lg-8 mt-5 justify-content-center">
+                <div class="card">
+                    <div class="card-body">
+                        {{#if couponMsg}}
+                        <div class="alert alert-success mt-3 alert-dismissible fade {{#if couponMsg}}show{{/if}}" role="alert">
+                            {{couponMsg}}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {{/if}}
+                        {{#if couponExMsg}}
+                        <div class="alert alert-danger mt-3 alert-dismissible fade {{#if couponExMsg}}show{{/if}}" role="alert">
+                            {{couponExMsg}}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {{/if}}
+                        <form action="/admin/add_coupon" method="post" onsubmit="return validationf(this)" class="row g-3">
+                            <h5 class="content-title">Add New Coupon</h5>
+                            <div class="col-12">
+                                <label for="coupon-code" class="form-label">Coupon Code</label>
+                                <input type="text" class="form-control" id="coupon-code" placeholder="Enter coupon code" name="code">
+                                <h6 class="alertAddcoupon mt-1" style="color: red" id="couponcodealert"></h6>
+                            </div>
+                            <div class="col-12">
+                                <label for="discount" class="form-label">Discount (%)</label>
+                                <div class="input-group mb-3">
+                                    <input type="number" class="form-control" id="discount" name="percent" placeholder="Discount %..." aria-label="Discount">
+                                    <span class="input-group-text">%</span>
+                                    <h6 class="alertAddcoupon mt-1" style="color: red" id="discountalert"></h6>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="min-purchase" class="form-label">Minimum Purchase Amount</label>
+                                <input type="number" class="form-control" id="min-purchase" placeholder="Enter minimum purchase amount" name="minPurchase">
+                                <h6 class="alertAddcoupon mt-1" style="color: red" id="minalert"></h6>
+                            </div>
+                            <div class="col-12">
+                                <label for="max-discount" class="form-label">Max Discount Amount</label>
+                                <div class="input-group mb-3">
+                                    <input type="number" class="form-control" id="max-discount" placeholder="Enter maximum discount amount" name="maxDiscount">
+                                    <h6 class="alertAddcoupon mt-1" style="color: red" id="maxalert"></h6>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="expiry-date">Expiry Date</label>
+                                <input type="date" class="form-control" id="expiry-date" name="expDate">
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">Add Coupon</button>
+                                <a href="/admin/coupons" class="btn btn-primary" id="backbutton">Back</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+    </section>
+    <footer class="main-footer font-xs">
+        <div class="row pb-30 pt-15">
+            <div class="col-sm-6">
+                <script>
+                    document.write(new Date().getFullYear())
+                </script> ©, BashaBook .
+            </div>
+            <div class="col-sm-6">
+                <div class="text-sm-end">
+                    All rights reserved
+                </div>
+            </div>
+        </div>
+    </footer>
+</main>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function () {
+        $('#backbutton').click(function (e) {
+            e.preventDefault();  // Prevent default navigation
+
+            Swal.fire({
+                title: "Leave the Page?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#088178",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "/admin/coupons";  // Navigate to the desired URL
+                }
+            });
+        });
+    });
+
+
+    function validationf(form) {
+        let errors = [];
+
+        let couponcode = document.getElementById('coupon-code').value;
+        let discount = document.getElementById('discount').value;
+        let minpurchase = document.getElementById('min-purchase').value;
+        let maxdiscount = document.getElementById('max-discount').value;
+
+        let couponcodePattern = /^[A-Za-z0-9\s]{3,}$/;
+
+        let couponerr = document.getElementById('couponcodealert');
+        let discounterr = document.getElementById('discountalert');
+        let minerror = document.getElementById('minalert');
+        let maxerror = document.getElementById('maxalert');
+
+        if (!couponcode.match(couponcodePattern)) {
+            errors.push('Coupon code is not valid');
+        }
+
+        if (discount <= 0 || discount > 100) {
+            errors.push('Give discount percentage below 100 and greater than zero');
+        }
+        if (minpurchase < 0) {
+            errors.push('Give a positive price value for minimum purchase');
+        }
+        if (maxdiscount < 0) {
+            errors.push('Give a positive price value for maximum discount');
+        }
+
+        if (errors.length > 0) {
+            couponerr.innerHTML = errors.includes('Coupon code is not valid') ? 'Coupon code is not valid' : "";
+            discounterr.innerHTML = errors.includes('Give discount percentage below 100 and greater than zero') ? 'Give discount percentage below 100 and greater than zero' : "";
+            minerror.innerHTML = errors.includes('Give a positive price value for minimum purchase') ? 'Give a positive price value for minimum purchase' : "";
+            maxerror.innerHTML = errors.includes('Give a positive price value for maximum discount') ? 'Give a positive price value for maximum discount' : "";
+
+            return false;
+        }
+
+        return true;
+    }
+
+    
+
+</script>

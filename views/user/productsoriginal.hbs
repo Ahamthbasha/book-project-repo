@@ -75,6 +75,21 @@
                                         <div class="product-stock">
                                             <span>Stock:{{this.stock}}left</span>
                                         </div>
+                                        <div class="product-action-1 show">
+                                            {{#if this.isWishlisted}}
+                                            <span id="click{{this._id}}">
+                                                <a onclick="removeFromWishlist('{{this._id}}')" id="icon-1"
+                                                    aria-label="Remove From Wishlist" class="wish action-btn hover-up"
+                                                    href="#"><i class="fa-solid fa-heart"></i></a>
+                                            </span>
+                                            {{else}}
+                                            <span id="click{{this._id}}">
+                                                <a onclick="addToWishlist('{{this._id}}')" id="icon-2"
+                                                    aria-label="Add To Wishlist" class="wish action-btn hover-up"
+                                                    href="#"><i class="fi-rs-heart"></i></a>
+                                            </span>
+                                            {{/if}}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -146,7 +161,6 @@
     </section>
 </main>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     let currentPage = 1;
     let currentSort = '';
@@ -206,10 +220,6 @@
                         <div class="product-action-1">
                             <a aria-label="Quick view" class="action-btn hover-up" href="/productview?id=${product._id}">
                                 <i class="fi-rs-search"></i></a>
-                            <a data-id="${product._id}" aria-label="Add To Wishlist"
-                                            class="wish action-btn hover-up" href="#"><i
-                                                class="fi-rs-heart"></i></a>
-
                         </div>
                         <div class="product-badges product-badges-position product-badges-mrg">
                         </div>
@@ -225,7 +235,12 @@
                         <div class="product-price">
                             <span>₹${product.price}</span>
                         </div>
-                        
+                        <div class="product-action-1 show">
+                            <span id="click${product._id}">
+                            <a onclick="addToWishlist('${product._id}')" id="icon-2" aria-label="Add To Wishlist"
+                                class="wish action-btn hover-up" href="#"><i class="fi-rs-heart"></i></a>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>`;
@@ -310,59 +325,6 @@
     // $('#searchButton').on('change', searchProducts);
 
     fetchProducts();
-
-    $(document).ready(function () {
-    const userId = "";  // Make sure this is assigned correctly or removed if not needed
-
-    $('#productList').on('click', '.wish.action-btn', function (event) {
-        event.preventDefault();
-        var $button = $(this);
-        var id = $button.data('id');
-
-        $.ajax({
-            type: 'POST',
-            url: '/addtowishlist',
-            contentType: 'application/json',
-            data: JSON.stringify({ id: id, userId: userId }),
-            success: function (productData) {
-                if (productData.success) {  // Fix: use productData instead of result
-                    Swal.fire({
-                        title: 'Success!',
-                        text: 'Product Successfully added to Wishlist!!!',
-                        icon: 'success',
-                        confirmButtonText: 'Cool'
-                    });
-                } else {
-                    if (productData.message) {  // Fix: use productData instead of result
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops',
-                            text: productData.message,
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: 'Login Required',
-                            showCancelButton: true,
-                            confirmButtonText: 'Login',
-                            confirmButtonColor: "#088178",
-                            cancelButtonColor: "#d33",
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = '/login';
-                            }
-                        });
-                    }
-                }
-            },
-            error: function (error) {
-                console.log('Error adding to wishlist', error);
-            }
-        });
-    });
-});
-
 
 </script>
 

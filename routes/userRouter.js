@@ -8,7 +8,8 @@ const forgetPasswordController=require('../controllers/user/forgetPasswordContro
 const orderController=require('../controllers/user/orderController')
 const cartController=require('../controllers/user/cartController')
 const checkoutController=require('../controllers/user/checkoutController')
-const productController=require('..//controllers/user/productController')
+const productController=require('../controllers/user/productController')
+const wishlistController=require('../controllers/user/wishlistController')
 const auth=require('../middlewares/userAuth')
 const { isLogin, isLogout, isBlocked, logedin } = auth
 
@@ -82,5 +83,11 @@ router.post('/checkOutOfStock', cartController.checkOutOfStock);
 router.get('/cart/checkout',logedin,isBlocked,checkoutController.loadCheckoutPage)
 router.post('/placeorder',checkoutController.placeorder)
 router.get("/orderPlaced",logedin,isBlocked,checkoutController.orderSuccess)
+
+
+//wishlist management
+router.get('/wishlist',logedin,isBlocked,wishlistController.showWishlistPage)
+router.post('/addtowishlist', isLogin, isBlocked,wishlistController.addToWishList)
+router.post('/removeFromWishList', logedin, isBlocked,wishlistController.removeFromWishList)
 
 module.exports=router

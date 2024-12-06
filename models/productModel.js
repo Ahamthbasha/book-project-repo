@@ -41,6 +41,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isWishlisted:{
+      type:Boolean,
+      default:false
+    },
   },
   { timestamps: true }
 );

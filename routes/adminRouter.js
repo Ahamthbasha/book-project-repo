@@ -5,6 +5,7 @@ const customerController=require("../controllers/admin/customerController")
 const categoryController=require("../controllers/admin/categoryController")
 const productController=require("../controllers/admin/productController")
 const orderController=require("../controllers/admin/orderController")
+const couponController=require("../controllers/admin/couponController")
 const store=require("../middlewares/multer")
 const adminAuth=require('../middlewares/adminAuth')
 
@@ -45,5 +46,18 @@ router.get('/orders', adminAuth.isLogin, orderController.ordersPage)
 router.get('/order_details/:id', adminAuth.isLogin, orderController.orderDetails)
 router.post('/change_status', orderController.changeOrderStatus)
 
+//coupon management
 
+// router.get('/coupons',adminAuth.isLogin,couponController.couponPage)
+// router.get("/addcoupon",adminAuth.isLogin,couponController.addCouponPage)
+// router.post('/addcoupon',adminAuth.isLogin,couponController.addCouponPost)
+// router.get('/editcoupon/:id',couponController.editCouponPage)
+// router.delete('/delete_coupon',adminAuth.isLogin,couponController.deleteCoupon)
+
+router.get('/coupons',adminAuth.isLogin,couponController.couponPage)
+router.get('/addcoupon',adminAuth.isLogin,couponController.addCouponPage)
+router.post('/add_coupon',couponController.addCouponPost)
+router.get('/editcoupon/:id', couponController.editCouponPage);
+router.post('/editcoupon/:id',couponController.editCouponPost)
+router.get("/delete_coupon/:id",adminAuth.isLogin,couponController.deleteCoupon)
 module.exports=router

@@ -1,4 +1,3 @@
-
 const User=require("../../models/userModel")
 
 const loadProfile=async(req,res)=>{
@@ -44,5 +43,5 @@ module.exports=
 {
     loadProfile,
     editDetails,
-    updateDetails
+    updateDetails,
 }

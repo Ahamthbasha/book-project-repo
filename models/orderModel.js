@@ -32,7 +32,23 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+//changes start
+  discountAmt: {
+    type: Number,
+  },
 
+  amountAfterDscnt: {
+    type: Number,
+  
+  },
+  coupon: {
+    type: String,
+  },
+  couponUsed: {
+    type: Boolean,
+    default: false,
+  },
+  //change end
   paymentMethod: {
     type: String,
     required: true,

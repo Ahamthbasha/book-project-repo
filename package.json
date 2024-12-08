@@ -17,6 +17,7 @@
     "express-handlebars": "^8.0.1",
     "express-session": "^1.18.1",
     "handlebars": "^4.7.8",
+    "handlebars-helpers": "^0.5.8",
     "hbs": "^4.2.0",
     "moment": "^2.30.1",
     "mongodb": "^6.10.0",
@@ -29,7 +30,8 @@
     "passport": "^0.7.0",
     "passport-google-oauth2": "^0.2.0",
     "passport-google-oauth20": "^2.0.0",
+    "razorpay": "^2.9.5",
     "sweetalert": "^2.1.2",
-    "sweetalert2": "^11.14.5"
+    "sweetalert2": "^11.6.13"
   }
 }

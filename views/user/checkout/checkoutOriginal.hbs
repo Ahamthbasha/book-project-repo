@@ -100,17 +100,17 @@
 
                                 <div class="panel-collapse1 collapse coupon_form " id="couponList">
                                     <div class="panel-body">
-                                        {{!-- <div class="mb-25">
+                                        <div class="mb-25">
                                             <h4>Address Form</h4>
-                                        </div> --}}
+                                        </div>
                                         {{#each coupon}}
                                         <article class="itemlist">
                                             <div class="row align-items-center">
-                                                {{!-- <div class="col col-check flex-grow-0">
+                                                <div class="col col-check flex-grow-0">
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="checkbox" value="">
                                                     </div>
-                                                </div> --}}
+                                                </div>
 
                                                 <div
                                                     class="col-lg-2 col-sm-2 col-2 flex-grow-1 col-name text-align-center">
@@ -130,9 +130,9 @@
                                                         </div>
                                                     </a>
                                                 </div>
-                                                {{!-- <div class="col-lg-2 col-sm-2 col-4 col-price">
+                                                <div class="col-lg-2 col-sm-2 col-4 col-price">
                                                     <span>$76.99</span>
-                                                </div> --}}
+                                                </div>
 
 
 
@@ -157,26 +157,26 @@
                                         <label class="form-check-label" for="cash-on-delivery" data-bs-toggle="collapse" data-target="#bankTranfer" aria-controls="bankTranfer">Cash On Delivery</label>
                                         </div>
                                         
-                                    <div class="custome-radio">
+                                    {{!-- <div class="custome-radio">
                                     <input class="form-check-input" required="" type="radio" name="payment_option"
                                         value="razorpay" id="razorpay">
                                     <label class="form-check-label" for="razorpay" data-bs-toggle="collapse"
                                         data-target="#checkPayment" aria-controls="checkPayment"> Razor Pay</label>
-                                </div>
-                                <div class="custome-radio">
+                                </div> --}}
+                                {{!-- <div class="custome-radio">
                                     <input class="form-check-input" required="" type="radio" name="payment_option"
                                         value="wallet" id="wallet" >
                                     <label class="form-check-label" for="wallet" data-bs-toggle="collapse"
                                         data-target="#paypal" aria-controls="paypal"> Wallet</label>
-                                </div>
-                                <div class="hotline d-none d-lg-block">
+                                </div> --}}
+                                {{!-- <div class="hotline d-none d-lg-block">
 
                                     <p class="my-2 mx-2">Wallet Balance : <strong><span id="update_wallet">
                                                 ₹{{userData.wallet}}</span>
                                         </strong></p>
 
                                     <input type="hidden" value="{{userData.wallet}}" name="wallet">
-                                </div>
+                                </div> --}}
                                     
                                 </div>
                             </div>
@@ -205,7 +205,7 @@
                             <div class="mb-25">
                                 <h4>Address Form</h4>
                             </div>
-                            <form action="/add_address" method="post">
+                            <form action="/add_new_adress" method="post">
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <div class="row gx-3">
@@ -380,7 +380,7 @@
             if (result.isConfirmed) {
                 subTotal = Number(document.getElementsByName('subTotal')[0].value);
                 if (paymentMethod === 'cash-on-delivery') {
-                    if (subTotal >= 1000) {
+                    if (subTotal >= 10000) {
                         Swal.fire({
                             title: 'Error',
                             text: 'Cash on delivery is not available for orders above ₹1000',
@@ -493,13 +493,13 @@
         }
         
         var options = {
-            "key": "rzp_test_OsDtnewxAfAwm0", // Enter the Key ID generated from the Dashboard
+            "key": "rzp_test_RgbHBDrROekluj", // Enter the Key ID generated from the Dashboard
             "amount": (subTotal)* 100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
             "currency": "INR",
             "image": "/images/logo/Logo_CH.png",
 
-            "name": "Basha Book", //your business name
-            /*"description": "Test Transaction",
+            /*"name": "Acme Corp", //your business name
+            "description": "Test Transaction",
             "image": "https://example.com/your_logo",*/
 
             "order_id":  undefined, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
@@ -672,3 +672,4 @@ function verifyPayment(response, order) {
 
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    

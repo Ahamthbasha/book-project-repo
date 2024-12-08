@@ -1,5 +1,9 @@
 const Handlebars = require('handlebars');
 const moment = require('moment');
+// //for wallet i add length helper
+// Handlebars.registerHelper('length', function (array, options) {
+//   return array.length;
+// });
 
 Handlebars.registerHelper('ifeq', function (a, b, options) {
     if (a == b) { return options.fn(this); }
@@ -69,5 +73,8 @@ Handlebars.registerHelper('ifeq', function (a, b, options) {
     return moment(timestamp).format(' h:mm A');
   });
 
+  Handlebars.registerHelper('eq', function(a, b) {
+    return a === b;
+  });
   
 module.exports = Handlebars;

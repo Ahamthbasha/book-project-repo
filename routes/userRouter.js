@@ -10,6 +10,7 @@ const cartController=require('../controllers/user/cartController')
 const checkoutController=require('../controllers/user/checkoutController')
 const productController=require('../controllers/user/productController')
 const wishlistController=require('../controllers/user/wishlistController')
+const walletController=require('../controllers/user/walletController')
 const auth=require('../middlewares/userAuth')
 const { isLogin, isLogout, isBlocked, logedin } = auth
 
@@ -69,7 +70,7 @@ router.post("/reset_password",forgetPasswordController.resetPasswordpost)
 //Order page
 router.get('/myOrders',logedin,isBlocked,orderController.my_Orders)
 router.get("/orderDetails/:id",logedin,isBlocked,orderController.orderDetails)
-router.post("/cancel_order",logedin,isBlocked,orderController.cancelOrder)
+router.post("/cancel_order/:id",logedin,isBlocked,orderController.cancelOrder)
 
 //cart management
 router.get('/cart',logedin,isBlocked,cartController.loadCart)
@@ -89,5 +90,17 @@ router.get("/orderPlaced",logedin,isBlocked,checkoutController.orderSuccess)
 router.get('/wishlist',logedin,isBlocked,wishlistController.showWishlistPage)
 router.post('/addtowishlist', isLogin, isBlocked,wishlistController.addToWishList)
 router.post('/removeFromWishList', logedin, isBlocked,wishlistController.removeFromWishList)
+
+//user side coupon management
+
+router.post('/validate_coupon',logedin,isBlocked,checkoutController.validateCoupon)
+router.post('/apply_coupon',checkoutController.applyCoupon)
+router.post('/remove_coupon',checkoutController.removeCoupon)
+
+//wallet management
+router.get('/wallet', logedin, isBlocked, walletController.walletpage)
+router.post('/addmoneytowallet',logedin,isBlocked,walletController.addMoneyToWallet)
+router.post('/verify_Payment',logedin,isBlocked,walletController.verifyPayment)
+
 
 module.exports=router

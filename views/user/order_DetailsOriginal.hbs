@@ -382,68 +382,64 @@ const retryPayment = async (id , status) => {
 
 }
 
-const changeStatus = async (id, status, status2) => {
-    try {
-        let wallet = Number(document.getElementsByName('user_wallet')[0].value);
-        let updatedWallet;
 
-        // Check if a coupon is applied
-        if (document.getElementById('coupon') && document.getElementsByName('amount_after_discount')[0]) {
-            const amountAfterDiscount = Number(document.getElementsByName('amount_after_discount')[0].value);
-            updatedWallet = wallet + amountAfterDiscount;
-            console.log('Coupon applied. Amount after discount:', amountAfterDiscount);
-        } else {
-            // If no coupon, calculate updatedWallet with total amount
-            const total = Number(document.getElementsByName('total')[0].value);
-            updatedWallet = wallet + total;
-        }
 
-        console.log('Updated Wallet:', updatedWallet, 'Original Wallet:', wallet);
+  const changeStatus = async (id, status, status2) => {
+  try {
+   
 
-        // Retrieve the payment method
-        const payMethod = document.getElementsByName('pay-method')[0].value;
-        console.log('Payment Method:', payMethod);
+    
+    let wallet = Number(document.getElementsByName('user_wallet')[0].value);
+    let updatedWallet;
 
-        // Make the request to update the order status
-        const response = await fetch(`/cancel_order/${id}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                updateWallet: updatedWallet,
-                payMethod: payMethod
-            })
-        });
-
-        // Parse the JSON response
-        const data = await response.json();
-        console.log('Response Data:', data);
-
-        // Update the UI based on the response
-        if (data.success) {
-            document.getElementById('cancel_btn').innerHTML = '';
-            document.getElementById('return_btn').innerHTML = '';
-            document.getElementById('order_status').innerText = `${status2}`;
-            Swal.fire({
-                title: 'Your order has been canceled!',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                location.reload();
-            });
-        } else {
-            Swal.fire({
-                title: 'Error!',
-                text: data.message || 'There was an error canceling the order.',
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
-        }
-    } catch (error) {
-        console.error('Error changing status:', error);
-        //Swal.fire('Oops!', 'Something went wrong. Please try again.', 'error');
+    // Check if a coupon is applied
+    if (document.getElementById('coupon') && document.getElementsByName('amount_after_discount')[0]) {
+      const amountAfterDiscount = Number(document.getElementsByName('amount_after_discount')[0].value);
+      updatedWallet = wallet + amountAfterDiscount;
+      console.log('Coupon applied. Amount after discount:', amountAfterDiscount);
+    } else {
+      // If no coupon, calculate updatedWallet with total amount
+      const total = Number(document.getElementsByName('total')[0].value);
+      updatedWallet = wallet + total;
     }
-};
 
+    console.log('Updated Wallet:', updatedWallet, 'Original Wallet:', wallet);
+
+    // Retrieve the payment method
+    const payMethod = document.getElementsByName('pay-method')[0].value;
+    console.log('Payment Method:', payMethod);
+
+    // Make the request to update the order status
+    const response = await fetch(`/${status}_order?id=${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        updateWallet: updatedWallet,
+        payMethod: payMethod
+        //{...obj}
+      })
+    });
+
+    // Parse the JSON response
+    const data = await response.json();
+    console.log('Response Data:', data);
+
+    // Update the UI based on the response
+    if (data) {
+      document.getElementById('cancel_btn').innerHTML = '';
+      document.getElementById('return_btn').innerHTML = '';
+      document.getElementById('order_status').innerText = `${status2}`;
+      Swal.fire({
+        title:'Your order has been canceled!',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      });
+    }
+  } catch (error) {
+    console.error('Error changing status:', error);
+    {{!-- Swal.fire('Oops!', 'Something went wrong. Please try again.', 'error'); --}}
+  }
+};
 
 
   const payment = (id) => {
@@ -455,7 +451,7 @@ const changeStatus = async (id, status, status2) => {
       "amount": parseInt(amount), // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
       "currency": "INR",
 
-      "name" : "Basha Book",
+      "name" : "Cake Shop",
       /*"name": "Acme Corp", //your business name
       "description": "Test Transaction",
       "image": "https://example.com/your_logo",*/

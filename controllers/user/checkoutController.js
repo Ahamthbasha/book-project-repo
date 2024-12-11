@@ -10,73 +10,6 @@ const Razorpay=require('razorpay')
 const mongoose=require("mongoose")
 const ObjectId=require("mongoose")
 
-
-//without applying coupon 
-
-// const loadCheckoutPage=async(req,res)=>{
-//     try{
-//         let userData=await User.findById(req.session.user._id).lean()
-
-//         const ID=new mongoose.Types.ObjectId(userData._id)
-//         const addressData=await Address.find({userId:userData._id}).lean()
-//         const subTotal=await Cart.aggregate([
-//             {
-//                 $match:{
-//                     userId:ID,
-//                 },
-//             },
-//             {
-//                 $group:{
-//                     _id:null,
-//                     total:{$sum:"$value"},
-//                 },
-//             },
-//             {
-//                 $project:{
-//                     _id:0,
-//                     total:1,
-//                 },
-//             },
-//         ])
-//         let cart=await Cart.aggregate([
-//             {
-//                 $match:{
-//                     userId:ID,
-//                 },
-//             },
-//             {
-//                 $lookup:{
-//                     from:"products",
-//                     foreignField:"_id",
-//                     localField:"product_Id",
-//                     as:"productData"
-//                 },
-//             },
-//             {
-//                 $project:{
-//                     _id:1,
-//                     userId:1,
-//                     quantity:1,
-//                     value:1,
-//                     productName:{$arrayElemAt:["$productData.name",0]},
-//                     productPrice:{$arrayElemAt:["$productData.price",0]},
-//                     productDescription:{$arrayElemAt:["$productData.description",0]},
-//                     productImage:{$arrayElemAt:["$productData.imageUrl",0]},
-//                 },
-//             },
-//         ])
-//         console.log(cart)
-
-//         res.render("user/checkout/checkout",{
-//             userData,addressData,subTotal:subTotal[0].total,cart
-//         })
-//     }catch(error){
-//         console.log(error)
-//     }
-// }
-
-//checkout with coupon
-
 const loadCheckoutPage = async (req, res) => {
     try {
       let userData = await User.findById(req.session.user._id).lean();
@@ -146,137 +79,178 @@ const loadCheckoutPage = async (req, res) => {
     }
   };
 
+// const placeorder = async (req, res) => {
+//     try {
+//         console.log("place order ");
+//         const userData = await User.findById(req.session.user._id).lean();
+//         const ID = new mongoose.Types.ObjectId(userData._id);
+//         const addressId = req.body.selectedAddress;
+//         const payMethod = req.body.selectedPayment;
+//         const totalamount = req.body.amount;
+//         console.log("Request dot body  ", addressId, payMethod, totalamount);
 
-//without using the coupon
+//         const result = Math.random().toString(36).substring(2, 7);
+//         const id = Math.floor(100000 + Math.random() * 900000);
+//         const ordeId = result + id;
 
-// const placeorder=async(req,res)=>{
-//     try{
-//        console.log("place order")
-//        userData=req.session.user
-//        const ID=new mongoose.Types.ObjectId(userData._id)
-//        const addressId=req.body.selectedAddress
-//        const payMethod=req.body.selectedPayment
-//        const totalAmount=req.body.amount 
-//        console.log("Request dot body",addressId, payMethod,totalAmount)
-
-//        const result=Math.random().toString(36).substring(2,7)
-//        const id=Math.floor(100000+ Math.random()*900000)
-//        const ordeId=result+id
-
-//        const productInCart=await Cart.aggregate([
-//         {
-//             $match:{
-//                 userId:ID,
+//         const productInCart = await Cart.aggregate([
+//             { $match: { userId: ID } },
+//             {
+//                 $lookup: {
+//                     from: "products",
+//                     foreignField: "_id",
+//                     localField: "product_Id",
+//                     as: "productData"
+//                 }
 //             },
-//         },
-//         {
-//             $lookup:{
-//                 from:"products",
-//                 foreignField:"_id",
-//                 localField:"product_Id",
-//                 as:"productData",
-//             },
-//         },
-//         {
-//             $project:{
-//                 product_Id:1,
-//                 userId:1,
-//                 quantity:1,
-//                 value:1,
-//                 name:{$arrayElemAt:["$productData.name",0]},
-//                 price:{$arrayElemAt:["$productData.price",0]},
-//                 productDescription:{$arrayElemAt:["$productData.description",0]},
-//                 image:{$arrayElemAt:["$productData.imageUrl",0]},
-//             },
-//         },
-//        ])
-//        console.log(productInCart)
+//             {
+//                 $project: {
+//                     product_Id: 1,
+//                     userId: 1,
+//                     quantity: 1,
+//                     value: 1,
+//                     name: { $arrayElemAt: ["$productData.name", 0] },
+//                     price: { $arrayElemAt: ["$productData.price", 0] },
+//                     productDescription: { $arrayElemAt: ["$productData.description", 0] },
+//                     image: { $arrayElemAt: ["$productData.imageUrl", 0] }
+//                 }
+//             }
+//         ]);
+//         console.log("Products in cart:", productInCart);
 
-//        let productDet =productInCart.map((item)=>{
-//         return{
-//             _id:item.product_Id,
-//             name:item.name,
-//             price:item.price,
-//             quantity:item.quantity,
-//             image:item.image[0],
+//         let productDet = productInCart.map((item) => ({
+//             _id: item.product_Id,
+//             name: item.name,
+//             price: item.price,
+//             quantity: item.quantity,
+//             image: item.image[0]
+//         }));
+//         console.log("Aggregated cart products:", productDet);
+
+//         // Apply coupon if present
+//         let discountAmt = 0;
+//         if (req.body.couponData) {
+//             console.log("Coupon data received:", req.body.couponData);
+//             discountAmt = req.body.couponData.discountAmt;
 //         }
-//        })
 
-//        console.log(productDet,"aggregated cart products")
+//         const DELIVERY_CHARGE = 50;
+//         const finalProductTotal = totalamount - discountAmt; // Total after applying discount
+//         const grandTotal = finalProductTotal + DELIVERY_CHARGE; // Add delivery charge to final total
 
-//        let finalTotal=totalAmount
-//        const DELIVERY_CHARGE=50
-//        const grandTotal=finalTotal+DELIVERY_CHARGE
+//         console.log("Final product total after discount:", finalProductTotal);
+//         console.log("Grand total (with delivery charge):", grandTotal);
 
-//        let saveOrder=async()=>{
-//         const order=new Order({
-//             userId:ID,
-//             product:productDet,
-//             address:addressId,
-//             orderId:ordeId,
-//             total:grandTotal,
-//             paymentMethod:payMethod,
-//         })
+//         // Save the order
+//         let saveOrder = async () => {
+//             const order = new Order({
+//                 userId: ID,
+//                 product: productDet,
+//                 address: addressId,
+//                 orderId: ordeId,
+//                 total: grandTotal,
+//                 paymentMethod: payMethod,
+//                 discountAmt: discountAmt,
+//                 amountAfterDscnt: finalProductTotal, // The grand total after discount
+//                 deliveryCharge: DELIVERY_CHARGE,
+//                 coupon: req.body.couponName ? req.body.couponName : "",
+//                 couponUsed: req.body.couponData ? true : false
+//             });
 
-//         const ordered= await order.save()
-//         console.log(ordered,"orderSaved")
+//             if (req.body.status) {
+//                 order.status = "Payment Failed";
+//                 console.log("Payment Failed  ", order.status);
+//             }
 
-//         productDet.forEach(async(product)=>{
-//             await Product.updateMany(
-//                 {_id:product._id},
-//                 {$inc:{stock:-product.quantity}}
-//             )
-//         })
-//         const deletedCart=await Cart.deleteMany({
-//             userId:ID,
-//         }).lean()
-//         console.log(deletedCart,"deletedCart")
-//        }
+//             const ordered = await order.save();
+//             console.log("Order saved:", ordered);
 
-//        if(addressId){
-//         if(payMethod === "cash-on-delivery"){
-//             console.log("cash on delivery")
-//             await saveOrder()
-//             res.json({COD:true})
+//             // Update stock of each product
+//             for (const product of productDet) {
+//                 await Product.updateOne(
+//                     { _id: product._id },
+//                     { $inc: { stock: -product.quantity } }
+//                 );
+//                 console.log(`Stock updated for product: ${product.name}`);
+//             }
+
+//             const deletedCart = await Cart.deleteMany({ userId: ID }).lean();
+//             console.log("Deleted cart items:", deletedCart);
+//         };
+
+//         if (addressId) {
+//             if (payMethod === "cash-on-delivery") {
+//                 console.log("CASH ON DELIVERY");
+//                 await saveOrder();
+//                 res.json({ COD: true });
+//             } else if (payMethod === "razorpay") {
+//                 const amount = grandTotal;
+//                 let instance = new Razorpay({
+//                     key_id: "rzp_test_QhDPSiMt8ea6IF",
+//                     key_secret: "5wg9GfJ3ESDupFYCxdSpPbRP"
+//                 });
+//                 const order = await instance.orders.create({
+//                     amount: amount * 100, // paise 1rupee=100paise
+//                     currency: "INR",
+//                     receipt: "Ahamathbasha"
+//                 });
+//                 await saveOrder();
+//                 res.json({ razorPaySucess: true, order, amount });
+//             } else if (payMethod === "wallet") {
+//                 console.log("Current Wallet Balance:", userData.wallet);
+//                 const newWallet = userData.wallet - grandTotal;
+//                 console.log("Updated Wallet Balance:", newWallet);
+
+//                 // Update the user's wallet and history
+//                 await User.findByIdAndUpdate(
+//                     userData._id,
+//                     {
+//                         $set: { wallet: newWallet },
+//                         $push: {
+//                             history: {
+//                                 amount: grandTotal,
+//                                 status: "debit",
+//                                 date: new Date()
+//                             }
+//                         }
+//                     },
+//                     { new: true }
+//                 );
+
+//                 await saveOrder();
+//                 res.json({ walletSuccess: true });
+//             }
 //         }
-//        }
-
-//     }catch(error){
-//         console.log(error)
+//     } catch (error) {
+//         console.log("Error during order placement:", error.message);
+//         res.status(500).send("Internal Server Error");
 //     }
-// }
+// };
 
-//it is working
 // const placeorder = async (req, res) => {
 //   try {
-//     console.log("place order ");
-//     userData = req.session.user;
+//     console.log("Place order process started");
+
+//     const userData = await User.findById(req.session.user._id).lean();
 //     const ID = new mongoose.Types.ObjectId(userData._id);
 //     const addressId = req.body.selectedAddress;
 //     const payMethod = req.body.selectedPayment;
-//     const totalamount = req.body.amount;
-//     console.log("Request dot body  ", addressId, payMethod, totalamount);
-
-//     console.log('Coupon data:', req.body.couponData); // To check if the couponData is passed
-// console.log('Coupon Name:', req.body.couponName); // To check the coupon name value
+//     let subtotal = req.body.amount; // This should be the product price without delivery charge
+//     console.log("Request Body Data: ", addressId, payMethod, subtotal);
 
 //     const result = Math.random().toString(36).substring(2, 7);
 //     const id = Math.floor(100000 + Math.random() * 900000);
 //     const ordeId = result + id;
 
 //     const productInCart = await Cart.aggregate([
-//       {
-//         $match: {
-//           userId: ID,
-//         },
-//       },
+//       { $match: { userId: ID } },
 //       {
 //         $lookup: {
 //           from: "products",
 //           foreignField: "_id",
 //           localField: "product_Id",
-//           as: "productData",
-//         },
+//           as: "productData"
+//         }
 //       },
 //       {
 //         $project: {
@@ -287,39 +261,40 @@ const loadCheckoutPage = async (req, res) => {
 //           name: { $arrayElemAt: ["$productData.name", 0] },
 //           price: { $arrayElemAt: ["$productData.price", 0] },
 //           productDescription: { $arrayElemAt: ["$productData.description", 0] },
-//           image: { $arrayElemAt: ["$productData.imageUrl", 0] },
-//         },
-//       },
+//           image: { $arrayElemAt: ["$productData.imageUrl", 0] }
+//         }
+//       }
 //     ]);
-//     console.log(productInCart);
+//     console.log("Products in cart:", productInCart);
 
-//     let productDet = productInCart.map((item) => {
-//       return {
-//         _id: item.product_Id,
-//         name: item.name,
-//         price: item.price,
-//         quantity: item.quantity,
-//         image: item.image[0],
-//       };
-//     });
-
-//     console.log(productDet, "aggregated cart prods");
+//     let productDet = productInCart.map((item) => ({
+//       _id: item.product_Id,
+//       name: item.name,
+//       price: item.price,
+//       quantity: item.quantity,
+//       image: item.image[0]
+//     }));
+//     console.log("Aggregated cart products:", productDet);
 
 //     // Apply coupon if present
-//     let finalTotal = totalamount;
 //     let discountAmt = 0;
+//     let finalProductTotal = subtotal;
 
 //     if (req.body.couponData) {
-//       console.log(req.body.couponData)
-//       finalTotal = req.body.couponData.newTotal;
-//       discountAmt = req.body.couponData.discountAmt;
+//       console.log("Coupon data received:", req.body.couponData);
+//       discountAmt = req.body.couponData.discountAmt; // Discount value should be 30 in this case
+//       finalProductTotal = req.body.couponData.newTotal; // New total after discount from applyCoupon
 //     }
 
+//     console.log("discountAmt we get", discountAmt);
+
 //     const DELIVERY_CHARGE = 50;
-//     const grandTotal = finalTotal+ DELIVERY_CHARGE;
 
-//      console.log("grand Total of the order:",grandTotal)
+//     // Check if coupon is applied; if yes, don't add delivery charge to final product total
+//     const grandTotal = req.body.couponData ? subtotal : finalProductTotal + DELIVERY_CHARGE;
 
+//     console.log("Final product total after discount:", finalProductTotal); // Should be 720 (750 - 30)
+//     console.log("Grand total (final product total + delivery charge):", grandTotal); // Should be 770 (720 + 50 or 720 without delivery charge)
 
 //     // Save the order
 //     let saveOrder = async () => {
@@ -328,388 +303,246 @@ const loadCheckoutPage = async (req, res) => {
 //         product: productDet,
 //         address: addressId,
 //         orderId: ordeId,
-//         total: grandTotal,
+//         subtotal: subtotal, // original subtotal (without discount)
+//         total: grandTotal, // grand total after discount and delivery charge
 //         paymentMethod: payMethod,
-//         discountAmt: discountAmt,
-//         amountAfterDscnt: grandTotal,  // The grand total after discount + delivery charge
+//         discountAmt: discountAmt, // coupon discount applied
+//         amountAfterDscnt: finalProductTotal, // the product total after discount
+//         deliveryCharge: req.body.couponData ? 0 : DELIVERY_CHARGE, // Only apply delivery charge if no coupon
 //         coupon: req.body.couponName ? req.body.couponName : "",
-//         couponUsed: req.body.couponData ? true : false,
+//         couponUsed: req.body.couponData ? true : false
 //       });
 
 //       if (req.body.status) {
 //         order.status = "Payment Failed";
-//         console.log("Payment Failed  ", order.status)
-//     }
+//         console.log("Payment Failed  ", order.status);
+//       }
 
 //       const ordered = await order.save();
-//       console.log(ordered, "ordersaved DATAAAA");
+//       console.log("Order saved:", ordered);
 
-//     //   productDet.forEach(async (product) => {
-//     //     await Product.updateMany(
-//     //       { _id: product._id },
-//     //       { $inc: { stock: -product.quantity, bestSelling:1 } }
-//     //     );
-//     //   });
-//     //   productDet.forEach(async (product) => {
-//     //     const populatedProd= await Product.findById(product._id).populate("category").lean()
-//     //     await Category.updateMany({ _id: populatedProd.category._id }, { $inc: { bestSelling:1} });
+//       // Update stock of each product
+//       for (const product of productDet) {
+//         await Product.updateOne(
+//           { _id: product._id },
+//           { $inc: { stock: -product.quantity } }
+//         );
+//         console.log(`Stock updated for product: ${product.name}`);
+//       }
 
-//     // })
-
-//       const deletedCart = await Cart.deleteMany({
-//         userId: ID,
-//       }).lean();
-
-//       console.log(deletedCart, "deletedCart");
+//       const deletedCart = await Cart.deleteMany({ userId: ID }).lean();
+//       console.log("Deleted cart items:", deletedCart);
 //     };
 
+//     // Check the payment method
 //     if (addressId) {
 //       if (payMethod === "cash-on-delivery") {
-//         console.log("CASH ON DELIVERY");
+//         console.log("Cash on Delivery");
 //         await saveOrder();
 //         res.json({ COD: true });
 //       } else if (payMethod === "razorpay") {
 //         const amount = grandTotal;
 //         let instance = new Razorpay({
 //           key_id: "rzp_test_QhDPSiMt8ea6IF",
-//           key_secret: "5wg9GfJ3ESDupFYCxdSpPbRP",
+//           key_secret: "5wg9GfJ3ESDupFYCxdSpPbRP"
 //         });
 //         const order = await instance.orders.create({
-//           amount: amount * 100,
+//           amount: amount * 100, // paise 1rupee=100paise
 //           currency: "INR",
-//           receipt: "Ahamathbasha",
+//           receipt: "Ahamathbasha"
 //         });
 //         await saveOrder();
-
-//         res.json({
-//           razorPaySucess: true,
-//           order,
-//           amount,
-//         });
+//         res.json({ razorPaySucess: true, order, amount });
 //       } else if (payMethod === "wallet") {
-//         const newWallet = req.body.updateWallet;
-//         console.log("amount i take from the wallet:",newWallet)
+//         console.log("Current Wallet Balance:", userData.wallet);
+//         const newWallet = userData.wallet - grandTotal;
+//         console.log("Updated Wallet Balance:", newWallet);
+
+//         // Update the user's wallet and history
 //         await User.findByIdAndUpdate(
 //           userData._id,
-//           { $set: { wallet: newWallet} },
+//           {
+//             $set: { wallet: newWallet },
+//             $push: {
+//               history: {
+//                 amount: grandTotal,
+//                 status: "debit",
+//                 date: new Date()
+//               }
+//             }
+//           },
 //           { new: true }
 //         );
 
 //         await saveOrder();
-
-//         res.json({ walletSucess: true });
+//         res.json({ walletSuccess: true });
 //       }
 //     }
 //   } catch (error) {
-//     console.log(error.message);
+//     console.log("Error during order placement:", error.message);
 //     res.status(500).send("Internal Server Error");
 //   }
 // };
 
-//it is working and show the debit also
 const placeorder = async (req, res) => {
   try {
-      console.log("place order ");
-      const userData = req.session.user;
-      const ID = new mongoose.Types.ObjectId(userData._id);
-      const addressId = req.body.selectedAddress;
-      const payMethod = req.body.selectedPayment;
-      const totalamount = req.body.amount;
-      console.log("Request dot body  ", addressId, payMethod, totalamount);
+    console.log("Place order process started");
 
-      const result = Math.random().toString(36).substring(2, 7);
-      const id = Math.floor(100000 + Math.random() * 900000);
-      const ordeId = result + id;
+    const userData = await User.findById(req.session.user._id).lean();
+    const ID = new mongoose.Types.ObjectId(userData._id);
+    const addressId = req.body.selectedAddress;
+    const payMethod = req.body.selectedPayment;
+    let subtotal = req.body.amount; // This should be the product price without delivery charge
+    console.log("Request Body Data: ", addressId, payMethod, subtotal);
 
-      const productInCart = await Cart.aggregate([
-          {
-              $match: {
-                  userId: ID,
-              },
-          },
-          {
-              $lookup: {
-                  from: "products",
-                  foreignField: "_id",
-                  localField: "product_Id",
-                  as: "productData",
-              },
-          },
-          {
-              $project: {
-                  product_Id: 1,
-                  userId: 1,
-                  quantity: 1,
-                  value: 1,
-                  name: { $arrayElemAt: ["$productData.name", 0] },
-                  price: { $arrayElemAt: ["$productData.price", 0] },
-                  productDescription: { $arrayElemAt: ["$productData.description", 0] },
-                  image: { $arrayElemAt: ["$productData.imageUrl", 0] },
-              },
-          },
-      ]);
-      console.log(productInCart);
+    const result = Math.random().toString(36).substring(2, 7);
+    const id = Math.floor(100000 + Math.random() * 900000);
+    const ordeId = result + id;
 
-      let productDet = productInCart.map((item) => ({
-          _id: item.product_Id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image[0],
-      }));
+    const productInCart = await Cart.aggregate([
+      { $match: { userId: ID } },
+      {
+        $lookup: {
+          from: "products",
+          foreignField: "_id",
+          localField: "product_Id",
+          as: "productData"
+        }
+      },
+      {
+        $project: {
+          product_Id: 1,
+          userId: 1,
+          quantity: 1,
+          value: 1,
+          name: { $arrayElemAt: ["$productData.name", 0] },
+          price: { $arrayElemAt: ["$productData.price", 0] },
+          productDescription: { $arrayElemAt: ["$productData.description", 0] },
+          image: { $arrayElemAt: ["$productData.imageUrl", 0] }
+        }
+      }
+    ]);
+    console.log("Products in cart:", productInCart);
 
-      console.log(productDet, "aggregated cart prods");
+    let productDet = productInCart.map((item) => ({
+      _id: item.product_Id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      image: item.image[0]
+    }));
+    console.log("Aggregated cart products:", productDet);
 
-      // Apply coupon if present
-      let finalTotal = totalamount;
-      let discountAmt = 0;
+    // Apply coupon if present
+    let discountAmt = 0;
+    let finalProductTotal = subtotal;
 
-      if (req.body.couponData) {
-          console.log(req.body.couponData);
-          finalTotal = req.body.couponData.newTotal;
-          discountAmt = req.body.couponData.discountAmt;
+    if (req.body.couponData) {
+      console.log("Coupon data received:", req.body.couponData);
+      discountAmt = req.body.couponData.discountAmt; // Discount value should be 30 in this case
+      finalProductTotal = req.body.couponData.newTotal; // New total after discount from applyCoupon
+    }
+
+    console.log("discountAmt we get", discountAmt);
+
+    const DELIVERY_CHARGE = 50;
+
+    // Check if coupon is applied; if yes, don't add delivery charge to final product total
+    const grandTotal = req.body.couponData ? subtotal : finalProductTotal + DELIVERY_CHARGE;
+
+    console.log("Final product total after discount:", finalProductTotal); // Should be 720 (750 - 30)
+    console.log("Grand total (final product total + delivery charge):", grandTotal); // Should be 770 (720 + 50 or 720 without delivery charge)
+
+    // Save the order
+    let saveOrder = async () => {
+      const order = new Order({
+        userId: ID,
+        product: productDet,
+        address: addressId,
+        orderId: ordeId,
+        subtotal: subtotal, // original subtotal (without discount)
+        total: grandTotal, // grand total after discount and delivery charge
+        paymentMethod: payMethod,
+        discountAmt: discountAmt, // coupon discount applied
+        amountAfterDscnt: finalProductTotal, // the product total after discount
+        deliveryCharge: req.body.couponData ? 0 : DELIVERY_CHARGE, // Only apply delivery charge if no coupon
+        coupon: req.body.couponName ? req.body.couponName : "",
+        couponUsed: req.body.couponData ? true : false
+      });
+
+      if (req.body.status) {
+        order.status = "Payment Failed";
+        console.log("Payment Failed  ", order.status);
       }
 
-      const DELIVERY_CHARGE = 50;
-      const grandTotal = finalTotal + DELIVERY_CHARGE;
-      console.log("grand Total of the order:", grandTotal);
+      const ordered = await order.save();
+      console.log("Order saved:", ordered);
 
-      // Save the order
-      let saveOrder = async () => {
-          const order = new Order({
-              userId: ID,
-              product: productDet,
-              address: addressId,
-              orderId: ordeId,
-              total: grandTotal,
-              paymentMethod: payMethod,
-              discountAmt: discountAmt,
-              amountAfterDscnt: grandTotal,  // The grand total after discount + delivery charge
-              coupon: req.body.couponName ? req.body.couponName : "",
-              couponUsed: req.body.couponData ? true : false,
-          });
+      productDet.forEach(async (product)=>{
+        await Product.updateMany(
+          {_id:product._id},
+          {$inc:{stock:-product.quantity,bestSelling:1}}
+        )
+      })
 
-          if (req.body.status) {
-              order.status = "Payment Failed";
-              console.log("Payment Failed  ", order.status);
-          }
+      productDet.forEach(async (product)=>{
+        const populatedProd=await Product.findById(product._id).populate("category").lean()
+        await Category.updateMany({_id:populatedProd.category._id},{$inc:{bestSelling:1}})
+      })
 
-          const ordered = await order.save();
-          console.log(ordered, "ordersaved DATAAAA");
+      const deletedCart = await Cart.deleteMany({ userId: ID }).lean();
+      console.log("Deleted cart items:", deletedCart);
+    };
 
-          const deletedCart = await Cart.deleteMany({
-              userId: ID,
-          }).lean();
+    // Check the payment method
+    if (addressId) {
+      if (payMethod === "cash-on-delivery") {
+        console.log("Cash on Delivery");
+        await saveOrder();
+        res.json({ COD: true });
+      } else if (payMethod === "razorpay") {
+        const amount = grandTotal;
+        let instance = new Razorpay({
+          key_id: "rzp_test_QhDPSiMt8ea6IF",
+          key_secret: "5wg9GfJ3ESDupFYCxdSpPbRP"
+        });
+        const order = await instance.orders.create({
+          amount: amount * 100, // paise 1rupee=100paise
+          currency: "INR",
+          receipt: "Ahamathbasha"
+        });
+        await saveOrder();
+        res.json({ razorPaySucess: true, order, amount });
+      } else if (payMethod === "wallet") {
+        console.log("Current Wallet Balance:", userData.wallet);
+        const newWallet = userData.wallet - grandTotal;
+        console.log("Updated Wallet Balance:", newWallet);
 
-          console.log(deletedCart, "deletedCart");
-      };
+        // Update the user's wallet and history
+        await User.findByIdAndUpdate(
+          userData._id,
+          {
+            $set: { wallet: newWallet },
+            $push: {
+              history: {
+                amount: grandTotal,
+                status: "debit",
+                date: new Date()
+              }
+            }
+          },
+          { new: true }
+        );
 
-      if (addressId) {
-          if (payMethod === "cash-on-delivery") {
-              console.log("CASH ON DELIVERY");
-              await saveOrder();
-              res.json({ COD: true });
-          } else if (payMethod === "razorpay") {
-              const amount = grandTotal;
-              let instance = new Razorpay({
-                  key_id: "rzp_test_QhDPSiMt8ea6IF",
-                  key_secret: "5wg9GfJ3ESDupFYCxdSpPbRP",
-              });
-              const order = await instance.orders.create({
-                  amount: amount * 100,
-                  currency: "INR",
-                  receipt: "Ahamathbasha",
-              });
-              await saveOrder();
-
-              res.json({
-                  razorPaySucess: true,
-                  order,
-                  amount,
-              });
-          } else if (payMethod === "wallet") {
-            //cash changes
-              const newWallet = req.body.updateWallet;
-              console.log("amount i take from the wallet:", newWallet);
-              
-              // Update the user's wallet and history
-              await User.findByIdAndUpdate(
-                  userData._id,
-                  {
-                      $set: { wallet: newWallet },
-                      $push: {
-                          history: {
-                              amount: grandTotal,
-                              status: 'debit',
-                              date: new Date(),
-                          }
-                      }
-                  },
-                  { new: true }
-              );
-
-              await saveOrder();
-
-              res.json({ walletSucess: true });
-          }
+        await saveOrder();
+        res.json({ walletSuccess: true });
       }
+    }
   } catch (error) {
-      console.log(error.message);
-      res.status(500).send("Internal Server Error");
+    console.log("Error during order placement:", error.message);
+    res.status(500).send("Internal Server Error");
   }
 };
-
-// const placeorder = async (req, res) => {
-//   try {
-//       console.log("place order ");
-//       const userData = req.session.user;
-//       const ID = new mongoose.Types.ObjectId(userData._id);
-//       const addressId = req.body.selectedAddress;
-//       const payMethod = req.body.selectedPayment;
-//       const totalamount = req.body.amount;
-//       console.log("Request dot body  ", addressId, payMethod, totalamount);
-
-//       const result = Math.random().toString(36).substring(2, 7);
-//       const id = Math.floor(100000 + Math.random() * 900000);
-//       const ordeId = result + id;
-
-//       const productInCart = await Cart.aggregate([
-//           {
-//               $match: {
-//                   userId: ID,
-//               },
-//           },
-//           {
-//               $lookup: {
-//                   from: "products",
-//                   foreignField: "_id",
-//                   localField: "product_Id",
-//                   as: "productData",
-//               },
-//           },
-//           {
-//               $project: {
-//                   product_Id: 1,
-//                   userId: 1,
-//                   quantity: 1,
-//                   value: 1,
-//                   name: { $arrayElemAt: ["$productData.name", 0] },
-//                   price: { $arrayElemAt: ["$productData.price", 0] },
-//                   productDescription: { $arrayElemAt: ["$productData.description", 0] },
-//                   image: { $arrayElemAt: ["$productData.imageUrl", 0] },
-//               },
-//           },
-//       ]);
-//       console.log(productInCart);
-
-//       let productDet = productInCart.map((item) => ({
-//           _id: item.product_Id,
-//           name: item.name,
-//           price: item.price,
-//           quantity: item.quantity,
-//           image: item.image[0],
-//       }));
-
-//       console.log(productDet, "aggregated cart prods");
-
-//       // Apply coupon if present
-//       let finalTotal = totalamount;
-//       let discountAmt = 0;
-
-//       if (req.body.couponData) {
-//           console.log(req.body.couponData);
-//           finalTotal = req.body.couponData.newTotal;
-//           discountAmt = req.body.couponData.discountAmt;
-//       }
-
-//       const DELIVERY_CHARGE = 50;
-//       const grandTotal = finalTotal + DELIVERY_CHARGE;
-//       console.log("grand Total of the order:", grandTotal);
-
-//       // Save the order
-//       let saveOrder = async () => {
-//           const order = new Order({
-//               userId: ID,
-//               product: productDet,
-//               address: addressId,
-//               orderId: ordeId,
-//               total: grandTotal,
-//               paymentMethod: payMethod,
-//               discountAmt: discountAmt,
-//               amountAfterDscnt: grandTotal,  // The grand total after discount + delivery charge
-//               coupon: req.body.couponName ? req.body.couponName : "",
-//               couponUsed: req.body.couponData ? true : false,
-//           });
-
-//           if (req.body.status) {
-//               order.status = "Payment Failed";
-//               console.log("Payment Failed  ", order.status);
-//           }
-
-//           const ordered = await order.save();
-//           console.log(ordered, "ordersaved DATAAAA");
-
-//           const deletedCart = await Cart.deleteMany({
-//               userId: ID,
-//           }).lean();
-
-//           console.log(deletedCart, "deletedCart");
-//       };
-
-//       if (addressId) {
-//           if (payMethod === "cash-on-delivery") {
-//               console.log("CASH ON DELIVERY");
-//               await saveOrder();
-//               res.json({ COD: true });
-//           } else if (payMethod === "razorpay") {
-//               const amount = grandTotal;
-//               let instance = new Razorpay({
-//                   key_id: "rzp_test_QhDPSiMt8ea6IF",
-//                   key_secret: "5wg9GfJ3ESDupFYCxdSpPbRP",
-//               });
-//               const order = await instance.orders.create({
-//                   amount: amount * 100,
-//                   currency: "INR",
-//                   receipt: "Ahamathbasha",
-//               });
-//               await saveOrder();
-
-//               res.json({
-//                   razorPaySucess: true,
-//                   order,
-//                   amount,
-//               });
-//           } else if (payMethod === "wallet") {
-//               const newWallet = userData.wallet - grandTotal;
-//               console.log(`userDatawallet amount`,userData.wallet)
-//               console.log("amount i take from the wallet:", grandTotal);
-
-//               // Update the user's wallet and history
-//               await User.findByIdAndUpdate(
-//                   userData._id,
-//                   {
-//                       $set: { wallet: newWallet },
-//                       $push: {
-//                           history: {
-//                               amount: grandTotal,
-//                               status: 'debit',
-//                               date: new Date(),
-//                           }
-//                       }
-//                   },
-//                   { new: true }
-//               );
-
-//               await saveOrder();
-
-//               res.json({ walletSuccess: true });
-//           }
-//       }
-//   } catch (error) {
-//       console.log(error.message);
-//       res.status(500).send("Internal Server Error");
-//   }
-// };
 
 
 const orderSuccess=async(req,res)=>{
@@ -791,6 +624,10 @@ const applyCoupon=async(req,res)=>{
             }
             const newTotal=subTotal-discountAmt
 
+            console.log("subtotal value",subTotal)
+
+            console.log("newTotal while applying the coupon",newTotal)
+
             return res.json({
                 discountAmt,
                 newTotal,
@@ -803,6 +640,7 @@ const applyCoupon=async(req,res)=>{
         console.log(error.message)
     }
 }
+
 
 const removeCoupon = async (req, res) => {
     try {

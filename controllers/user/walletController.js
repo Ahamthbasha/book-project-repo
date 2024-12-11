@@ -96,7 +96,7 @@ const walletpage = async (req, res) => {
         const totalItems = userHistory.history.length;
         const totalPages = Math.ceil(totalItems / limit);
         const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-        const sortedHistory = userHistory.history.sort((a, b) => new Date(b.date) - new Date(a.date));
+        const sortedHistory = userHistory.history.sort((a, b) => new Date(b.date) - new Date(a.date));//descending wise sorting
         const paginatedHistory = sortedHistory.slice(skip, skip + limit);
         console.log('Page:', page);
         console.log('Skip:', skip);

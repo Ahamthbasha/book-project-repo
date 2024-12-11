@@ -12,6 +12,10 @@ const categorySchema = new mongoose.Schema({
     isListed:{
         type:Boolean,
         default:true
+    },
+    bestSelling:{
+        type:Number,
+        default:0
     }
 },{timestamps:true})
 

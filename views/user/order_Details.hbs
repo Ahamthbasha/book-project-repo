@@ -194,16 +194,27 @@
                                                                         </dl>
                                                                         <dl class="dlist">
                                                                             <dt>Grand total:</dt>
-                                                                            {{#if myOrderDetails.amountAfterDscnt}}
+                                                                            {{!-- {{#if myOrderDetails.amountAfterDscnt}}
                                                                             <dd> <b
                                                                                     class="h5">{{myOrderDetails.amountAfterDscnt}}</b>
                                                                             </dd>
-                                                                            {{else}}
+                                                                            {{else}} --}}
                                                                             <dd> <b
                                                                                     class="h5">{{myOrderDetails.total}}</b>
                                                                             </dd>
-                                                                            {{/if}}
+                                                                            {{!-- {{/if}} --}}
                                                                         </dl>
+    {{!-- <dl class="dlist">
+    <dt>Product total:</dt>
+    <dd> <b class="h5">{{myOrderDetails.amountAfterDscnt}}</b></dd>
+    <dt>Discount:</dt>
+    <dd> <b class="h5">{{myOrderDetails.discountAmt}}</b></dd>
+    <dt>Delivery charge:</dt>
+    <dd> <b class="h5">{{myOrderDetails.deliveryCharge}}</b></dd>
+    <dt>Grand total:</dt>
+    <dd> <b class="h5">{{myOrderDetails.total}}</b></dd>
+</dl> --}}
+
                                                                         <dl class="dlist">
                                                                             <dt class="text-muted">Status:</dt>
                                                                             <dd>

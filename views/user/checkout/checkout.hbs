@@ -55,10 +55,9 @@
                                         </tr>
                                         <tr>
                                             <th>Grand Total</th>
-                                            {{!-- <td colspan="2" class="product-subtotal"><span class="font-xl text-brand fw-900">$280.00</span></td> --}}
+                                            
                                             <td colspan="2" class="product-subtotal"><span id="new_sub_total"><span
-                                                    class="font-xl text-brand fw-900" id="total">₹{{add subTotal
-                                                    50}}</span></span></td>
+                                                    class="font-xl text-brand fw-900" id="total">₹{{add subTotal 50}}</span></span></td>
                                                     <input type="hidden" name="subTotal" value="{{  subTotal  }}" id="subTotal">
                                         </tr>
                                     </tbody>
@@ -205,7 +204,7 @@
                             <div class="mb-25">
                                 <h4>Address Form</h4>
                             </div>
-                            <form action="/add_address" method="post">
+                            <form action="/add_new_adress" method="post">
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <div class="row gx-3">
@@ -493,7 +492,7 @@
         }
         
         var options = {
-            "key": "rzp_test_OsDtnewxAfAwm0", // Enter the Key ID generated from the Dashboard
+            "key": "rzp_test_QhDPSiMt8ea6IF", // Enter the Key ID generated from the Dashboard
             "amount": (subTotal)* 100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
             "currency": "INR",
             "image": "/images/logo/Logo_CH.png",

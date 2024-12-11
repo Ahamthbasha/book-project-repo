@@ -15,13 +15,15 @@ const showWishlistPage = async (req, res) => {
 
     try {
         const userId = userData._id;
-
+        //new mongoose.Types.ObjectId()=>create or query by ObjectId field the value have string representation of the ObjectId.Helps in type consistencyand avoid errors during comparison or queries.
         // Find the user's wishlist
         const wishlist = await Wishlist.findOne({ user: new mongoose.Types.ObjectId(userId) });
         const wishlistCount = wishlist ? (wishlist.productId ? wishlist.productId.length : 0) : 0;
 
         // Fetch the cart items
         const cartItems = await Cart.find({ userId: new mongoose.Types.ObjectId(userId) });
+
+        //It converts the objectId into string
         const cartProductIds = cartItems.map(item => item.product_Id.toString());
 
         // Aggregate the wishlist products
@@ -132,7 +134,7 @@ const addToWishList = async (req, res) => {
         let wishlistData = await Wishlist.updateOne(
             { user: userId },
             {
-                $addToSet: { productId: productData._id }
+                $addToSet: { productId: productData._id }//avoid duplicate
             },
             {
                 upsert: true,  // If no wishlist exists, create a new one

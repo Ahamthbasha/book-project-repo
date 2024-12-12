@@ -55,6 +55,8 @@ const salesReportTemplate = `
               <th scope="col">Date</th>
               <th scope="col">Order id</th>
               <th scope="col">Payment Method</th>
+              <th scope="col">Coupon</th>
+              <th scope="col">Coupon Used</th>
               <th scope="col">Product Details</th>
               <th scope="col">Total</th>
               
@@ -66,11 +68,15 @@ const salesReportTemplate = `
               <td>{{this.date}}</td>
               <td>{{this.orderId}}</td>
               <td>{{this.payMethod}}</td> 
+              <td>{{this.coupon}}</td>
+              <td>{{this.couponUsed}}</td>
               <td>
                  {{#each this.proName}}
                  <p>Name: {{this.name}}</p>
                  <p>Quantity: {{this.quantity}}</p>
                  <p>Price: <span>₹</span>{{this.price}}</p>
+                 <p>Discount Amount: <span>₹</span>{{this.discountAmt}}</p>
+                 <p>DeliveryCharge:50</p>
                  {{/each}}
                  </td> 
             
@@ -81,7 +87,8 @@ const salesReportTemplate = `
         </table>
                 
         <h5>Total Revenue: ₹<strong class="ml-auto">{{data.grandTotal}}</strong>  </h5>
-       
+        <h5>Total Sales Count: <strong>{{data.salesCount}}</strong></h5>
+        <h5>Total Discount Amount: ₹<strong class="ml-auto">{{data.overallDiscountAmount}}</strong></h5>
       </ul>
     </div>
   </div>
@@ -89,60 +96,58 @@ const salesReportTemplate = `
 `;
 
 
-
-
-// Define function to render template with data
 function renderSalesReport(data) {
   const compiledTemplate = Handlebars.compile(salesReportTemplate);
   const salesReportHTML = compiledTemplate({ data: data });
-  document.getElementById('table').innerHTML = salesReportHTML
+  document.getElementById('table').innerHTML = salesReportHTML;
 
-  $(document).ready( function () {
+  // Update the DataTable configuration
+  $(document).ready(function () {
     $('#my-table').DataTable({
       dom: 'Bfrtip',
-          buttons: [
-              'excelHtml5',
-              'pdfHtml5'
+      buttons: [
+        {
+          extend: 'excelHtml5',
+          text: 'Excel',
+          exportOptions: {
+            columns: ':visible'  // Export visible columns
+          }
+        },
+        {
+          extend: 'pdfHtml5',
+          text: 'PDF',
+          customize: function (doc) {
+            // Extract the totals from the passed data
+            const grandTotal = data.grandTotal;
+            const salesCount = data.salesCount;
+            const overallDiscountAmount = data.overallDiscountAmount;
+
+            // Add the totals to the footer of the PDF
+            doc.content.push({
+              text: [
+                `Total Revenue: ₹${grandTotal}`,
+                `Total Sales Count: ${salesCount}`,
+                `Total Discount Amount: ₹${overallDiscountAmount}`
+              ],
+              margin: [0, 20, 0, 0],  // Add some margin space to the footer
+              alignment: 'left'
+            });
+          }
+        }
       ]
     });
-  } );
+  });
 }
 
+// Fetch the sales data
+  const response = await fetch(`/admin/get_sales?stDate=${startDate}&edDate=${endDate}`, {
+    headers: { 'Content-Type': 'application/json' },
+  });
 
- const response = await fetch(`/admin/get_sales?stDate=${startDate}&edDate=${endDate}`, {
-    headers: { 'Content-Type': "application/json" },
- })
+  const data = await response.json();
+  console.log(data);
 
-   const data = await response.json() 
-   console.log(data)
-
-   if (data) {
-    console.log(data.orders);
-    
-    renderSalesReport(data);
+  if (data) {
+    renderSalesReport(data); // Render the sales report
   }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+};

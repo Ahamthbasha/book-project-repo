@@ -181,8 +181,11 @@
                                             </span>
                                         </div>
                                         <div class="product-price">
-                                            <span>₹{{price}}</span>
-                                            <span class="old-price">₹{{price}}</span>
+                                            <span>₹{{this.discountedPrice}}</span>
+                                            {{#if this.offerAvailable}}
+                                            <span class="old-price">₹{{this.price}}</span>
+                                            <span class="offer-status">Offer Available</span>
+                                            {{/if}}
                                         </div>
                                         <div class="product-action-1 show">
                                         </div>
@@ -195,49 +198,10 @@
                         <!--End product-grid-4-->
                     </div>
                     <!--En tab one (Featured)-->
-                    {{!-- <div class="tab-pane fade" id="tab-two" role="tabpanel" aria-labelledby="tab-two">
-                        <div class="row product-grid-4">
-                            {{#each popularCakes}}
-                            <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-                                <div class="product-cart-wrap mb-30">
-                                    <div class="product-img-action-wrap">
-                                        <div class="product-img product-img-zoom">
-                                            <a href="/productview?id={{this.productDetails._id}}">
-                                                <img class="default-img" src="/images/products/{{this.productDetails.imageUrl.[0]}}" alt="">
-                                                <img class="hover-img" src="/images/products/{{this.productDetails.imageUrl.[1]}}" alt="">
-                                            </a>
-                                        </div>
-                                       
-                                        <div class="product-badges product-badges-position product-badges-mrg">
-                                            <span class="hot">Hot</span>
-                                        </div>
-                                    </div>
-                                    <div class="product-content-wrap">
-                                        <div class="product-category">
-                                            <a >{{this.categoryDetails.category}} </a>
-                                        </div>
-                                        <h2><a >{{this.productDetails.name}}</a></h2>
-                                        <div class="rating-result" title="90%">
-                                            <span>
-                                                <span>90%</span>
-                                            </span>
-                                        </div>
-                                        <div class="product-price">
-                                            <span>{{this.productDetails.name}} </span>
-                                            <span class="old-price">₹245.8</span>
-                                        </div>
-                                        <div class="product-action-1 show">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {{/each}}
-                        </div>
-                        <!--End product-grid-4-->
-                    </div> --}}
+                    
                     <div class="tab-pane fade" id="tab-two" role="tabpanel" aria-labelledby="tab-two">
     <div class="row product-grid-4">
-        {{#each popularCakes}}
+        {{#each popularbooks}}
         <div class="col-lg-3 col-md-4 col-12 col-sm-6">
             <div class="product-cart-wrap mb-30">
                 <div class="product-img-action-wrap">
@@ -262,8 +226,11 @@
                         </span>
                     </div>
                     <div class="product-price">
-                        <span>₹{{this.price}}</span>
+                        <span>₹{{this.discountedPrice}}</span>
+                        {{#if this.offerAvailable}}
                         <span class="old-price">₹{{this.price}}</span>
+                        <span class="offer-status">Offer Available</span>
+                        {{/if}}
                     </div>
                     <div class="product-action-1 show"></div>
                 </div>
@@ -301,9 +268,16 @@
                                                 <span>90%</span>
                                             </span>
                                         </div>
-                                        <div class="product-price">
+                                        {{!-- <div class="product-price">
                                             <span>₹{{price}}</span>
                                             <span class="old-price">₹{{price}}</span>
+                                        </div> --}}
+                                        <div class="product-price">
+                                            <span>₹{{this.discountedPrice}}</span>
+                                            {{#if this.offerAvailable}}
+                                            <span class="old-price">₹{{this.price}}</span>
+                                            <span class="offer-status">Offer Available</span>
+                                            {{/if}}
                                         </div>
                                         <div class="product-action-1 show">
                                         </div>

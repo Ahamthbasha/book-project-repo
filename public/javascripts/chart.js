@@ -1,5 +1,5 @@
 
-const today = new Date().toISOString().split('T')[0];
+const today = new Date().toISOString().split('T')[0];//format into(YYYY-MM-DD)
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate());
 const maxDate = tomorrow.toISOString().split('T')[0];
@@ -27,7 +27,7 @@ const startDate = document.getElementById('start-date').value
 const endDate =document.getElementById('end-date').value
  console.log(startDate, endDate) 
 
-
+//custom helper
 
  Handlebars.registerHelper("for", function(from, to, incr, block) {
   var accum = '';
@@ -97,24 +97,27 @@ const salesReportTemplate = `
 
 
 function renderSalesReport(data) {
-  const compiledTemplate = Handlebars.compile(salesReportTemplate);
-  const salesReportHTML = compiledTemplate({ data: data });
-  document.getElementById('table').innerHTML = salesReportHTML;
+  const compiledTemplate = Handlebars.compile(salesReportTemplate);//handlebar.compile() converts the template string into a callable function that generate dynamic html
+
+
+  const salesReportHTML = compiledTemplate({ data: data });//invokes compiled handlebars templte with data passed as an argument.Data is sales object orders,grandTtoal.Atlast sales reportHtml is a string of html that display sales report
+
+  document.getElementById('table').innerHTML = salesReportHTML;//this line inserts generates salesReporthtml INTO the dom element.
 
   // Update the DataTable configuration
-  $(document).ready(function () {
-    $('#my-table').DataTable({
-      dom: 'Bfrtip',
-      buttons: [
+  $(document).ready(function () { //data table initialization only happens when the dom is fully loaded
+    $('#my-table').DataTable({ //initializes the datatable 
+      dom: 'Bfrtip',//button,search/filter input field,processing display,table,information(showing entries),pagination
+      buttons: [//export buttons
         {
-          extend: 'excelHtml5',
+          extend: 'excelHtml5',//this tells the datatable to use the excel export functionality
           text: 'Excel',
           exportOptions: {
             columns: ':visible'  // Export visible columns
           }
         },
         {
-          extend: 'pdfHtml5',
+          extend: 'pdfHtml5',//activates the pdf export functionality
           text: 'PDF',
           customize: function (doc) {
             // Extract the totals from the passed data

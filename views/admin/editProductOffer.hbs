@@ -1,0 +1,180 @@
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars/dist/handlebars.min.js"></script>
+</head>
+
+<aside class="navbar-aside" id="offcanvas_aside">
+    <div class="aside-top">
+        <a href="/admin/home" class="brand-wrap">
+            <img src="/assetsAdmin/imgs/theme/logo.svg" class="logo" alt="Evara Dashboard">
+        </a>
+        <div>
+            <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i>
+            </button>
+        </div>
+    </div>
+    
+    <nav>
+    <ul class="menu-aside">
+        <li class="menu-item">
+            <a class="menu-link" href="/admin/home"> 
+                <i class="icon material-icons md-home"></i>
+                <span class="text">Dashboard</span>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a class="menu-link" href="/admin/product"> 
+                <i class="icon material-icons md-shopping_bag"></i>
+                <span class="text">Products</span>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a class="menu-link" href="/admin/orders"> 
+                <i class="icon material-icons md-shopping_cart"></i>
+                <span class="text">Orders</span>
+            </a>
+        </li>
+
+        <!-- Product Offer Menu Item -->
+        <li class="menu-item">
+            <a class="menu-link" href="/admin/productOffers"> 
+                <i class="icon material-icons md-local_offer"></i>
+                <span class="text">Product Offer</span>
+            </a>
+        </li>
+
+        <!-- Category Offer Menu Item -->
+        
+
+        <li class="menu-item active">
+            <a class="menu-link" href="/admin/category"> 
+                <i class="icon material-icons md-category"></i>
+                <span class="text">Category</span>
+            </a>
+        </li>
+
+        <li class="menu-item">
+            <a class="menu-link" href="/admin/coupons"> 
+                <i class="icon fa-solid fa-ticket"></i>
+                <span class="text">Coupons</span>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a class="menu-link" href="/admin/manage_users"> 
+                <i class="icon material-icons md-person"></i>
+                <span class="text">Users</span>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a class="menu-link" href="/admin/banners"> 
+                <i class="icon material-icons md-local_offer"></i>
+                <span class="text">Banner</span>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a class="menu-link" href="/admin/reviews"> 
+                <i class="icon material-icons md-comment"></i>
+                <span class="text">Reviews</span>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a class="menu-link" href="/admin/brands"> 
+                <i class="icon material-icons md-stars"></i>
+                <span class="text">Brands</span>
+            </a>
+        </li>
+    </ul>
+    <hr>
+    <ul class="menu-aside">
+        <li class="menu-item">
+            <a class="menu-link" href="#"> 
+                <i class="icon material-icons md-settings"></i>
+                <span class="text">Settings</span>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a class="menu-link btn btn-primary" href="/admin/logout"> 
+                <i class="icon material-icons md-exit_to_app"></i>
+                Logout
+            </a>
+        </li>
+    </ul>
+    <br>
+    <br>
+</nav>
+
+</aside>
+<main class="main-wrap">
+    <section class="content-main">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-10">
+                <div class="content-header">
+                    <h2 class="content-title">Edit Product Offer</h2>
+                </div>
+            </div>
+            <div class="col-10 mt-5 justify-content-center">
+                <div class="card">
+                    <div class="card-body">
+                        <form action="/admin/editProductOffer/{{editProductOfferData._id}}" id="editProductOfferForm" role="form"  method="post">
+                            <input type="hidden" name="offerId" value="{{editProductOfferData._id}}" />
+                            
+                            <div class="modal-body">
+                                <label for="productName" class="mb-2">Product Name:</label>
+                                <select name="productName" id="productName" class="form-select">
+                                    {{#each products}}
+                                    <option value="{{this.name}}" {{#if (eq this.name ../editProductOfferData.productName)}}selected{{/if}}>
+                                        {{this.name}}
+                                    </option>
+                                    {{/each}}
+                                </select>
+
+                                <div class="offerPercentageInput p-2">
+                                    <label for="productOfferPercentage" class="mb-2">Product Offer Percentage: </label>
+                                    <div class="input-group">
+                                        <input id="productOfferPercentage" value="{{editProductOfferData.productOfferPercentage}}" name="productOfferPercentage" class="form-control" placeholder="Enter the offer percentage">
+                                    </div>
+                                    <div class="form-text">Choose a percentage to be discounted. Between 5% and 90%.</div>
+                                </div>
+                                
+                                <div class="startDateInput p-2">
+                                    <label for="startDate">Offer Start Date: </label>
+                                    <div class="input-group">
+                                        <input id="startDate" value="{{startDate}}" name="startDate" type="date" class="form-control">
+                                    </div>
+                                    <div class="form-text">Choose a start date for the offer to be considered.</div>
+                                </div>
+
+                                <div class="endDateInput p-2">
+                                    <label for="endDate">Offer Expiry Date: </label>
+                                    <div class="input-group">
+                                        <input id="endDate" value="{{endDate}}" name="endDate" type="date" class="form-control">
+                                    </div>
+                                    <div class="form-text">Choose an expiry date for the offer to end.</div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-info">Save changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+    </section>
+
+
+    <footer class="main-footer font-xs">
+        <div class="row pb-30 pt-15">
+            <div class="col-sm-6">
+                <script>
+                    document.write(new Date().getFullYear())
+                </script> ©, MobileBazaar .
+            </div>
+            <div class="col-sm-6">
+                <div class="text-sm-end">
+                    All rights reserved
+                </div>
+            </div>
+        </div>
+    </footer>
+</main>
+

@@ -1,3 +1,4 @@
+const referralSchema = require("../../models/referralSchema")
 const User=require("../../models/userModel")
 
 const loadProfile=async(req,res)=>{
@@ -5,7 +6,9 @@ const loadProfile=async(req,res)=>{
         const user=req.session.user
         const id=user._id
         const userData=await User.findById(id).lean()
-        res.render("user/about_me",{userData})
+        const referralData=await referralSchema.find({userId:id},{referralCode:1}).lean()
+        console.log(referralData)
+        res.render("user/about_me",{userData,referralData})
     }catch(error){
         console.log(error)
     }

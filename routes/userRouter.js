@@ -23,6 +23,11 @@ router.get('/',userController.loadHome)
 router.get('/signup', isLogout, userController.usersignup)
 router.post('/signup', isLogout,userController.doSignup)
 
+//referals
+
+router.get('/referals',isLogout,userController.loadReferalPage)
+router.post('/verifyReferalCode',userController.verifyReferelCode)
+
 //otp
 router.get('/get_otp', isLogout, userController.getOtp)
 router.post('/submit_otp',isLogout, userController.submitOtp)
@@ -41,6 +46,7 @@ router.get('/logout', userController.doLogout)
 router.get("/product",productController.getProduct)
 router.post("/search",productController.searchSortFilter)
 router.get("/productview",productController.productView)
+// router.get('/productDetails/:id',productDetails)
 
 //profile management
 router.get("/profile",logedin,isBlocked,profileController.loadProfile)

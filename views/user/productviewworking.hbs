@@ -1,10 +1,3 @@
-<style>
-    .old-price {
-    text-decoration: line-through;
-    color: #888;  /* Optional: Change the color of the old price */
-    margin-left: 10px;
-}
-</style>
 <main class="main">
     <div class="page-header breadcrumb-wrap">
         <div class="container">
@@ -42,14 +35,14 @@
                                 <div class="detail-info">
                                     <h2 class="title-detail">{{proData.name}}</h2>
                                     <div class="product-price">
-                                        {{#if proData.productOffer}} <!-- Check if product has an offer -->
-                                            <span>₹{{proData.productOffer.discountPrice}}</span> <!-- Display discounted price -->
-                                            <span class="old-price">₹{{proData.price}}</span> <!-- Display original price -->
-                                            <span class="offer-status">Offer Available</span> <!-- Offer message -->
-                                        {{else}}
-                                            <span>₹{{proData.price}}</span> <!-- Display normal price if no offer -->
-                                        {{/if}}
-                                    </div>
+    {{#if proData.productOffer}} <!-- Check if product has an offer -->
+        <span>₹{{proData.productOffer.discountedPrice}}</span> <!-- Display discounted price -->
+        <span class="old-price">₹{{proData.productOffer.price}}</span> <!-- Display original price -->
+        <span class="offer-status">Offer Available</span> <!-- Offer message -->
+    {{else}}
+        <span>₹{{proData.discountedPrice}}</span> <!-- Display normal price if no offer -->
+    {{/if}}
+</div>
 
                                     <div class="bt-1 border-color-1 mt-15 mb-15"></div>
                                     <div class="short-desc mb-30">

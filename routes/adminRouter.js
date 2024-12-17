@@ -7,7 +7,8 @@ const productController=require("../controllers/admin/productController")
 const orderController=require("../controllers/admin/orderController")
 const couponController=require("../controllers/admin/couponController")
 const dashboardController=require("../controllers/admin/dashboardController")
-const offerController=require("../controllers/admin/offerController")
+const offerController=require("../controllers/admin/productOfferController")
+
 const store=require("../middlewares/multer")
 const adminAuth=require('../middlewares/adminAuth')
 
@@ -61,7 +62,12 @@ router.get("/delete_coupon/:id",adminAuth.isLogin,couponController.deleteCoupon)
 
 router.get('/get_sales',adminAuth.isLogin,dashboardController.getSales)
 
-//offer management
+//product offer management
 router.get("/productOffers",adminAuth.isLogin,offerController.productOfferPage)
 router.get("/addProOffers",adminAuth.isLogin,offerController.addProductOfferPage)
+router.post("/addProOffers",adminAuth.isLogin,offerController.addProductOffer)
+router.get("/editProductOffer/:id",adminAuth.isLogin,offerController.editProductOfferPage)
+router.post("/editProductOffer/:id",adminAuth.isLogin,offerController.editProductOffer)
+router.delete("/deleteProOffer/:id",adminAuth.isLogin,offerController.deleteProductOffer)
+
 module.exports=router

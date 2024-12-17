@@ -21,6 +21,46 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<style>
+ /* Container for all the buttons to align them properly */
+.button-container {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping for smaller screens */
+    justify-content: flex-start; /* Align buttons to the left */
+    gap: 20px; /* Adds consistent space between buttons */
+    margin-top: 15px; /* Space at the top of the button container */
+}
+
+/* Buttons inside the container */
+.btn {
+    margin: 0; /* No extra margin to avoid unnecessary spacing */
+    padding: 10px 20px; /* Padding for better button size */
+    font-size: 14px; /* Ensures the text on the button is readable */
+    border-radius: 5px; /* Rounded corners for the buttons */
+}
+
+/* Custom styles for different button IDs to maintain spacing */
+#cancel_btn, #retry_btn, #return_btn {
+    display: inline-block;
+}
+
+/* Media Query to handle button spacing and layout for larger screens */
+@media (min-width: 768px) {
+    /* Keep buttons on the same row with larger gaps between them */
+    .button-container {
+        flex-wrap: nowrap; /* No wrapping in desktop view */
+        justify-content: flex-start; /* Align the buttons from the start */
+        gap: 20px; /* Adds more space between buttons */
+    }
+
+    /* Ensure buttons have appropriate padding and no margin between them */
+    .btn {
+        padding: 10px 20px;
+        margin: 0;
+    }
+}
+  
+</style>
 </head>
 
 <body>
@@ -193,6 +233,10 @@
                                                                             {{/if}}
                                                                         </dl>
                                                                         <dl class="dlist">
+                                                                            <dt>Deliverycharge:</dt>
+                                                                            <dd>50</dd>
+                                                                        </dl>
+                                                                        <dl class="dlist">
                                                                             <dt>Grand total:</dt>
                                                                             {{!-- {{#if myOrderDetails.amountAfterDscnt}}
                                                                             <dd> <b
@@ -237,7 +281,7 @@
                                                         {{myOrderDetails.paymentMethod}}
                                                     </p>
                                                 </div>
-                                                <div class="mt-3">
+                                                <div class="mt-3 button-container">
                                                     <a href="/myOrders" type="button"
                                                         class="btn btn-primary">Back</a>
                                                     {{#ifeq myOrderDetails.status 'pending'}}

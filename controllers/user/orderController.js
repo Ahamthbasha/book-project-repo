@@ -2,6 +2,7 @@ const Product=require("../../models/productModel")
 const User=require("../../models/userModel")
 const Address=require("../../models/addressModel")
 const Order=require("../../models/orderModel")
+const productOffer=require("../../models/productOfferModel")
 const moment=require('moment')
 const mongoose=require('mongoose')
 
@@ -239,14 +240,140 @@ const my_Orders=async(req,res)=>{
 //     }
 // };
 
+//18-12-2024
+// const orderDetails = async (req, res) => {
+//     try {
+//         const orderId = req.params.id;
+//         const user = req.session.user;
+//         const userId = user._id;
+//         const userData = await User.findById(userId).lean();
+//         const myOrderDetails = await Order.findById(orderId).lean();
+        
+//         if (!myOrderDetails) {
+//             return res.status(400).send("Order not found");
+//         }
+
+//         // Format the date
+//         myOrderDetails.date = moment(myOrderDetails.date).format('ddd MMM DD YYYY');
+
+//         const orderedProDet = await Order.aggregate([
+//             { $match: { _id: new mongoose.Types.ObjectId(orderId) } },
+//             { $unwind: "$product" },
+//             { $project: { _id: 1, product: 1 } }
+//         ]);
+
+//         const address = await Address.findOne({ userId: userId }).lean();
+
+//         console.log("Address:", address);
+//         console.log("Order Details:", myOrderDetails);
+//         console.log("Ordered Product Details:", orderedProDet);
+
+//         // Check the values before rendering
+//         console.log("amountAfterDscnt:", myOrderDetails.amountAfterDscnt);
+//         console.log("total:", myOrderDetails.total);
+
+//         res.render("user/order_Details", {
+//             totalprice: myOrderDetails.total,
+//             address,
+//             orderedProDet,
+//             myOrderDetails,
+//             userData
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send("Internal Server Error");
+//     }
+// };
+
+// const orderDetails = async (req, res) => {
+//     try {
+//         const orderId = req.params.id;
+//         const user = req.session.user;
+//         const userId = user._id;
+
+//         // Fetch user data and order details
+//         const userData = await User.findById(userId).lean();
+//         const myOrderDetails = await Order.findById(orderId).lean();
+
+//         if (!myOrderDetails) {
+//             return res.status(400).send("Order not found");
+//         }
+
+//         // Format the date
+//         myOrderDetails.date = moment(myOrderDetails.date).format('ddd MMM DD YYYY');
+
+//         // Fetch ordered product details
+//         const orderedProDet = await Order.aggregate([
+//             { $match: { _id: new mongoose.Types.ObjectId(orderId) } },
+//             { $unwind: "$product" },
+//             { $project: { _id: 1, product: 1 } }
+//         ]);
+
+//         // Fetch address
+//         const address = await Address.findOne({ userId: userId }).lean();
+
+//         // Fetch product offers for each product in the order
+//         const productIds = orderedProDet.map(item => item.product.productId);
+//         const productOffers = await productOffer.find({
+//             productId: { $in: productIds },
+//             currentStatus: true,
+//             startDate: { $lte: new Date() },
+//             endDate: { $gte: new Date() }
+//         }).lean();
+
+//         // Create a map for quick access to offers
+//         const offerMap = {};
+//         productOffers.forEach(offer => {
+//             offerMap[offer.productId] = offer;
+//         });
+
+//         // Enhance ordered products with pricing logic
+//         const enhancedOrderedProDet = orderedProDet.map(item => {
+//             const offer = offerMap[item.product.productId];
+//             if (offer) {
+//                 return {
+//                     ...item,
+//                     offerPrice: offer.discountPrice,
+//                     originalPrice: item.product.price,
+//                 };
+//             } else {
+//                 return {
+//                     ...item,
+//                     offerPrice: null,
+//                     originalPrice: item.product.price,
+//                 };
+//             }
+//         });
+
+//         console.log("Address:", address);
+//         console.log("Order Details:", myOrderDetails);
+//         console.log("Ordered Product Details:", enhancedOrderedProDet);
+
+//         res.render("user/orderDetails", {
+//             totalprice: myOrderDetails.total,
+//             address,
+//             orderedProDet: enhancedOrderedProDet,
+//             myOrderDetails,
+//             userData
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send("Internal Server Error");
+//     }
+// };
+
+
+
 const orderDetails = async (req, res) => {
     try {
         const orderId = req.params.id;
         const user = req.session.user;
         const userId = user._id;
+
+        // Fetch user data and order details
         const userData = await User.findById(userId).lean();
         const myOrderDetails = await Order.findById(orderId).lean();
-        
+
         if (!myOrderDetails) {
             return res.status(400).send("Order not found");
         }
@@ -254,26 +381,63 @@ const orderDetails = async (req, res) => {
         // Format the date
         myOrderDetails.date = moment(myOrderDetails.date).format('ddd MMM DD YYYY');
 
+        // Fetch ordered product details
         const orderedProDet = await Order.aggregate([
             { $match: { _id: new mongoose.Types.ObjectId(orderId) } },
             { $unwind: "$product" },
             { $project: { _id: 1, product: 1 } }
         ]);
 
+        // Fetch address
         const address = await Address.findOne({ userId: userId }).lean();
+
+        // Fetch product offers for each product in the order
+        const productIds = orderedProDet.map(item => item.product._id);
+        const productOffers = await productOffer.find({
+            productId: { $in: productIds },
+            currentStatus: true,
+            startDate: { $lte: new Date() },
+            endDate: { $gte: new Date() }
+        }).lean();
+
+        // Create a map for quick access to offers
+        const offerMap = {};
+        productOffers.forEach(offer => {
+            offerMap[offer.productId] = offer;
+        });
+
+        // Enhance ordered products with pricing logic
+        const enhancedOrderedProDet = orderedProDet.map(item => {
+            const offer = offerMap[item.product._id];
+            if (offer) {
+                return {
+                    ...item,
+                    product: {
+                        ...item.product,
+                        discountPrice: offer.discountPrice,
+                        originalPrice: item.product.price,
+                    }
+                };
+            } else {
+                return {
+                    ...item,
+                    product: {
+                        ...item.product,
+                        discountPrice: item.product.price,
+                        originalPrice: item.product.price,
+                    }
+                };
+            }
+        });
 
         console.log("Address:", address);
         console.log("Order Details:", myOrderDetails);
-        console.log("Ordered Product Details:", orderedProDet);
+        console.log("Ordered Product Details:", enhancedOrderedProDet);
 
-        // Check the values before rendering
-        console.log("amountAfterDscnt:", myOrderDetails.amountAfterDscnt);
-        console.log("total:", myOrderDetails.total);
-
-        res.render("user/order_Details", {
+        res.render("user/orderDetails", {
             totalprice: myOrderDetails.total,
             address,
-            orderedProDet,
+            orderedProDet: enhancedOrderedProDet,
             myOrderDetails,
             userData
         });
@@ -358,10 +522,252 @@ const cancelOrder = async (req, res) => {
     }
 };
 
+const returnOrder = async (req, res) => {
+    try {
+        const id = req.params.id;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ error: 'Invalid order ID' });
+        }
+        const ID = new mongoose.Types.ObjectId(id);
+        let notCancelledAmt = 0;
+
+        let returnedOrder = await Order.findOne({ _id: ID }).lean();
+        console.log(returnedOrder, "returnedOrder")
+
+        const returnedorder = await Order.findByIdAndUpdate(ID, { $set: { status: 'Returned' } }, { new: true });
+        for (const product of returnedorder.product) {
+            if (!product.isCancelled) {
+                await Product.updateOne(
+                    { _id: product._id },
+                    { $inc: { stock: product.quantity } }
+                );
+
+                await Order.updateOne(
+                    { _id: ID, 'product._id': product._id },
+                    { $set: { 'product.$.isReturned': true } }
+                );
+            }
+
+
+        }
+
+        let couponAmountEach = 0
+        if(returnedOrder.coupon){
+            couponAmountEach = returnedOrder.discountAmt / returnedOrder.product.length
+
+        }
+
+        if (['wallet', 'razorpay'].includes(returnedOrder.paymentMethod)) {
+            for (const data of returnedOrder.product) {
+                //await Product.updateOne({ _id: data._id }, { $inc: { stock: data.quantity } });
+                await User.updateOne(
+                    { _id: req.session.user._id },
+                    { $inc: { wallet: (data.price * data.quantity) - couponAmountEach } }
+                );
+                notCancelledAmt += data.price * data.quantity - couponAmountEach;
+            }
+
+            await User.updateOne(
+                { _id: req.session.user._id },
+                {
+                    $push: {
+                        history: {
+                            amount: notCancelledAmt,
+                            status: 'refund of Order Return',
+                            date: Date.now()
+                        }
+                    }
+                }
+            );
+        }
+
+        res.json({
+            success: true,
+            message: 'Successfully Returned Order'
+
+        });
+    } catch (error) {
+        console.log(error.message);
+       // res.status(HttpStatus.InternalServerError).send('Internal Server Error');
+    }
+};
+
+const cancelOneProduct = async (req, res) => {
+    try {
+        const { id, prodId } = req.body;
+        console.log(id, prodId)
+
+        if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
+            return res.status(HttpStatus.BadRequest).json({ error: 'Invalid order or product ID' });
+        }
+
+        const ID = new mongoose.Types.ObjectId(id);
+        const PRODID = new mongoose.Types.ObjectId(prodId);
+
+        const updatedOrder = await Order.findOneAndUpdate(
+            { _id: ID, 'product._id': PRODID },
+            { $set: { 'product.$.isCancelled': true } },
+            { new: true }
+        ).lean();
+
+        if (!updatedOrder) {
+            return res.status(HttpStatus.NotFound).json({ error: 'Order or product not found' });
+        }
+
+        const result = await Order.findOne(
+            { _id: ID, 'product._id': PRODID },
+            { 'product.$': 1 }
+        ).lean();
+
+        const productQuantity = result.product[0].quantity;
+        const productprice = result.product[0].price * productQuantity
+
+        await Product.findOneAndUpdate(
+            { _id: PRODID },
+            { $inc: { stock: productQuantity } }
+        );
+        if(updatedOrder.couponUsed){
+            const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
+            const discountAmt = (productprice * coupon.discount) / 100;
+            const newTotal = productprice - discountAmt;
+            await User.updateOne(
+                { _id: req.session.user._id },
+                { $inc: { wallet: newTotal } }
+            );
+
+            await User.updateOne(
+                { _id: req.session.user._id },
+                {
+                    $push: {
+                        history: {
+                            amount: newTotal,
+                            status: `refund of: ${result.product[0].name}`,
+                            date: Date.now()
+                        }
+                    }
+                }
+            );
+
+        }else{
+            await User.updateOne(
+                { _id: req.session.user._id },
+                { $inc: { wallet: productprice } }
+            );
+            await User.updateOne(
+                { _id: req.session.user._id },
+                {
+                    $push: {
+                        history: {
+                            amount: productprice,
+                            status: `refund of: ${result.product[0].name}`,
+                            date: Date.now()
+                        }
+                    }
+                }
+            );
+        }
+
+        res.json({
+            success: true,
+            message: 'Successfully removed product'
+        });
+    } catch (error) {
+        console.log(error.message);
+        //res.status(HttpStatus.InternalServerError).send('Internal Server Error');
+    }
+};
+
+const returnOneProduct = async (req, res) => {
+    try {
+        const { id, prodId } = req.body;
+        console.log(id, prodId)
+
+        if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
+            return res.status(HttpStatus.BadRequest).json({ error: 'Invalid order or product ID' });
+        }
+
+        const ID = new mongoose.Types.ObjectId(id);
+        const PRODID = new mongoose.Types.ObjectId(prodId);
+
+        const updatedOrder = await Order.findOneAndUpdate(
+            { _id: ID, 'product._id': PRODID },
+            { $set: { 'product.$.isReturned': true } },
+            { new: true }
+        ).lean();
+
+        if (!updatedOrder) {
+            return res.status(HttpStatus.NotFound).json({ error: 'Order or product not found' });
+        }
+
+        const result = await Order.findOne(
+            { _id: ID, 'product._id': PRODID },
+            { 'product.$': 1 }
+        ).lean();
+
+        const productQuantity = result.product[0].quantity;
+        const productprice = result.product[0].price * productQuantity
+
+        await Product.findOneAndUpdate(
+            { _id: PRODID },
+            { $inc: { stock: productQuantity } }
+        );
+        if(updatedOrder.couponUsed){
+            const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
+            const discountAmt = (productprice * coupon.discount) / 100;
+            const newTotal = productprice - discountAmt;
+            await User.updateOne(
+                { _id: req.session.user._id },
+                { $inc: { wallet: newTotal } }
+            );
+
+            await User.updateOne(
+                { _id: req.session.user._id },
+                {
+                    $push: {
+                        history: {
+                            amount: newTotal,
+                            status: `[return] refund of: ${result.product[0].name}`,
+                            date: Date.now()
+                        }
+                    }
+                }
+            );
+
+        }else{
+            await User.updateOne(
+                { _id: req.session.user._id },
+                { $inc: { wallet: productprice } }
+            );
+            await User.updateOne(
+                { _id: req.session.user._id },
+                {
+                    $push: {
+                        history: {
+                            amount: productprice,
+                            status: `[return]refund of: ${result.product[0].name}`,
+                            date: Date.now()
+                        }
+                    }
+                }
+            );
+        }
+
+        res.json({
+            success: true,
+            message: 'Successfully removed product'
+        });
+    } catch (error) {
+        console.log(error.message);
+      //  res.status(HttpStatus.InternalServerError).send('Internal Server Error');
+    }
+}
 
 module.exports=
 {
     my_Orders,
     orderDetails,
-    cancelOrder
+    cancelOrder,
+    returnOrder,
+    cancelOneProduct,
+    returnOneProduct
 }

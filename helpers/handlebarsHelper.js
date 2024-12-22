@@ -1,9 +1,5 @@
 const Handlebars = require('handlebars');
 const moment = require('moment');
-// //for wallet i add length helper
-// Handlebars.registerHelper('length', function (array, options) {
-//   return array.length;
-// });
 
 Handlebars.registerHelper('ifeq', function (a, b, options) {
     if (a == b) { return options.fn(this); }
@@ -35,6 +31,7 @@ Handlebars.registerHelper('ifeq', function (a, b, options) {
     }
   })
   
+
   Handlebars.registerHelper('multiply', function(a, b) {
     return a * b;
   });
@@ -76,5 +73,79 @@ Handlebars.registerHelper('ifeq', function (a, b, options) {
   Handlebars.registerHelper('eq', function(a, b) {
     return a === b;
   });
+  
+  // Handlebars.registerHelper('singlestatuchecker', function (product, options) {
+  //   if (product.isReturned) {
+  //     return new Handlebars.SafeString('<span class="badge rounded-pill alert-info text-info">Returned</span>');
+  //   } else if (product.isCancelled) {
+  //     return new Handlebars.SafeString('<span class="badge rounded-pill alert-danger text-danger">Cancelled</span>');
+  //   } else {
+  //     return options.fn(this);
+  //   }
+  // });
+
+//   Handlebars.registerHelper('singlestatuchecker', function (product, options) {
+//     // Check if the product has been returned
+//     if (product.isReturned) {
+//         return new Handlebars.SafeString('<span class="badge rounded-pill alert-info text-info">Returned</span>');
+//     } 
+//     // Check if the product has been canceled
+//     else if (product.isCancelled) {
+//         return new Handlebars.SafeString('<span class="badge rounded-pill alert-danger text-danger">Cancelled</span>');
+//     } 
+//     // If neither condition is true, allow rendering of buttons
+//     else {
+//         return options.fn(this);
+//     }
+// });
+
+Handlebars.registerHelper('singlestatuchecker', function (product, options) {
+  console.group('helper called with product',product)
+  if (product.isReturned) {
+      return new Handlebars.SafeString('<span class="badge rounded-pill alert-info text-info">Returned</span>');
+  } else if (product.isCancelled) {
+      return new Handlebars.SafeString('<span class="badge rounded-pill alert-danger text-danger">Cancelled</span>');
+  } else {
+      // Allow rendering of buttons when neither condition is true
+      return options.fn(this);
+  }
+});
+
+
+  Handlebars.registerHelper('statuchecker', function (value) {
+    let returnCount = value.product.filter((elem) => elem.isReturned).length;
+    let cancelCount = value.product.filter((elem) => elem.isCancelled).length;
+    
+    let allCancelled = value.product.every(product => product.isCancelled);
+    let allReturned = value.product.every(product => product.isReturned);
+    
+    // Handle the order statuses
+    if (value.status === "Delivered") {
+      return new Handlebars.SafeString(`
+        <button id="returnOrder" data-order-id="${value._id}" class="btn btn-sm btn-primary">Return Entire Order</button>
+      `);
+    } else if (value.status === "Returned") {
+      return new Handlebars.SafeString('<span class="badge rounded-pill alert-info text-info">Order Returned</span>');
+    } else if (value.status === "Payment Failed") {
+      return new Handlebars.SafeString(`
+        <button id="retryPayment" data-order-id="${value._id}" class="btn btn-sm btn-warning">Retry Payment</button>
+      `);
+    } else {
+      if (allCancelled || value.status === 'Cancelled') {
+        return new Handlebars.SafeString('<span class="badge rounded-pill alert-danger text-danger">Order Cancelled</span>');
+      } else if (returnCount > 0) {
+        return new Handlebars.SafeString('<span class="badge rounded-pill alert-info text-info">Order Returned</span>');
+      } else {
+        return new Handlebars.SafeString(`
+          <button id="cancelOrder" data-order-id="${value._id}" class="btn btn-sm btn-primary">Cancel Entire Order</button>
+        `);
+      }
+    }
+  });
+
+  Handlebars.registerHelper('json', function(context) {
+    return JSON.stringify(context);
+});
+
   
 module.exports = Handlebars;

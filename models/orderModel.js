@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const Handlebars=require("../helpers/handlebarsHelper")
 const orderSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -15,6 +15,8 @@ const orderSchema = new mongoose.Schema({
       quantity: { type: Number },
       image: { type: String },
       address: { type: Object },
+      isCancelled:{type:Boolean,default:false},
+      isReturned:{type:Boolean,default:false}
     },
   ],
 

@@ -76,7 +76,11 @@ router.post("/reset_password",forgetPasswordController.resetPasswordpost)
 //Order page
 router.get('/myOrders',logedin,isBlocked,orderController.my_Orders)
 router.get("/orderDetails/:id",logedin,isBlocked,orderController.orderDetails)
-router.post("/cancel_order/:id",logedin,isBlocked,orderController.cancelOrder)
+router.put('/cancel-order/:id',logedin,isBlocked,orderController.cancelOrder)
+router.put('/return-order/:id',logedin,isBlocked,orderController.returnOrder)
+router.put('/cancel-one-product',logedin,isBlocked,orderController.cancelOneProduct)
+router.put('/return-one-product',logedin,isBlocked,orderController.returnOneProduct)
+// router.post("/cancel_order/:id",logedin,isBlocked,orderController.cancelOrder)
 
 //cart management
 router.get('/cart',logedin,isBlocked,cartController.loadCart)

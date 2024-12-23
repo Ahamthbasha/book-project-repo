@@ -32,9 +32,17 @@
                                         <tr>
                                             <td class="image product-thumbnail"><img src="/images/products/{{productImage.[0]}}" alt="#"></td>
                                             <td>
-                                                <h5><a href="shop-product-full.html">{{this.productName}}</a></h5> <span class="product-qty">{{this.productPrice}}x {{this.quantity}}</span>
+                                                <h5><a href="shop-product-full.html">{{this.productName}}</a></h5>
+                                                 <span class="product-qty">
+                                                 {{#if this.offerPercentage}}
+                    <del>₹{{this.productPrice}}</del> x {{this.quantity}} 
+                    <span class="text-danger"> (Discounted Price: ₹{{this.finalPrice}})</span>
+                {{else}}
+                    ₹{{this.productPrice}} x {{this.quantity}}
+                {{/if}}   
+                                                 </span>
                                             </td>
-                                            <td>₹{{multiply this.productPrice this.quantity }}</td>
+                                            <td>₹{{multiply this.finalPrice this.quantity }}</td>
                                         </tr>
                                         {{/each}}
                                         <tr>
@@ -59,7 +67,7 @@
                                             <td colspan="2" class="product-subtotal"><span id="new_sub_total"><span
                                                     class="font-xl text-brand fw-900" id="total">₹{{add subTotal
                                                     50}}</span></span></td>
-                                                    <input type="hidden" name="subTotal" value="{{  subTotal  }}" id="subTotal">
+                                                    <input type="hidden" name="subTotal" value="{{ subTotal }}" id="subTotal">
                                         </tr>
                                     </tbody>
                                 </table>
@@ -94,57 +102,42 @@
                                     </div>
                                 </div>
                             </div>
+                            
                             <div class="col-lg-4">
+    <button type="button" class="btn btn-fill-out btn-block" data-bs-toggle="collapse" data-bs-target="#couponList" aria-expanded="false" aria-controls="couponList"> 
+        <i class="fi-rs-label mr-10"></i> Show Available Coupons
+    </button>
 
-                                <button type="button" class="btn btn-fill-out btn-block " data-bs-toggle="collapse" data-bs-target="#couponList" aria-expanded="false" aria-controls="couponList"> <i class="fi-rs-label mr-10"></i> Show Available Coupons</button>
-
-                                <div class="panel-collapse1 collapse coupon_form " id="couponList">
-                                    <div class="panel-body">
-                                        <div class="mb-25">
-                                            <h4>Address Form</h4>
-                                        </div>
-                                        {{#each coupon}}
-                                        <article class="itemlist">
-                                            <div class="row align-items-center">
-                                                <div class="col col-check flex-grow-0">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" value="">
-                                                    </div>
-                                                </div>
-
-                                                <div
-                                                    class="col-lg-2 col-sm-2 col-2 flex-grow-1 col-name text-align-center">
-                                                    <a class="itemside">
-
-                                                        <div class="info">
-                                                            <h6 class="mb-2">{{this.code}}</h6>
-                                                        </div>
-                                                    </a>
-                                                </div>
-                                                <div
-                                                    class="col-lg-2 col-sm-2 col-2 flex-grow-1 col-name text-align-center">
-                                                    <a class="itemside">
-
-                                                        <div class="info">
-                                                            <h6 class="mb-0">{{this.discount}}%</h6>
-                                                        </div>
-                                                    </a>
-                                                </div>
-                                                <div class="col-lg-2 col-sm-2 col-4 col-price">
-                                                    <span>$76.99</span>
-                                                </div>
-
-
-
-
-
-
-                                            </div> <!-- row .// -->
-                                        </article>
-                                        {{/each}}
+    <div class="panel-collapse1 collapse coupon_form" id="couponList">
+        <div class="panel-body">
+            {{#if coupon.length}}
+                {{#each coupon}}
+                    <article class="itemlist">
+                        <div class="row align-items-center">
+                            <div class="col-lg-2 col-sm-2 col-2 flex-grow-1 col-name text-align-center">
+                                <a class="itemside">
+                                    <div class="info">
+                                        <h6 class="mb-2">{{this.code}}</h6>
                                     </div>
-                                </div>
+                                </a>
                             </div>
+                            <div class="col-lg-2 col-sm-2 col-2 flex-grow-1 col-name text-align-center">
+                                <a class="itemside">
+                                    <div class="info">
+                                        <h6 class="mb-0">{{this.discount}}%</h6>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                {{/each}}
+            {{else}}
+                <p>No Coupons Available</p>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
                         </div>
                             <div class="bt-1 border-color-1 mt-30 mb-30"></div>
                             <div class="payment_method">
@@ -157,26 +150,26 @@
                                         <label class="form-check-label" for="cash-on-delivery" data-bs-toggle="collapse" data-target="#bankTranfer" aria-controls="bankTranfer">Cash On Delivery</label>
                                         </div>
                                         
-                                    {{!-- <div class="custome-radio">
+                                    <div class="custome-radio">
                                     <input class="form-check-input" required="" type="radio" name="payment_option"
                                         value="razorpay" id="razorpay">
                                     <label class="form-check-label" for="razorpay" data-bs-toggle="collapse"
                                         data-target="#checkPayment" aria-controls="checkPayment"> Razor Pay</label>
-                                </div> --}}
-                                {{!-- <div class="custome-radio">
+                                </div>
+                                <div class="custome-radio">
                                     <input class="form-check-input" required="" type="radio" name="payment_option"
                                         value="wallet" id="wallet" >
                                     <label class="form-check-label" for="wallet" data-bs-toggle="collapse"
                                         data-target="#paypal" aria-controls="paypal"> Wallet</label>
-                                </div> --}}
-                                {{!-- <div class="hotline d-none d-lg-block">
+                                </div>
+                                <div class="hotline d-none d-lg-block">
 
                                     <p class="my-2 mx-2">Wallet Balance : <strong><span id="update_wallet">
                                                 ₹{{userData.wallet}}</span>
                                         </strong></p>
 
                                     <input type="hidden" value="{{userData.wallet}}" name="wallet">
-                                </div> --}}
+                                </div>
                                     
                                 </div>
                             </div>
@@ -205,7 +198,7 @@
                             <div class="mb-25">
                                 <h4>Address Form</h4>
                             </div>
-                            <form action="/add_new_adress" method="post">
+                            <form action="/add_address" method="post">
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <div class="row gx-3">
@@ -276,6 +269,7 @@
     let newTotal
     let subTotal
     let updateWallet
+    let deliveryCharge=50
     let ct=0
 
 
@@ -380,7 +374,7 @@
             if (result.isConfirmed) {
                 subTotal = Number(document.getElementsByName('subTotal')[0].value);
                 if (paymentMethod === 'cash-on-delivery') {
-                    if (subTotal >= 10000) {
+                    if (subTotal >= 1000) {
                         Swal.fire({
                             title: 'Error',
                             text: 'Cash on delivery is not available for orders above ₹1000',
@@ -404,12 +398,11 @@
 
 
     const useWallet = () => {
-        const wallet = document.getElementsByName('wallet')[0].value
-        const subTotal = Number(document.getElementsByName('subTotal')[0].value)
-        console.log(wallet, 'walletttttttttttt', subTotal)
-
+    const wallet = document.getElementsByName('wallet')[0].value
+    const subTotal = Number(document.getElementsByName('subTotal')[0].value)
+    console.log(wallet, 'walletttttttttttt', subTotal)
         if (wallet > subTotal) {
-            updateWallet = wallet - subTotal
+            updateWallet = wallet - (subTotal+deliveryCharge)
 
             console.log(updateWallet, 'my name is update wallet...........')
             Cod()
@@ -493,13 +486,13 @@
         }
         
         var options = {
-            "key": "rzp_test_RgbHBDrROekluj", // Enter the Key ID generated from the Dashboard
+            "key": "rzp_test_OsDtnewxAfAwm0", // Enter the Key ID generated from the Dashboard
             "amount": (subTotal)* 100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
             "currency": "INR",
             "image": "/images/logo/Logo_CH.png",
 
-            /*"name": "Acme Corp", //your business name
-            "description": "Test Transaction",
+            "name": "Basha Book", //your business name
+            /*"description": "Test Transaction",
             "image": "https://example.com/your_logo",*/
 
             "order_id":  undefined, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1

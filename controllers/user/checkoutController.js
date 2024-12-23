@@ -320,6 +320,7 @@ const placeorder = async (req, res) => {
       // Apply coupon if present
       let finalTotal = totalamount;
       let discountAmt = 0;
+      console.log("finalTotal",finalTotal)
   
       if (req.body.couponData) {
         console.log(req.body.couponData)
@@ -329,6 +330,7 @@ const placeorder = async (req, res) => {
   
       const DELIVERY_CHARGE = 50;
       const grandTotal = finalTotal + DELIVERY_CHARGE;
+      console.log("grandTotal",grandTotal)
   
       // Save the order
       let saveOrder = async () => {
@@ -400,12 +402,26 @@ const placeorder = async (req, res) => {
           });
         } else if (payMethod === "wallet") {
           const newWallet = req.body.updateWallet;
+          console.log("newWallet",newWallet)
   
           await User.findByIdAndUpdate(
             userData._id,
-            { $set: { wallet: newWallet + 50 } },
+            { $set: { wallet: newWallet } },
             { new: true }
           );
+
+          await User.updateOne(
+            {_id:req.session.user._id},
+            {
+              $push:{
+                history:{
+                  amount:grandTotal,
+                  status:`debited`,
+                  date:Date.now()
+                }
+              }
+            }
+          )
   
           await saveOrder();
   
@@ -417,6 +433,8 @@ const placeorder = async (req, res) => {
       res.status(500).send("Internal Server Error");
     }
   };
+
+
 
 const orderSuccess = async (req, res) => {
   try {

@@ -2,7 +2,8 @@ const Product=require("../../models/productModel")
 const User=require("../../models/userModel")
 const Address=require("../../models/addressModel")
 const Order=require("../../models/orderModel")
-const productOffer=require("../../models/productOfferModel")
+const Coupon=require("../../models/couponModel")
+const ProductOffer=require("../../models/productOfferModel")
 const moment=require('moment')
 const mongoose=require('mongoose')
 
@@ -393,7 +394,7 @@ const orderDetails = async (req, res) => {
 
         // Fetch product offers for each product in the order
         const productIds = orderedProDet.map(item => item.product._id);
-        const productOffers = await productOffer.find({
+        const productOffers = await ProductOffer.find({
             productId: { $in: productIds },
             currentStatus: true,
             startDate: { $lte: new Date() },
@@ -489,7 +490,7 @@ const cancelOrder = async (req, res) => {
         }
 
         let totalRefund = canceledOrder.total - DELIVERY_CHARGE
-
+        console.log(totalRefund)
         if (['wallet', 'razorpay'].includes(canceledOrder.paymentMethod)) {
             await User.updateOne(
                 { _id: req.session.user._id },
@@ -523,244 +524,555 @@ const cancelOrder = async (req, res) => {
 };
 
 const returnOrder = async (req, res) => {
-    try {
-        const id = req.params.id;
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ error: 'Invalid order ID' });
-        }
-        const ID = new mongoose.Types.ObjectId(id);
-        let notCancelledAmt = 0;
+  try {
+      const id = req.params.id;
 
-        let returnedOrder = await Order.findOne({ _id: ID }).lean();
-        console.log(returnedOrder, "returnedOrder")
+      // Validate the order ID
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+          return res.status(400).json({ error: 'Invalid order ID' });
+      }
+      const ID = new mongoose.Types.ObjectId(id);
+      let totalRefund = 0;
+      let DELIVERY_CHARGE = 50;
 
-        const returnedorder = await Order.findByIdAndUpdate(ID, { $set: { status: 'Returned' } }, { new: true });
-        for (const product of returnedorder.product) {
-            if (!product.isCancelled) {
-                await Product.updateOne(
-                    { _id: product._id },
-                    { $inc: { stock: product.quantity } }
-                );
+      // Find the order to be returned
+      let returnedOrder = await Order.findOne({ _id: ID }).lean();
+      console.log(returnedOrder, "returnedOrder");
 
-                await Order.updateOne(
-                    { _id: ID, 'product._id': product._id },
-                    { $set: { 'product.$.isReturned': true } }
-                );
-            }
+      if (!returnedOrder) {
+          return res.status(404).json({ error: 'Order not found' });
+      }
 
+      // Mark the order status as returned
+      const returnedOrderStatus = await Order.findByIdAndUpdate(ID, { $set: { status: 'Returned' } }, { new: true });
 
-        }
+      // Loop through the products and mark them as returned if not already cancelled
+      for (const product of returnedOrderStatus.product) {
+          if (!product.isCancelled) {
+              await Product.updateOne(
+                  { _id: product._id },
+                  { $inc: { stock: product.quantity } }
+              );
 
-        let couponAmountEach = 0
-        if(returnedOrder.coupon){
-            couponAmountEach = returnedOrder.discountAmt / returnedOrder.product.length
+              await Order.updateOne(
+                  { _id: ID, 'product._id': product._id },
+                  { $set: { 'product.$.isReturned': true } }
+              );
+          }
+      }
 
-        }
+      // Calculate the discount for each product if a coupon is applied
+      let couponAmountEach = 0;
+      if (returnedOrder.coupon) {
+          couponAmountEach = returnedOrder.discountAmt / returnedOrder.product.length;
+      }
 
-        if (['wallet', 'razorpay'].includes(returnedOrder.paymentMethod)) {
-            for (const data of returnedOrder.product) {
-                //await Product.updateOne({ _id: data._id }, { $inc: { stock: data.quantity } });
-                await User.updateOne(
-                    { _id: req.session.user._id },
-                    { $inc: { wallet: (data.price * data.quantity) - couponAmountEach } }
-                );
-                notCancelledAmt += data.price * data.quantity - couponAmountEach;
-            }
+      // Handle wallet or razorpay payment methods
+      if (['wallet', 'razorpay'].includes(returnedOrder.paymentMethod)) {
+          // First, calculate the refund amount for all products
+          for (const product of returnedOrder.product) {
+              const productTotal = (product.price * product.quantity) - couponAmountEach;
+              totalRefund += productTotal;
+              console.log(`Product total before delivery charge: ₹${productTotal}`);
+          }
 
-            await User.updateOne(
-                { _id: req.session.user._id },
-                {
-                    $push: {
-                        history: {
-                            amount: notCancelledAmt,
-                            status: 'refund of Order Return',
-                            date: Date.now()
-                        }
-                    }
-                }
-            );
-        }
+          // Now, subtract the delivery charge from the total refund
+          totalRefund -= DELIVERY_CHARGE;
+          console.log(`Total refund after delivery charge: ₹${totalRefund}`);
 
-        res.json({
-            success: true,
-            message: 'Successfully Returned Order'
+          // Update the wallet balance for the user
+          await User.updateOne(
+              { _id: req.session.user._id },
+              { $inc: { wallet: totalRefund } }
+          );
 
-        });
-    } catch (error) {
-        console.log(error.message);
-       // res.status(HttpStatus.InternalServerError).send('Internal Server Error');
-    }
+          // Record the refund transaction in the user's history
+          await User.updateOne(
+              { _id: req.session.user._id },
+              {
+                  $push: {
+                      history: {
+                          amount: totalRefund,
+                          status: 'Refund for Order Return',
+                          date: Date.now()
+                      }
+                  }
+              }
+          );
+          console.log('Wallet updated and refund history added');
+      }
+
+      // Special case for COD (Cash on Delivery) orders: Refund the amount to wallet
+      if (returnedOrder.status === 'Delivered' && returnedOrder.paymentMethod === 'cash-on-delivery') {
+          let codRefundAmount = 0;
+
+          // Calculate the refund amount for all products before subtracting delivery charge
+          for (const product of returnedOrder.product) {
+              const productTotal = (product.price * product.quantity);
+              codRefundAmount += productTotal;
+              console.log(`COD Product total before delivery charge: ₹${productTotal}`);
+          }
+
+          // Now, subtract the delivery charge from the total refund
+          codRefundAmount -= DELIVERY_CHARGE;
+          console.log(`COD total refund after delivery charge: ₹${codRefundAmount}`);
+
+          // Update wallet balance for COD orders
+          await User.updateOne(
+              { _id: req.session.user._id },
+              { $inc: { wallet: codRefundAmount } }
+          );
+
+          // Record the COD refund in the user's history
+          await User.updateOne(
+              { _id: req.session.user._id },
+              {
+                  $push: {
+                      history: {
+                          amount: codRefundAmount,
+                          status: 'COD Order Return Refund',
+                          date: Date.now()
+                      }
+                  }
+              }
+          );
+          console.log('COD refund history added');
+      }
+
+      // Send response indicating successful order return
+      res.json({
+          success: true,
+          message: 'Successfully Returned Order'
+      });
+
+  } catch (error) {
+      console.log(error.message);
+      res.status(500).json({ error: 'Internal server error' });
+  }
 };
+
+
+// const returnOrder = async (req, res) => {
+//   try {
+//       const id = req.params.id;
+//       if (!mongoose.Types.ObjectId.isValid(id)) {
+//           return res.status(400).json({ error: 'Invalid order ID' });
+//       }
+//       const ID = new mongoose.Types.ObjectId(id);
+//       let notCancelledAmt = 0;
+//       let DELIVERY_CHARGE = 50;
+//       let returnedOrder = await Order.findOne({ _id: ID }).lean();
+//       console.log(returnedOrder, "returnedOrder");
+
+//       const returnedorder = await Order.findByIdAndUpdate(ID, { $set: { status: 'Returned' } }, { new: true });
+
+//       // Loop through the products and mark them as returned if not already cancelled
+//       for (const product of returnedorder.product) {
+//           if (!product.isCancelled) {
+//               await Product.updateOne(
+//                   { _id: product._id },
+//                   { $inc: { stock: product.quantity } }
+//               );
+
+//               await Order.updateOne(
+//                   { _id: ID, 'product._id': product._id },
+//                   { $set: { 'product.$.isReturned': true } }
+//               );
+//           }
+//       }
+
+//       let couponAmountEach = 0;
+//       if (returnedOrder.coupon) {
+//           couponAmountEach = returnedOrder.discountAmt / returnedOrder.product.length;
+//       }
+
+//       // Check if the payment method is wallet or razorpay
+//       if (['wallet', 'razorpay'].includes(returnedOrder.paymentMethod)) {
+//           for (const data of returnedOrder.product) {
+//               // Update user's wallet for products returned
+//               await User.updateOne(
+//                   { _id: req.session.user._id },
+//                   { $inc: { wallet: ((data.price * data.quantity) - couponAmountEach)- DELIVERY_CHARGE } }
+//               );
+//               notCancelledAmt += data.price * data.quantity - couponAmountEach - DELIVERY_CHARGE
+//               console.log(notCancelledAmt)
+//           }
+
+//           await User.updateOne(
+//               { _id: req.session.user._id },
+//               {
+//                   $push: {
+//                       history: {
+//                           amount: notCancelledAmt,
+//                           status: 'refund of Order Return',
+//                           date: Date.now()
+//                       }
+//                   }
+//               }
+//           );
+//       }
+
+//       // Check if the order status is 'Delivered' and payment method is 'cash-on-delivery'
+//       if (returnedOrder.status === 'Delivered' && returnedOrder.paymentMethod === 'cash-on-delivery') {
+//           for (const data of returnedOrder.product) {
+//               // Credit the amount to the wallet for COD orders
+//               await User.updateOne(
+//                   { _id: req.session.user._id },
+//                   { $inc: { wallet: (data.price * data.quantity) - DELIVERY_CHARGE } }
+//               );
+//               notCancelledAmt += (data.price * data.quantity) - DELIVERY_CHARGE;
+//           }
+
+//           await User.updateOne(
+//               { _id: req.session.user._id },
+//               {
+//                   $push: {
+//                       history: {
+//                           amount: notCancelledAmt,
+//                           status: 'COD Order Return Refund',
+//                           date: Date.now()
+//                       }
+//                   }
+//               }
+//           );
+//       }
+
+//       res.json({
+//           success: true,
+//           message: 'Successfully Returned Order'
+//       });
+//   } catch (error) {
+//       console.log(error.message);
+//       res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
+
+// const returnOrder = async (req, res) => {
+//   try {
+//       const id = req.params.id;
+
+//       // Validate the order ID
+//       if (!mongoose.Types.ObjectId.isValid(id)) {
+//           return res.status(400).json({ error: 'Invalid order ID' });
+//       }
+//       const ID = new mongoose.Types.ObjectId(id);
+//       let notCancelledAmt = 0;
+//       let DELIVERY_CHARGE = 50;
+
+//       // Find the order to be returned
+//       let returnedOrder = await Order.findOne({ _id: ID }).lean();
+//       console.log(returnedOrder, "returnedOrder");
+
+//       if (!returnedOrder) {
+//           return res.status(404).json({ error: 'Order not found' });
+//       }
+
+//       // Mark the order status as returned
+//       const returnedOrderStatus = await Order.findByIdAndUpdate(ID, { $set: { status: 'Returned' } }, { new: true });
+
+//       // Loop through the products and mark them as returned if not already cancelled
+//       for (const product of returnedOrderStatus.product) {
+//           if (!product.isCancelled) {
+//               await Product.updateOne(
+//                   { _id: product._id },
+//                   { $inc: { stock: product.quantity } }
+//               );
+
+//               await Order.updateOne(
+//                   { _id: ID, 'product._id': product._id },
+//                   { $set: { 'product.$.isReturned': true } }
+//               );
+//           }
+//       }
+
+//       // Calculate the discount for each product if a coupon is applied
+//       let couponAmountEach = 0;
+//       if (returnedOrder.coupon) {
+//           couponAmountEach = returnedOrder.discountAmt / returnedOrder.product.length;
+//       }
+
+//       // Initialize refund amount logic
+//       let totalRefund = 0;
+
+//       // Handle wallet or razorpay payment methods
+//       if (['wallet', 'razorpay'].includes(returnedOrder.paymentMethod)) {
+//           for (const product of returnedOrder.product) {
+//               const productTotal = (product.price * product.quantity) - couponAmountEach;
+//               const refundAmount = productTotal - DELIVERY_CHARGE;
+              
+//               // Update the wallet balance for the user
+//               await User.updateOne(
+//                   { _id: req.session.user._id },
+//                   { $inc: { wallet: refundAmount } }
+//               );
+              
+//               // Accumulate the total refund amount
+//               totalRefund += refundAmount;
+//               console.log(`Refund for product: ₹${refundAmount}`);
+//           }
+
+//           // Record the refund transaction in the user's history
+//           await User.updateOne(
+//               { _id: req.session.user._id },
+//               {
+//                   $push: {
+//                       history: {
+//                           amount: totalRefund,
+//                           status: 'Refund for Order Return',
+//                           date: Date.now()
+//                       }
+//                   }
+//               }
+//           );
+//           console.log('Wallet updated and refund history added');
+//       }
+
+//       // Special case for COD (Cash on Delivery) orders: Refund the amount to wallet
+//       if (returnedOrder.status === 'Delivered' && returnedOrder.paymentMethod === 'cash-on-delivery') {
+//           let codRefundAmount = 0;
+//           for (const product of returnedOrder.product) {
+//               const productTotal = (product.price * product.quantity);
+//               const codRefund = productTotal - DELIVERY_CHARGE;
+
+//               // Update wallet balance for COD orders
+//               await User.updateOne(
+//                   { _id: req.session.user._id },
+//                   { $inc: { wallet: codRefund } }
+//               );
+
+//               // Accumulate the total refund for COD order
+//               codRefundAmount += codRefund;
+//               console.log(`COD Refund for product: ₹${codRefund}`);
+//           }
+
+//           // Record the COD refund in the user's history
+//           await User.updateOne(
+//               { _id: req.session.user._id },
+//               {
+//                   $push: {
+//                       history: {
+//                           amount: codRefundAmount,
+//                           status: 'COD Order Return Refund',
+//                           date: Date.now()
+//                       }
+//                   }
+//               }
+//           );
+//           console.log('COD refund history added');
+//       }
+
+//       // Send response indicating successful order return
+//       res.json({
+//           success: true,
+//           message: 'Successfully Returned Order'
+//       });
+
+//   } catch (error) {
+//       console.log(error.message);
+//       res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
+
 
 const cancelOneProduct = async (req, res) => {
-    try {
-        const { id, prodId } = req.body;
-        console.log(id, prodId)
+  try {
+    const { id, prodId } = req.body;
+    console.log(id, prodId);
 
-        if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
-            return res.status(HttpStatus.BadRequest).json({ error: 'Invalid order or product ID' });
-        }
-
-        const ID = new mongoose.Types.ObjectId(id);
-        const PRODID = new mongoose.Types.ObjectId(prodId);
-
-        const updatedOrder = await Order.findOneAndUpdate(
-            { _id: ID, 'product._id': PRODID },
-            { $set: { 'product.$.isCancelled': true } },
-            { new: true }
-        ).lean();
-
-        if (!updatedOrder) {
-            return res.status(HttpStatus.NotFound).json({ error: 'Order or product not found' });
-        }
-
-        const result = await Order.findOne(
-            { _id: ID, 'product._id': PRODID },
-            { 'product.$': 1 }
-        ).lean();
-
-        const productQuantity = result.product[0].quantity;
-        const productprice = result.product[0].price * productQuantity
-
-        await Product.findOneAndUpdate(
-            { _id: PRODID },
-            { $inc: { stock: productQuantity } }
-        );
-        if(updatedOrder.couponUsed){
-            const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
-            const discountAmt = (productprice * coupon.discount) / 100;
-            const newTotal = productprice - discountAmt;
-            await User.updateOne(
-                { _id: req.session.user._id },
-                { $inc: { wallet: newTotal } }
-            );
-
-            await User.updateOne(
-                { _id: req.session.user._id },
-                {
-                    $push: {
-                        history: {
-                            amount: newTotal,
-                            status: `refund of: ${result.product[0].name}`,
-                            date: Date.now()
-                        }
-                    }
-                }
-            );
-
-        }else{
-            await User.updateOne(
-                { _id: req.session.user._id },
-                { $inc: { wallet: productprice } }
-            );
-            await User.updateOne(
-                { _id: req.session.user._id },
-                {
-                    $push: {
-                        history: {
-                            amount: productprice,
-                            status: `refund of: ${result.product[0].name}`,
-                            date: Date.now()
-                        }
-                    }
-                }
-            );
-        }
-
-        res.json({
-            success: true,
-            message: 'Successfully removed product'
-        });
-    } catch (error) {
-        console.log(error.message);
-        //res.status(HttpStatus.InternalServerError).send('Internal Server Error');
+    if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
+      return res.status(500).json({ error: 'Invalid order or product ID' });
     }
+
+    const ID = new mongoose.Types.ObjectId(id);
+    const PRODID = new mongoose.Types.ObjectId(prodId);
+
+    // Find the updated order
+    const updatedOrder = await Order.findOneAndUpdate(
+      { _id: ID, 'product._id': PRODID },
+      { $set: { 'product.$.isCancelled': true } },
+      { new: true }
+    ).lean();
+
+    if (!updatedOrder) {
+      return res.status(500).json({ error: 'Order or product not found' });
+    }
+
+    const result = await Order.findOne(
+      { _id: ID, 'product._id': PRODID },
+      { 'product.$': 1 }
+    ).lean();
+
+    const productQuantity = result.product[0].quantity;
+    
+    // Check if there's an offer for the product
+    const productOffer = await ProductOffer.findOne({
+      productId: PRODID,
+      currentStatus: true,
+      startDate: { $lte: Date.now() },
+      endDate: { $gte: Date.now() }
+    });
+
+    // Use the offer price if there's an active offer, otherwise use the original price
+    const productPrice = productOffer ? productOffer.discountPrice * productQuantity : result.product[0].price * productQuantity;
+
+    await Product.findOneAndUpdate(
+      { _id: PRODID },
+      { $inc: { stock: productQuantity } }
+    );
+
+    // Handle coupon refund logic
+    if (updatedOrder.couponUsed) {
+      const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
+      const discountAmt = (productPrice * coupon.discount) / 100;
+      const newTotal = productPrice - discountAmt;
+
+      await User.updateOne(
+        { _id: req.session.user._id },
+        { $inc: { wallet: newTotal } }
+      );
+      await User.updateOne(
+        { _id: req.session.user._id },
+        {
+          $push: {
+            history: {
+              amount: newTotal,
+              status: `refund of: ${result.product[0].name}`,
+              date: Date.now()
+            }
+          }
+        }
+      );
+    } else {
+      await User.updateOne(
+        { _id: req.session.user._id },
+        { $inc: { wallet: productPrice } }
+      );
+      await User.updateOne(
+        { _id: req.session.user._id },
+        {
+          $push: {
+            history: {
+              amount: productPrice,
+              status: `refund of: ${result.product[0].name}`,
+              date: Date.now()
+            }
+          }
+        }
+      );
+    }
+
+    // Check if all products are cancelled, and if so, update the order status to "Cancelled"
+    const allCancelled = updatedOrder.product.every(p => p.isCancelled);
+    if (allCancelled) {
+      // Update the order status to "Cancelled" even if the payment method is COD
+      await Order.updateOne({ _id: ID }, { $set: { status: 'Cancelled' } });
+    }
+
+    res.json({ success: true, message: 'Successfully removed product' });
+  } catch (error) {
+    console.log(error.message);
+  }
 };
 
-const returnOneProduct = async (req, res) => {
+  const returnOneProduct = async (req, res) => {
     try {
-        const { id, prodId } = req.body;
-        console.log(id, prodId)
-
-        if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
-            return res.status(HttpStatus.BadRequest).json({ error: 'Invalid order or product ID' });
-        }
-
-        const ID = new mongoose.Types.ObjectId(id);
-        const PRODID = new mongoose.Types.ObjectId(prodId);
-
-        const updatedOrder = await Order.findOneAndUpdate(
-            { _id: ID, 'product._id': PRODID },
-            { $set: { 'product.$.isReturned': true } },
-            { new: true }
-        ).lean();
-
-        if (!updatedOrder) {
-            return res.status(HttpStatus.NotFound).json({ error: 'Order or product not found' });
-        }
-
-        const result = await Order.findOne(
-            { _id: ID, 'product._id': PRODID },
-            { 'product.$': 1 }
-        ).lean();
-
-        const productQuantity = result.product[0].quantity;
-        const productprice = result.product[0].price * productQuantity
-
-        await Product.findOneAndUpdate(
-            { _id: PRODID },
-            { $inc: { stock: productQuantity } }
+      const { id, prodId } = req.body;
+      console.log(id, prodId);
+  
+      if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
+        return res.status(HttpStatus.BadRequest).json({ error: 'Invalid order or product ID' });
+      }
+  
+      const ID = new mongoose.Types.ObjectId(id);
+      const PRODID = new mongoose.Types.ObjectId(prodId);
+  
+      // Find the updated order
+      const updatedOrder = await Order.findOneAndUpdate(
+        { _id: ID, 'product._id': PRODID },
+        { $set: { 'product.$.isReturned': true } },
+        { new: true }
+      ).lean();
+  
+      if (!updatedOrder) {
+        return res.status(HttpStatus.NotFound).json({ error: 'Order or product not found' });
+      }
+  
+      const result = await Order.findOne(
+        { _id: ID, 'product._id': PRODID },
+        { 'product.$': 1 }
+      ).lean();
+  
+      const productQuantity = result.product[0].quantity;
+  
+      // Check if there's an offer for the product
+      const productOffer = await ProductOffer.findOne({
+        productId: PRODID,
+        currentStatus: true,
+        startDate: { $lte: Date.now() },
+        endDate: { $gte: Date.now() }
+      });
+  
+      // Use the offer price if there's an active offer, otherwise use the original price
+      const productPrice = productOffer ? productOffer.discountPrice * productQuantity : result.product[0].price * productQuantity;
+  
+      await Product.findOneAndUpdate(
+        { _id: PRODID },
+        { $inc: { stock: productQuantity } }
+      );
+  
+      // Handle coupon refund logic
+      if (updatedOrder.couponUsed) {
+        const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
+        const discountAmt = (productPrice * coupon.discount) / 100;
+        const newTotal = productPrice - discountAmt;
+  
+        await User.updateOne(
+          { _id: req.session.user._id },
+          { $inc: { wallet: newTotal } }
         );
-        if(updatedOrder.couponUsed){
-            const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
-            const discountAmt = (productprice * coupon.discount) / 100;
-            const newTotal = productprice - discountAmt;
-            await User.updateOne(
-                { _id: req.session.user._id },
-                { $inc: { wallet: newTotal } }
-            );
-
-            await User.updateOne(
-                { _id: req.session.user._id },
-                {
-                    $push: {
-                        history: {
-                            amount: newTotal,
-                            status: `[return] refund of: ${result.product[0].name}`,
-                            date: Date.now()
-                        }
-                    }
-                }
-            );
-
-        }else{
-            await User.updateOne(
-                { _id: req.session.user._id },
-                { $inc: { wallet: productprice } }
-            );
-            await User.updateOne(
-                { _id: req.session.user._id },
-                {
-                    $push: {
-                        history: {
-                            amount: productprice,
-                            status: `[return]refund of: ${result.product[0].name}`,
-                            date: Date.now()
-                        }
-                    }
-                }
-            );
+        await User.updateOne(
+          { _id: req.session.user._id },
+          {
+            $push: {
+              history: {
+                amount: newTotal,
+                status: `[return] refund of: ${result.product[0].name}`,
+                date: Date.now()
+              }
+            }
+          }
+        );
+      } else {
+        await User.updateOne(
+          { _id: req.session.user._id },
+          { $inc: { wallet: productPrice } }
+        );
+        await User.updateOne(
+          { _id: req.session.user._id },
+          {
+            $push: {
+              history: {
+                amount: productPrice,
+                status: `[return]refund of: ${result.product[0].name}`,
+                date: Date.now()
+              }
+            }
+          }
+        );
+      }
+  
+        // Check if all products are returned, and if so, update the order status to "Returned"
+        const allReturned = updatedOrder.product.every(p => p.isReturned);
+        if (allReturned) {
+            await Order.updateOne({ _id: ID }, { $set: { status: 'Returned' } });
         }
 
-        res.json({
-            success: true,
-            message: 'Successfully removed product'
-        });
+      res.json({ success: true, message: 'Successfully removed product' });
     } catch (error) {
-        console.log(error.message);
-      //  res.status(HttpStatus.InternalServerError).send('Internal Server Error');
+      console.log(error.message);
+      
     }
-}
+  };
 
 module.exports=
 {

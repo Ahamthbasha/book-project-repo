@@ -17,8 +17,9 @@ router.post('/login', adminAuth.isLogout,adminController.adminDoLogin)
 
 router.get('/logout', adminController.adminLogout)
 
-router.get('/home', adminAuth.isLogin, adminController.loadHome)
-
+router.get('/home', adminAuth.isLogin, dashboardController.loadDashboard)
+router.get('/get_sales',adminAuth.isLogin,dashboardController.getSales)
+router.get('/get_chart_data',adminAuth.isLogin,dashboardController.getChartData)
 //user management
 router.get('/manage_users', adminAuth.isLogin, customerController.loadUsersData)
 
@@ -57,10 +58,6 @@ router.post('/add_coupon',couponController.addCouponPost)
 router.get('/editcoupon/:id', couponController.editCouponPage);
 router.post('/editcoupon/:id',couponController.editCouponPost)
 router.get("/delete_coupon/:id",adminAuth.isLogin,couponController.deleteCoupon)
-
-//sales
-
-router.get('/get_sales',adminAuth.isLogin,dashboardController.getSales)
 
 //product offer management
 router.get("/productOffers",adminAuth.isLogin,offerController.productOfferPage)

@@ -6,6 +6,7 @@ const Coupon=require("../../models/couponModel")
 const ProductOffer=require("../../models/productOfferModel")
 const moment=require('moment')
 const mongoose=require('mongoose')
+const easyinvoice=require('easyinvoice')
 
 const my_Orders=async(req,res)=>{
     try{
@@ -1074,6 +1075,208 @@ const cancelOneProduct = async (req, res) => {
     }
   };
 
+
+  //   try{
+  //     const orderId=req.query.id
+  //     const order=await Order.findById(orderId)
+
+  //     if(!order){
+  //       res.status(500).send({message:"order not found"})
+  //     }
+
+  //     const {userId,address:addressId}=order
+  //     const [user,address]=await Promise.all([
+  //       User.findById(userId),
+  //       Address.findById(addressId)
+  //     ])
+
+  //     if(!user || !address){
+  //       res.status(500).send({message:"user or address not found"})
+  //     }
+
+  //     const products=order.product.map((product)=>({
+  //       quantity:product.quantity.toString(),
+  //       description:product.name,
+  //       tax:product.tax,
+  //       price:product.price,
+  //     }))
+
+  //     products.push({
+  //       quantity:'1',
+  //       description:'Delivery Charge',
+  //       tax:0,
+  //       price:50,
+  //     })
+
+  //     const date=moment(order.date).format("MMMM D,YYYY")
+
+  //     const data={
+  //       mode:"development",
+  //       currency:"INR",
+  //       taxNotation:'vat',
+  //       marginTop:25,
+  //       marginRight:25,
+  //       marginLeft:25,
+  //       marginBottom:25,
+
+  //       sender:{
+  //         company:"BASHA BOOK",
+  //         addres:"Park Avenue",
+  //         zip:'600034',
+  //         city:'chennai',
+  //         country:'India',
+  //       },
+  //       client:{
+  //         company:user.name,
+  //         address:address.adressLine1,
+  //         zip:address.pin,
+  //         city:address.city,
+  //         country:'India',
+  //       },
+  //       information:{
+  //         number:`INV-${orderId}`,
+  //         date:date,
+  //       },
+  //       products:products,
+  //     }
+
+  //     easyinvoice.createInvoice(data,function(result){
+  //       const fileName=`invoice_${orderId}.pdf`
+  //       const pdfBuffer=Buffer.from(result.pdf,'base64')
+  //       res.setHeader('Content-Type','application/pdf')
+  //       res.setHeader('Content-Disposition',`attachment;filename=${fileName}`)
+  //       res.send(pdfBuffer)
+  //     })
+  //   }catch(error){
+  //     console.log(error)
+  //   }
+  // }
+
+//it is working finely if the product has offer
+  const getInvoice = async (req, res) => {
+    try {
+      const orderId = req.query.id;
+      const order = await Order.findById(orderId);
+  
+      if (!order) {
+        return res.status(500).send({ message: "Order not found" });
+      }
+  
+      const { userId, address: addressId, product } = order;
+      const [user, address] = await Promise.all([
+        User.findById(userId),
+        Address.findById(addressId),
+      ]);
+  
+      if (!user || !address) {
+        return res.status(500).send({ message: "User or address not found" });
+      }
+  
+      // Log the fetched order and products
+      console.log("Fetched Order:", order);
+      console.log("Fetched Products:", product);
+  
+      // Get product offers for the products in the order
+      const productOffers = await ProductOffer.find({
+        productId: { $in: product.map(p => p._id) },  // Make sure we use the correct field (_id of the product)
+        startDate: { $lte: new Date() },
+        endDate: { $gte: new Date() },
+        currentStatus: true,
+      });
+  
+      // Log the fetched product offers
+      console.log("Fetched Active Product Offers:", productOffers);
+  
+      // Map through products and apply offer if available
+      const products = await Promise.all(
+        product.map(async (productItem) => {
+          // Log each product before applying the offer
+          console.log("Processing Product:", productItem);
+  
+          // Find the offer for the current product
+          const offer = productOffers.find(
+            (offer) => offer.productId.toString() === productItem._id.toString()
+          );
+  
+          let price = productItem.price;
+          if (offer) {
+            // Apply the discount if an offer exists
+            console.log(`Found offer for ${productItem.name}:`, offer);
+  
+            // If there's a discountPrice, apply it. Otherwise, apply the percentage discount.
+            price = offer.discountPrice || price - (price * offer.productOfferPercentage) / 100;
+            console.log(`Discounted Price for ${productItem.name}: ${price}`);
+          }
+  
+          return {
+            quantity: productItem.quantity.toString(),
+            description: productItem.name,
+            tax: productItem.tax || 0,  // Make sure tax is set (default 0 if undefined)
+            price: price, // Use the offer price if available
+          };
+        })
+      );
+  
+      // Log the products array after applying offers
+      console.log("Products after applying offers:", products);
+  
+      // Add the delivery charge
+      products.push({
+        quantity: "1",
+        description: "Delivery Charge",
+        tax: 0,
+        price: 50,
+      });
+  
+      // Log the complete products array with delivery charge
+      console.log("Final Products with Delivery Charge:", products);
+  
+      const date = moment(order.date).format("MMMM D, YYYY");
+  
+      const data = {
+        mode: "development",
+        currency: "INR",
+        taxNotation: "vat",
+        marginTop: 25,
+        marginRight: 25,
+        marginLeft: 25,
+        marginBottom: 25,
+  
+        sender: {
+          company: "BASHA BOOK",
+          address: "Park Avenue",
+          zip: "600034",
+          city: "Chennai",
+          country: "India",
+        },
+        client: {
+          company: user.name,
+          address: address.adressLine1,
+          zip: address.pin,
+          city: address.city,
+          country: "India",
+        },
+        information: {
+          number: `INV-${orderId}`,
+          date: date,
+        },
+        products: products,
+      };
+  
+      easyinvoice.createInvoice(data, function (result) {
+        const fileName = `invoice_${orderId}.pdf`;
+        const pdfBuffer = Buffer.from(result.pdf, "base64");
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment;filename=${fileName}`);
+        res.send(pdfBuffer);
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({ message: "Error generating invoice", error: error.message });
+    }
+  };
+   
+
 module.exports=
 {
     my_Orders,
@@ -1081,5 +1284,6 @@ module.exports=
     cancelOrder,
     returnOrder,
     cancelOneProduct,
-    returnOneProduct
+    returnOneProduct,
+    getInvoice
 }

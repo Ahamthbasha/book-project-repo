@@ -80,6 +80,8 @@ router.put('/cancel-order/:id',logedin,isBlocked,orderController.cancelOrder)
 router.put('/return-order/:id',logedin,isBlocked,orderController.returnOrder)
 router.put('/cancel-one-product',logedin,isBlocked,orderController.cancelOneProduct)
 router.put('/return-one-product',logedin,isBlocked,orderController.returnOneProduct)
+//orderPage get invoice
+router.get('/get_invoice',logedin,isBlocked,orderController.getInvoice)
 // router.post("/cancel_order/:id",logedin,isBlocked,orderController.cancelOrder)
 
 //cart management

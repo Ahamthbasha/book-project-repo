@@ -8,6 +8,8 @@ const moment=require('moment')
 const mongoose=require('mongoose')
 const easyinvoice=require('easyinvoice')
 
+
+
 const my_Orders=async(req,res)=>{
     try{
         const user=req.session.user
@@ -1075,7 +1077,6 @@ const cancelOneProduct = async (req, res) => {
     }
   };
 
-
   //   try{
   //     const orderId=req.query.id
   //     const order=await Order.findById(orderId)
@@ -1276,7 +1277,55 @@ const cancelOneProduct = async (req, res) => {
     }
   };
    
+const verify=(req,res)=>{
+  console.log(req.body.payment,"end")
+  const {orderId}=req.body
+  const{razorpay_order_id,razorpay_payment_id,razorpay_signature}=req.body.payment
 
+  let hmac=crypto.createHmac("sha256",process.env.KEY_SECRET)
+
+  hmac.update(
+    `${razorpay_order_id}|${razorpay_payment_id}`
+  )
+
+  hmac=hmac.digest("hex")
+
+  console.log(hmac,"hmac")
+  console.log(razorpay_signature,"signature")
+
+  if(hmac === razorpay_signature){
+    console.log("true")
+    changeOrderStatusToConfirmed(orderId)
+    res.json({status:true})
+  }else{
+    console.log("false")
+      res.json({status:false})
+  }
+}
+
+const retryPayment=async(req,res)=>{
+  try{
+    const id=req.params.id
+    console.log("Retry Payment for order ID:",id)
+
+    const updatedOrder=await Order.findByIdAndUpdate(id,{$set:{status:'pending'}})
+
+    if(!updatedOrder){
+      return res.status(404).json({
+        success:false,
+        message:"Order not found"
+      })
+    }
+
+    res.json({
+      success:true,
+      message:"Payment status has been set to 'pending'.you can retry the payment",
+      order:updatedOrder
+    })
+  }catch(error){
+    console.log(error)
+  }
+}
 module.exports=
 {
     my_Orders,
@@ -1285,5 +1334,7 @@ module.exports=
     returnOrder,
     cancelOneProduct,
     returnOneProduct,
-    getInvoice
+    getInvoice,
+    verify,
+    retryPayment
 }

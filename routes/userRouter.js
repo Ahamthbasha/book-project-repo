@@ -82,6 +82,9 @@ router.put('/cancel-one-product',logedin,isBlocked,orderController.cancelOneProd
 router.put('/return-one-product',logedin,isBlocked,orderController.returnOneProduct)
 //orderPage get invoice
 router.get('/get_invoice',logedin,isBlocked,orderController.getInvoice)
+//verify
+router.post("/verifyPayment",logedin,isBlocked,orderController.verify)
+router.post("/retry-payment/:id",logedin,isBlocked,orderController.retryPayment)
 // router.post("/cancel_order/:id",logedin,isBlocked,orderController.cancelOrder)
 
 //cart management
@@ -96,6 +99,7 @@ router.post('/checkOutOfStock', cartController.checkOutOfStock);
 router.get('/cart/checkout',logedin,isBlocked,checkoutController.loadCheckoutPage)
 router.post('/placeorder',checkoutController.placeorder)
 router.get("/orderPlaced",logedin,isBlocked,checkoutController.orderSuccess)
+router.get('/payment_failed',logedin,isBlocked,checkoutController.payment_failed)
 
 
 //wishlist management

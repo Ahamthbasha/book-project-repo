@@ -607,6 +607,23 @@ const removeCoupon = async (req, res) => {
   }
 };
 
+const payment_failed=(req,res)=>{
+  try{
+    const userData=req.session.user
+    const {error,payment_method,order_id}=req.query
+    
+    res.render("user/paymentFailed",{
+      userData,
+      error,
+      payment_method,
+      order_id,
+      message:'Your payment attempt failed.Please try again or choose another payment method'
+    })
+  }catch(error){
+    console.log(error)
+  }
+}
+
 module.exports = {
   loadCheckoutPage,
   placeorder,
@@ -614,4 +631,5 @@ module.exports = {
   validateCoupon,
   applyCoupon,
   removeCoupon,
+  payment_failed
 };

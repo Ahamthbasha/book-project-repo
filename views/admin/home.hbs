@@ -1,7 +1,3 @@
-<head>
-    <script src="https://cdn.jsdelivr.net/npm/handlebars/dist/handlebars.min.js"></script>
-</head>
-
 <aside class="navbar-aside" id="offcanvas_aside">
     <div class="aside-top">
         <a href="/admin/home" class="brand-wrap">
@@ -12,96 +8,75 @@
             </button>
         </div>
     </div>
-    
     <nav>
-    <ul class="menu-aside">
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/home"> 
-                <i class="icon material-icons md-home"></i>
-                <span class="text">Dashboard</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/product"> 
-                <i class="icon material-icons md-shopping_bag"></i>
-                <span class="text">Products</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/orders"> 
-                <i class="icon material-icons md-shopping_cart"></i>
-                <span class="text">Orders</span>
-            </a>
-        </li>
+        <ul class="menu-aside">
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/home"> <i class="icon material-icons md-home"></i>
+                    <span class="text">Dashboard</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/product"> <i class="icon material-icons md-shopping_bag"></i>
+                    <span class="text">Products</span>
+                </a>
 
-        <!-- Product Offer Menu Item -->
+            </li>
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/orders"> <i class="icon material-icons md-shopping_cart"></i>
+                    <span class="text">Orders</span>
+                </a>
+
+            </li>
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/category"> <i class="icon material-icons md-category"></i>
+                    <span class="text">Category</span>
+                </a>
+
+            </li>
+            
+
+             <li class="menu-item active">
+                    <a class="menu-link" href="/admin/coupons"><i class="icon fa-solid fa-ticket"></i>
+                        <span class="text">Coupons</span>
+                    </a>
+      </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/manage_users"> <i class="icon material-icons md-person"></i>
+                    <span class="text">Users</span>
+                </a>
+
+            </li>
+        </ul>
+        <hr>
+        <ul class="menu-aside">
+            <ul class="menu-aside">
         <li class="menu-item">
             <a class="menu-link" href="/admin/productOffers"> 
                 <i class="icon material-icons md-local_offer"></i>
                 <span class="text">Product Offer</span>
             </a>
         </li>
-
-
-        <li class="menu-item active">
-            <a class="menu-link" href="/admin/category"> 
-                <i class="icon material-icons md-category"></i>
-                <span class="text">Category</span>
-            </a>
-        </li>
-
         <li class="menu-item">
-            <a class="menu-link" href="/admin/coupons"> 
-                <i class="icon fa-solid fa-ticket"></i>
-                <span class="text">Coupons</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/manage_users"> 
-                <i class="icon material-icons md-person"></i>
-                <span class="text">Users</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/banners"> 
+            <a class="menu-link" href="/admin/categoryOffers"> 
                 <i class="icon material-icons md-local_offer"></i>
-                <span class="text">Banner</span>
+                <span class="text">Category Offer</span>
             </a>
         </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/reviews"> 
-                <i class="icon material-icons md-comment"></i>
-                <span class="text">Reviews</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/brands"> 
-                <i class="icon material-icons md-stars"></i>
-                <span class="text">Brands</span>
-            </a>
-        </li>
-    </ul>
-    <hr>
-    <ul class="menu-aside">
-        <li class="menu-item">
-            <a class="menu-link" href="#"> 
-                <i class="icon material-icons md-settings"></i>
-                <span class="text">Settings</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link btn btn-primary" href="/admin/logout"> 
-                <i class="icon material-icons md-exit_to_app"></i>
-                Logout
-            </a>
-        </li>
-    </ul>
-    <br>
-    <br>
-</nav>
-
+            <li class="menu-item">
+                <a class="menu-link btn btn-primary" href="/admin/logout"> <i
+                        class="icon material-icons md-exit_to_app"></i>
+                    Logout
+                </a>
+            </li>
+        </ul>
+        <br>
+        <br>
+    </nav>
 </aside>
-    
+
+
+<!-- JavaScript and CSS go below -->
+
 
 <main class="main-wrap">   
     <section class="content-main">
@@ -358,7 +333,7 @@
             <div class="col-sm-6">
                 <script>
                     document.write(new Date().getFullYear())
-                </script> ©, Mobile Bazaar .
+                </script> ©, BASHA BOOK.
             </div>
             <div class="col-sm-6">
                 <div class="text-sm-end">
@@ -372,6 +347,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="/javascripts/chart.js"></script>
+
+
 
 <script>
 

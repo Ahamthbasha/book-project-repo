@@ -123,7 +123,7 @@ const loadDashboard=async(req,res)=>{
             totalSales,
             thisMonthOrder,
             thisMonthSales,
-            layout:'adminLayout'
+            layout:'adminLayout',
         })
     }catch(error){
         console.log(error)

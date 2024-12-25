@@ -63,46 +63,47 @@
 
                     <!-- Product List Section -->
                     <div id="pro_container">
-                        <div class="row product-grid-3" id="productList">
-                            {{#each proData}}
-                                <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-                                    <div class="product-cart-wrap mb-30">
-                                        <div class="product-img-action-wrap">
-                                            <div class="product-img product-img-zoom">
-                                                <a href="/productview?id={{this._id}}">
-                                                    <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="{{this.name}}">
-                                                    <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="{{this.name}}">
-                                                </a>
-                                            </div>
-                                            {{#if this.offerAvailable}}
-                                                <div class="product-badges product-badges-position product-badges-mrg">
-                                                    <span class="hot">Offer</span>
-                                                </div>
-                                            {{/if}}
-                                        </div>
+                        <div class="row product-grid-4">
+    {{#each proData}}
+    <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+        <div class="product-cart-wrap mb-30">
+            <div class="product-img-action-wrap">
+                <div class="product-img product-img-zoom">
+                    <a href="/productview?id={{this._id}}">
+                        <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="">
+                        <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="">
+                    </a>
+                </div>
+                
+                <div class="product-badges product-badges-position product-badges-mrg">
+                    <span class="hot">Hot</span>
+                </div>
+            </div>
+            <div class="product-content-wrap">
+                <div class="product-category">
+                    <a>{{this.category.category}}</a>
+                </div>
+                <h2><a href="/productDetails/{{this._id}}">{{this.name}}</a></h2>
+                <div class="rating-result" title="90%">
+                    <span>
+                        <span>90%</span>
+                    </span>
+                </div>
+                <div class="product-price">
+                    <span>₹{{this.discountedPrice}}</span>
+                    {{#if this.offerAvailable}}
+                    <span class="old-price">₹{{this.price}}</span>
+                    <span class="offer-status">Offer Available</span>
+                    {{/if}}
+                </div>
+                <div class="product-action-1 show">
+                </div>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+</div>
 
-                                        <div class="product-content-wrap">
-                                            <div class="product-category">
-                                                <a>{{this.category.category}}</a>
-                                            </div>
-                                            <h2><a href="/productDetails/{{this._id}}">{{this.name}}</a></h2>
-                                            <div class="rating-result" title="90%">
-                                                <span><span>90%</span></span>
-                                            </div>
-
-                                            <!-- Pricing Section -->
-                                            <div class="product-price">
-                                                <span>₹{{this.discountedPrice}}</span>
-                                                {{#if this.offerAvailable}}
-                                                    <span class="old-price">₹{{this.price}}</span>
-                                                    <span class="offer-status">Offer Available</span>
-                                                {{/if}}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {{/each}}
-                        </div>
                     </div>
 
                     <!-- Pagination Section -->
@@ -205,51 +206,65 @@
         });
     };
 
-    const updateProductList = (products) => {
-        const productList = $('#productList');
-        productList.empty();
+  const updateProductList = (products) => {
+    const productList = $('#pro_container .row.product-grid-4');
+    productList.empty(); // Clear previous products
 
-        if (products.length === 0) {
-            productList.html('<h2 class="m-5">No products available</h2>');
-            return;
-        }
+    if (products.length === 0) {
+        productList.html('<h2 class="m-5">No product available</h2>');
+        return;
+    }
 
-        products.forEach((product) => {
-            const productHtml = `
-                <div class="col-lg-4 col-md-4 col-12 col-sm-6">
-                    <div class="product-cart-wrap mb-30">
-                        <div class="product-img-action-wrap">
-                            <div class="product-img product-img-zoom">
-                                <a href="/productview?id=${product._id}">
-                                    <img class="default-img" src="/images/products/${product.imageUrl[0]}" alt="${product.name}">
-                                    <img class="hover-img" src="/images/products/${product.imageUrl[1]}" alt="${product.name}">
-                                </a>
-                            </div>
-                            <div class="product-action-1">
-                                <a aria-label="Quick view" class="action-btn hover-up" href="/productview?id=${product._id}">
-                                    <i class="fi-rs-search"></i>
-                                </a>
-                                <a data-id="${product._id}" aria-label="Add To Wishlist" class="wish action-btn hover-up" href="#">
-                                    <i class="fi-rs-heart"></i>
-                                </a>
-                            </div>
+    products.forEach((product) => {
+        const productHtml = `
+            <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                <div class="product-cart-wrap mb-30">
+                    <div class="product-img-action-wrap">
+                        <div class="product-img product-img-zoom">
+                            <a href="/productDetails/${product._id}">
+                                <img class="default-img" src="/images/products/${product.imageUrl[0]}" alt="">
+                                <img class="hover-img" src="/images/products/${product.imageUrl[1]}" alt="">
+                            </a>
                         </div>
-                        <div class="product-content-wrap">
-                            <div class="product-category">
-                                ${product.category.category}
-                            </div>
-                            <h2><a href="/productview?id=${product._id}">${product.name}</a></h2>
-                            <div class="product-price">
-                                <span>₹${product.discountedPrice}</span>
-                                ${product.offerAvailable ? `<span class="old-price">₹${product.price}</span><span class="offer-status">Offer Available</span>` : ''}
-                            </div>
+                        <div class="product-action-1">
+                            <a aria-label="Quick view" class="action-btn hover-up" href="/productDetails/${product._id}" data-bs-target="#quickViewModal">
+                                <i class="fi-rs-search"></i>
+                            </a>
+                            <a data-id="${product._id}" aria-label="Add To Wishlist" class="wish action-btn hover-up" href="#">
+                                <i class="fi-rs-heart"></i>
+                            </a>
+                        </div>
+                        <div class="product-badges product-badges-position product-badges-mrg">
+                            <span class="hot">Hot</span>
                         </div>
                     </div>
+                    <div class="product-content-wrap">
+                        <div class="product-category">
+                            <a href="shop-grid-right.html">${product.category.category}</a>
+                        </div>
+                        <h2><a href="/productDetails/${product._id}">${product.name}</a></h2>
+                        <div class="rating-result" title="90%">
+                            <span><span>90%</span></span>
+                        </div>
+                        <div class="product-price">
+                            ${
+                                product.discountPrice && product.discountPrice < product.price
+                                    ? `<span>₹${product.discountPrice}</span>
+                                       <span class="old-price">₹${product.price}</span>
+                                       <span >offer Available</span>` 
+                                    : `<span>₹${product.price}</span>`
+                            }
+                        </div>
+                        <div class="product-action-1 show"></div>
+                    </div>
                 </div>
-            `;
-            productList.append(productHtml);
-        });
-    };
+            </div>
+        `;
+
+        // Append to product list
+        productList.append(productHtml);
+    });
+};
 
     const updatePagination = (totalProducts) => {
         const paginationList = $('#paginationList');

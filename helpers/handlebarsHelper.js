@@ -147,5 +147,19 @@ Handlebars.registerHelper('singlestatuchecker', function (product, options) {
     return JSON.stringify(context);
 });
 
+Handlebars.registerHelper('isActive', function(route, options) {
+  // Get the current URL path
+  const currentRoute = window.location.pathname; // or use your routing system variable
+
+  // Check if the current route matches the provided route and return the correct result
+  if (currentRoute.includes(route)) {
+      return options.fn(this); // Execute the block inside the {{#if}} if the route matches
+  } else {
+      return options.inverse(this); // Otherwise, execute the {{else}} block
+  }
+});
+
+
+
   
 module.exports = Handlebars;

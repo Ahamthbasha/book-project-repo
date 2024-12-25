@@ -8,6 +8,7 @@ const orderController=require("../controllers/admin/orderController")
 const couponController=require("../controllers/admin/couponController")
 const dashboardController=require("../controllers/admin/dashboardController")
 const offerController=require("../controllers/admin/productOfferController")
+const categoryOfferController=require("../controllers/admin/categoryOfferController")
 
 const store=require("../middlewares/multer")
 const adminAuth=require('../middlewares/adminAuth')
@@ -67,4 +68,11 @@ router.get("/editProductOffer/:id",adminAuth.isLogin,offerController.editProduct
 router.post("/editProductOffer/:id",adminAuth.isLogin,offerController.editProductOffer)
 router.delete("/deleteProOffer/:id",adminAuth.isLogin,offerController.deleteProductOffer)
 
+//category offer management
+router.get('/categoryOffers',adminAuth.isLogin,categoryOfferController.categoryOfferPage)
+router.get('/addCatOffers',adminAuth.isLogin, categoryOfferController.addCategoryOfferPage)
+router.post('/addCatOffers',adminAuth.isLogin, categoryOfferController.addCategoryOffer)
+router.get('/editCategoryOffer/:id',adminAuth.isLogin, categoryOfferController.editCategoryOfferPage)
+router.post("/editCategoryOffer/:id",adminAuth.isLogin, categoryOfferController.editCategoryOffer);
+router.delete('/deleteCatOffer/:id',adminAuth.isLogin, categoryOfferController.deleteCategoryOffer)
 module.exports=router

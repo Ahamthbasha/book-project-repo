@@ -20,7 +20,10 @@ const categorySchema = new mongoose.Schema({
 },{timestamps:true})
 
 
-const Category = mongoose.model('category', categorySchema); 
+// const Category = mongoose.model('category', categorySchema); 
+
+//change i made 25-12-2024
+const Category = mongoose.model('Category', categorySchema);
 
 module.exports = Category; 
 

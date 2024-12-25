@@ -151,22 +151,37 @@ let OwnerId
 
 const loadHome = async (req, res) => {
   try {
+
     const loadProData = await Product.aggregate([
       {
-        $match: { is_blocked: false },  // Filter products that are not blocked
+        $match: { is_blocked: false },
       },
       {
         $lookup: {
-          from: "productoffers",  // Reference to the productOffers collection
-          localField: "productOfferId",  // Product's offer reference
-          foreignField: "_id",  // Lookup the product offer by ID
-          as: "productOffer",  // Store the result in the productOffer array
+          from: "productoffers",
+          localField: "_id", 
+          foreignField: "productId",
+          as: "productOffer",
         },
       },
       {
         $unwind: {
-          path: "$productOffer",  // Flatten the productOffer array into an object
-          preserveNullAndEmptyArrays: true,  // Keep products without an offer
+          path: "$productOffer",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "categoryoffers",
+          localField: "category._id",
+          foreignField: "categoryId",
+          as: "categoryOffer",
+        },
+      },
+      {
+        $unwind: {
+          path: "$categoryOffer",
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -184,25 +199,47 @@ const loadHome = async (req, res) => {
             imageUrl: 1,
             isListed: 1,
           },
-          productOffer:1,
+          productOffer: 1,
+          categoryOffer: 1,
           discountedPrice: {
             $cond: {
-              if: { $eq: ["$productOffer.currentStatus", true] }, // Check if the offer is active
-              then: "$productOffer.discountPrice",  // Apply the discount price if active
-              else: "$price",  // Otherwise, use the original price
+              if: {
+                $and: [
+                  { $eq: ["$productOffer.currentStatus", true] },
+                  { $ne: ["$productOffer.discountPrice", null] },
+                ],
+              },
+              then: "$productOffer.discountPrice",
+              else: {
+                $cond: {
+                  if: {
+                    $and: [
+                      { $eq: ["$categoryOffer.currentStatus", true] },
+                      { $ne: ["$categoryOffer.discountPrice", null] },
+                    ],
+                  },
+                  then: "$categoryOffer.discountPrice",
+                  else: "$price",
+                },
+              },
             },
           },
           offerAvailable: {
             $cond: {
-              if: { $eq: ["$productOffer.currentStatus", true] },
-              then: true,  // Offer is available
-              else: false, // No offer
+              if: {
+                $or: [
+                  { $eq: ["$productOffer.currentStatus", true] },
+                  { $eq: ["$categoryOffer.currentStatus", true] },
+                ],
+              },
+              then: true,
+              else: false,
             },
           },
         },
-      }      
+      },
     ]);
-
+    
     const newProduct = await Product.aggregate([
       {
         $match: { is_blocked: false },  // Filter products that are not blocked
@@ -210,8 +247,8 @@ const loadHome = async (req, res) => {
       {
         $lookup: {
           from: "productoffers",  // Reference to the 'productoffers' collection
-          localField: "productOfferId",  // The field in 'Product' that references 'productoffers'
-          foreignField: "_id",  // Look for matching '_id' in the 'productoffers' collection
+          localField: "_id",  // The field in 'Product' that references 'productoffers'
+          foreignField: "productId",  // Look for matching 'productId' in the 'productoffers' collection
           as: "productOffer",  // Store the result in the 'productOffer' field
         },
       },
@@ -259,7 +296,7 @@ const loadHome = async (req, res) => {
         $limit: 8,  // Limit to 8 products
       },
     ]);
-
+    
     const popularbooks = await Product.aggregate([
       {
         $match: { 
@@ -270,8 +307,8 @@ const loadHome = async (req, res) => {
       {
         $lookup: {
           from: "productoffers",  // Reference to the 'productoffers' collection
-          localField: "productOfferId",  // The field in 'Product' that references 'productoffers'
-          foreignField: "_id",  // Look for matching '_id' in the 'productoffers' collection
+          localField: "_id",  // The field in 'Product' that references 'productoffers'
+          foreignField: "productId",  // Look for matching 'productId' in the 'productoffers' collection
           as: "productOffer",  // Store the result in the 'productOffer' field
         },
       },
@@ -320,7 +357,6 @@ const loadHome = async (req, res) => {
       },
     ]);
     
-    
 
     console.log(loadProData);
     console.log(newProduct)
@@ -335,6 +371,8 @@ const loadHome = async (req, res) => {
     console.log(error);
   }
 };
+
+
 
 
 const userLogin = (req, res) => {

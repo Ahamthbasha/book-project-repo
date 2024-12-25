@@ -1,3 +1,78 @@
+<aside class="navbar-aside" id="offcanvas_aside">
+    <div class="aside-top">
+        <a href="/admin/home" class="brand-wrap">
+            <img src="/assetsAdmin/imgs/theme/logo.svg" class="logo" alt="Evara Dashboard">
+        </a>
+        <div>
+            <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i>
+            </button>
+        </div>
+    </div>
+    <nav>
+        <ul class="menu-aside">
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/home"> <i class="icon material-icons md-home"></i>
+                    <span class="text">Dashboard</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/product"> <i class="icon material-icons md-shopping_bag"></i>
+                    <span class="text">Products</span>
+                </a>
+
+            </li>
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/orders"> <i class="icon material-icons md-shopping_cart"></i>
+                    <span class="text">Orders</span>
+                </a>
+
+            </li>
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/category"> <i class="icon material-icons md-category"></i>
+                    <span class="text">Category</span>
+                </a>
+
+            </li>
+            
+
+             <li class="menu-item active">
+                    <a class="menu-link" href="/admin/coupons"><i class="icon fa-solid fa-ticket"></i>
+                        <span class="text">Coupons</span>
+                    </a>
+      </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/manage_users"> <i class="icon material-icons md-person"></i>
+                    <span class="text">Users</span>
+                </a>
+
+            </li>
+        </ul>
+        <hr>
+        <ul class="menu-aside">
+            <ul class="menu-aside">
+        <li class="menu-item">
+            <a class="menu-link" href="/admin/productOffers"> 
+                <i class="icon material-icons md-local_offer"></i>
+                <span class="text">Product Offer</span>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a class="menu-link" href="/admin/categoryOffers"> 
+                <i class="icon material-icons md-local_offer"></i>
+                <span class="text">Category Offer</span>
+            </a>
+        </li>
+            <li class="menu-item">
+                <a class="menu-link btn btn-primary" href="/admin/logout"> <i
+                        class="icon material-icons md-exit_to_app"></i>
+                    Logout
+                </a>
+            </li>
+        </ul>
+        <br>
+        <br>
+    </nav>
+</aside>
 <main class="main-wrap">
     <section class="content-main">
         <div class="row justify-content-center align-items-center">
@@ -6,55 +81,54 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="modal-header">
-                    <h5 class="modal-title" id="addCategoryOfferModalLabel">Add Category Offer</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="addCategoryOfferForm" role="form" action="/admin/editCategoryOffer/{{editCategoryOfferData._id}}" method="post">
-                    <div class="modal-body">
-
-                        <div class="input-group mb-3">
-                            <label class="container">
-                                <label for="categoryName" class="mb-2" style="width: 100%";>Category Name: </label>
-                                <select name="categoryName" id="categoryName" class="form-select">
-                                    {{#each category}}
-                                    <option value="{{this.category}}">{{this.category}}</option>
-                                    {{/each}}
-                                </select>
-                            </label>
+                            <h5 class="modal-title" id="addCategoryOfferModalLabel">Add Category Offer</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
+                        <form id="addCategoryOfferForm" role="form" action="/admin/editCategoryOffer/{{editCategoryOfferData._id}}" method="post">
+                            <div class="modal-body">
 
-                        <div class="offerPercentageInput p-2">
-                            <label for="categoryOfferPercentage" class="mb-2">Category Offer Percentage: </label>
-                            <div class="input-group">
-                                <input id="categoryOfferPercentage" name="categoryOfferPercentage" class="form-control"
-                                    placeholder="Enter the offer percentage" value="{{editCategoryOfferData.categoryOfferPercentage}}">
+                                <div class="input-group mb-3">
+                                    <label class="container">
+                                        <label for="categoryName" class="mb-2" style="width: 100%";>Category Name: </label>
+                                        <select name="categoryName" id="categoryName" class="form-select">
+                                            {{#each category}}
+                                            <option value="{{this.category}}">{{this.category}}</option>
+                                            {{/each}}
+                                        </select>
+                                    </label>
+                                </div>
+
+                                <div class="offerPercentageInput p-2">
+                                    <label for="categoryOfferPercentage" class="mb-2">Category Offer Percentage: </label>
+                                    <div class="input-group">
+                                        <input id="categoryOfferPercentage" name="categoryOfferPercentage" class="form-control"
+                                               placeholder="Enter the offer percentage" value="{{editCategoryOfferData.categoryOfferPercentage}}">
+                                    </div>
+                                    <div class="form-text">Choose a percentage to be discounted. Between 5% and 90%.</div>
+                                </div>
+
+                                <div class="startDateInput p-2">
+                                    <label for="categoryOfferStartDate">Offer Start Date: </label>
+                                    <div class="input-group">
+                                        <input id="categoryOfferStartDate" name="categoryOfferStartDate" type="date" class="form-control" value="{{startDate}}">
+                                    </div>
+                                    <div class="form-text">Choose a start date for the offer to be considered.</div>
+                                </div>
+
+                                <div class="endDateInput p-2">
+                                    <label for="categoryOfferEndDate">Offer Expiry Date: </label>
+                                    <div class="input-group">
+                                        <input id="categoryOfferEndDate" name="categoryOfferEndDate" type="date" class="form-control" value="{{endDate}}">
+                                    </div>
+                                    <div class="form-text">Choose an expiry date for the offer to end.</div>
+                                </div>
+
                             </div>
-                            <div class="form-text">Choose a percentage to be discounted. Between 5% and 90%.</div>
-                        </div>
-
-                        <div class="startDateInput p-2">
-                            <label for="categoryOfferStartDate">Offer Start Date: </label>
-                            <div class="input-group">
-                                <input id="categoryOfferStartDate" name="categoryOfferStartDate" type="date" class="form-control" value="{{startDate}}">
+                            <div class="modal-footer">
+                                <button id="backbutton" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+                                <button type="submit" class="btn btn-info">Save changes</button>
                             </div>
-                            <div class="form-text">Choose a start date for the offer to be considered.</div>
-                        </div>
-
-                        <div class="endDateInput p-2">
-                            <label for="categoryOfferEndDate">Offer Expiry Date : </label>
-                            <div class="input-group">
-                                <input id="categoryOfferEndDate" name="categoryOfferEndDate" type="date" class="form-control" value="{{endDate}}">
-                            </div>
-                            <div class="form-text">Choose an exipry date for offer to end.</div>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        <button id="backbutton" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
-                        <button type="submit" class="btn btn-info">Save changes</button>
-                    </div>
-                </form>
-            
+                        </form>
                     </div>
                 </div>
             </div>
@@ -64,7 +138,7 @@
             <div class="col-sm-6">
                 <script>
                     document.write(new Date().getFullYear())
-                </script> ©, BashaBook .
+                </script> ©, MobileBazaar .
             </div>
             <div class="col-sm-6">
                 <div class="text-sm-end">
@@ -76,29 +150,39 @@
 </main>
 
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.10/dist/sweetalert2.min.js"></script>
 
 <script>
+$(document).ready(function () {
+    // When the form is submitted (Save changes button)
+    $('#addCategoryOfferForm').on('submit', function (e) {
+        e.preventDefault(); // Prevent the default form submission
 
-    $(document).ready(function () {
-        $('#backbutton').click(function (e) {
-            e.preventDefault();
-            Swal.fire({
-                title: "Leave the Page?",
-                //text: "The Data will not be saved",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#088178",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "/admin/categoryOffers";
-                }
-            });
+        const formData = $(this).serialize(); // Serialize the form data
 
-
+        $.ajax({
+            url: '/admin/editCategoryOffer/{{editCategoryOfferData._id}}',
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                // Redirect immediately after saving without showing SweetAlert
+                window.location.href = "/admin/categoryOffers"; 
+            },
+            error: function (xhr) {
+                const errorMessage = xhr.responseJSON?.message || "Something went wrong!";
+                // Optionally, log the error in the console or handle it as needed
+                console.error(errorMessage);
+                // Redirect even if there's an error
+                window.location.href = "/admin/categoryOffers";
+            }
         });
     });
 
+    // When the "Back" button is clicked
+    $('#backbutton').click(function (e) {
+        e.preventDefault(); // Prevent default behavior (closing modal)
+
+        // Directly redirect without SweetAlert confirmation
+        window.location.href = "/admin/categoryOffers";
+    });
+});
 </script>

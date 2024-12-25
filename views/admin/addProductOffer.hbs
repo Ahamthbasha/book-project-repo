@@ -1,7 +1,3 @@
-<head>
-    <script src="https://cdn.jsdelivr.net/npm/handlebars/dist/handlebars.min.js"></script>
-</head>
-
 <aside class="navbar-aside" id="offcanvas_aside">
     <div class="aside-top">
         <a href="/admin/home" class="brand-wrap">
@@ -12,101 +8,70 @@
             </button>
         </div>
     </div>
-    
     <nav>
-    <ul class="menu-aside">
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/home"> 
-                <i class="icon material-icons md-home"></i>
-                <span class="text">Dashboard</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/product"> 
-                <i class="icon material-icons md-shopping_bag"></i>
-                <span class="text">Products</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/orders"> 
-                <i class="icon material-icons md-shopping_cart"></i>
-                <span class="text">Orders</span>
-            </a>
-        </li>
+        <ul class="menu-aside">
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/home"> <i class="icon material-icons md-home"></i>
+                    <span class="text">Dashboard</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/product"> <i class="icon material-icons md-shopping_bag"></i>
+                    <span class="text">Products</span>
+                </a>
 
-        <!-- Product Offer Menu Item -->
+            </li>
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/orders"> <i class="icon material-icons md-shopping_cart"></i>
+                    <span class="text">Orders</span>
+                </a>
+
+            </li>
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/category"> <i class="icon material-icons md-category"></i>
+                    <span class="text">Category</span>
+                </a>
+
+            </li>
+            
+
+             <li class="menu-item active">
+                    <a class="menu-link" href="/admin/coupons"><i class="icon fa-solid fa-ticket"></i>
+                        <span class="text">Coupons</span>
+                    </a>
+      </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/manage_users"> <i class="icon material-icons md-person"></i>
+                    <span class="text">Users</span>
+                </a>
+
+            </li>
+        </ul>
+        <hr>
+        <ul class="menu-aside">
+            <ul class="menu-aside">
         <li class="menu-item">
             <a class="menu-link" href="/admin/productOffers"> 
                 <i class="icon material-icons md-local_offer"></i>
                 <span class="text">Product Offer</span>
             </a>
         </li>
-
-        <!-- Category Offer Menu Item -->
         <li class="menu-item">
-            <a class="menu-link" href="/admin/category-offer"> 
+            <a class="menu-link" href="/admin/categoryOffers"> 
                 <i class="icon material-icons md-local_offer"></i>
                 <span class="text">Category Offer</span>
             </a>
         </li>
-
-        <li class="menu-item active">
-            <a class="menu-link" href="/admin/category"> 
-                <i class="icon material-icons md-category"></i>
-                <span class="text">Category</span>
-            </a>
-        </li>
-
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/coupons"> 
-                <i class="icon fa-solid fa-ticket"></i>
-                <span class="text">Coupons</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/manage_users"> 
-                <i class="icon material-icons md-person"></i>
-                <span class="text">Users</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/banners"> 
-                <i class="icon material-icons md-local_offer"></i>
-                <span class="text">Banner</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/reviews"> 
-                <i class="icon material-icons md-comment"></i>
-                <span class="text">Reviews</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/brands"> 
-                <i class="icon material-icons md-stars"></i>
-                <span class="text">Brands</span>
-            </a>
-        </li>
-    </ul>
-    <hr>
-    <ul class="menu-aside">
-        <li class="menu-item">
-            <a class="menu-link" href="#"> 
-                <i class="icon material-icons md-settings"></i>
-                <span class="text">Settings</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link btn btn-primary" href="/admin/logout"> 
-                <i class="icon material-icons md-exit_to_app"></i>
-                Logout
-            </a>
-        </li>
-    </ul>
-    <br>
-    <br>
-</nav>
-
+            <li class="menu-item">
+                <a class="menu-link btn btn-primary" href="/admin/logout"> <i
+                        class="icon material-icons md-exit_to_app"></i>
+                    Logout
+                </a>
+            </li>
+        </ul>
+        <br>
+        <br>
+    </nav>
 </aside>
     
 <main class="main-wrap">
@@ -130,85 +95,49 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                         {{/if}}
-                        {{!-- <form action="/admin/add_coupon" method="post" onsubmit="return validationf(this)" class="row g-3">
-                            <h5 class="content-title">Add New Coupon</h5>
-                            <div class="col-12">
-                                <label for="coupon-code" class="form-label">Coupon Code</label>
-                                <input type="text" class="form-control" id="coupon-code" placeholder="Enter coupon code" name="code">
-                                <h6 class="alertAddcoupon mt-1" style="color: red" id="couponcodealert"></h6>
-                            </div>
-                            <div class="col-12">
-                                <label for="discount" class="form-label">Discount (%)</label>
-                                <div class="input-group mb-3">
-                                    <input type="number" class="form-control" id="discount" name="percent" placeholder="Discount %..." aria-label="Discount">
-                                    <span class="input-group-text">%</span>
-                                    <h6 class="alertAddcoupon mt-1" style="color: red" id="discountalert"></h6>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <label for="min-purchase" class="form-label">Minimum Purchase Amount</label>
-                                <input type="number" class="form-control" id="min-purchase" placeholder="Enter minimum purchase amount" name="minPurchase">
-                                <h6 class="alertAddcoupon mt-1" style="color: red" id="minalert"></h6>
-                            </div>
-                            <div class="col-12">
-                                <label for="max-discount" class="form-label">Max Discount Amount</label>
-                                <div class="input-group mb-3">
-                                    <input type="number" class="form-control" id="max-discount" placeholder="Enter maximum discount amount" name="maxDiscount">
-                                    <h6 class="alertAddcoupon mt-1" style="color: red" id="maxalert"></h6>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="expiry-date">Expiry Date</label>
-                                <input type="date" class="form-control" id="expiry-date" name="expDate">
-                            </div>
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary">Add Coupon</button>
-                                <a href="/admin/coupons" class="btn btn-primary" id="backbutton">Back</a>
-                            </div>
-                        </form> --}}
                         <form id="addProductOfferForm" role="form" action="/admin/addProOffers" method="post">
-                    <div class="modal-body">
+                            <div class="modal-body">
 
-                        <label for="productName" class="mb-2">Product Name:</label>
-                        <select name="productName" id="productName" class="form-select">
-                            {{#each products}}
-                            <option value="{{this.name}}">
-                                {{this.name}}
-                            </option>
-                            {{/each}}
-                        </select>
+                                <label for="productName" class="mb-2">Product Name:</label>
+                                <select name="productName" id="productName" class="form-select">
+                                    {{#each products}}
+                                    <option value="{{this.name}}">
+                                        {{this.name}}
+                                    </option>
+                                    {{/each}}
+                                </select>
 
-                        <div class="offerPercentageInput p-2">
-                            <label for="productOfferPercentage" class="mb-2">Product Offer Percentage: </label>
-                            <div class="input-group">
-                                <input id="productOfferPercentage" name="productOfferPercentage" class="form-control"
-                                    placeholder="Enter the offer percentage">
+                                <div class="offerPercentageInput p-2">
+                                    <label for="productOfferPercentage" class="mb-2">Product Offer Percentage: </label>
+                                    <div class="input-group">
+                                        <input id="productOfferPercentage" name="productOfferPercentage" class="form-control"
+                                            placeholder="Enter the offer percentage">
+                                    </div>
+                                    <div class="form-text">Choose a percentage to be discounted. Between 5% and 90%.</div>
+                                </div>
+
+                                <div class="startDateInput p-2">
+                                    <label for="startDate">Offer Start Date: </label>
+                                    <div class="input-group">
+                                        <input id="startDate" name="startDate" type="date" class="form-control">
+                                    </div>
+                                    <div class="form-text">Choose a start date for the offer to be considered.</div>
+                                </div>
+
+                                <div class="endDateInput p-2">
+                                    <label for="endDate">Offer Expiry Date : </label>
+                                    <div class="input-group">
+                                        <input id="endDate" name="endDate" type="date" class="form-control">
+                                    </div>
+                                    <div class="form-text">Choose an expiry date for offer to end.</div>
+                                </div>
+
                             </div>
-                            <div class="form-text">Choose a percentage to be discounted. Between 5% and 90%.</div>
-                        </div>
-
-                        <div class="startDateInput p-2">
-                            <label for="startDate">Offer Start Date: </label>
-                            <div class="input-group">
-                                <input id="startDate" name="startDate" type="date" class="form-control">
+                            <div class="modal-footer">
+                                <button id="backbutton" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+                                <button type="submit" class="btn btn-info">Save changes</button>
                             </div>
-                            <div class="form-text">Choose a start date for the offer to be considered.</div>
-                        </div>
-
-                        <div class="endDateInput p-2">
-                            <label for="endDate">Offer Expiry Date : </label>
-                            <div class="input-group">
-                                <input id="endDate" name="endDate" type="date" class="form-control">
-                            </div>
-                            <div class="form-text">Choose an exipry date for offer to end.</div>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        <button id="backbutton" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
-                        <button type="submit" class="btn btn-info">Save changes</button>
-                    </div>
-                </form>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -229,31 +158,18 @@
     </footer>
 </main>
 
-
-
+<!-- Removed the Swal Script Import -->
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.10/dist/sweetalert2.min.js"></script>
 
 <script>
 
     $(document).ready(function () {
+        // Removing the Swal functionality from the "backbutton"
         $('#backbutton').click(function (e) {
             e.preventDefault();
-            Swal.fire({
-                title: "Leave the Page?",
-                //text: "The Data will not be saved",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#088178",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "/admin/productOffers";
-                }
-            });
-
-
+            if (confirm('Do you really want to leave the page?')) {
+                window.location.href = "/admin/productOffers";
+            }
         });
     });
 

@@ -1254,84 +1254,8 @@ const cancelOneProduct = async (req, res) => {
     }
   };
 
-  //   try{
-  //     const orderId=req.query.id
-  //     const order=await Order.findById(orderId)
-
-  //     if(!order){
-  //       res.status(500).send({message:"order not found"})
-  //     }
-
-  //     const {userId,address:addressId}=order
-  //     const [user,address]=await Promise.all([
-  //       User.findById(userId),
-  //       Address.findById(addressId)
-  //     ])
-
-  //     if(!user || !address){
-  //       res.status(500).send({message:"user or address not found"})
-  //     }
-
-  //     const products=order.product.map((product)=>({
-  //       quantity:product.quantity.toString(),
-  //       description:product.name,
-  //       tax:product.tax,
-  //       price:product.price,
-  //     }))
-
-  //     products.push({
-  //       quantity:'1',
-  //       description:'Delivery Charge',
-  //       tax:0,
-  //       price:50,
-  //     })
-
-  //     const date=moment(order.date).format("MMMM D,YYYY")
-
-  //     const data={
-  //       mode:"development",
-  //       currency:"INR",
-  //       taxNotation:'vat',
-  //       marginTop:25,
-  //       marginRight:25,
-  //       marginLeft:25,
-  //       marginBottom:25,
-
-  //       sender:{
-  //         company:"BASHA BOOK",
-  //         addres:"Park Avenue",
-  //         zip:'600034',
-  //         city:'chennai',
-  //         country:'India',
-  //       },
-  //       client:{
-  //         company:user.name,
-  //         address:address.adressLine1,
-  //         zip:address.pin,
-  //         city:address.city,
-  //         country:'India',
-  //       },
-  //       information:{
-  //         number:`INV-${orderId}`,
-  //         date:date,
-  //       },
-  //       products:products,
-  //     }
-
-  //     easyinvoice.createInvoice(data,function(result){
-  //       const fileName=`invoice_${orderId}.pdf`
-  //       const pdfBuffer=Buffer.from(result.pdf,'base64')
-  //       res.setHeader('Content-Type','application/pdf')
-  //       res.setHeader('Content-Disposition',`attachment;filename=${fileName}`)
-  //       res.send(pdfBuffer)
-  //     })
-  //   }catch(error){
-  //     console.log(error)
-  //   }
-  // }
-
 //it is working finely if the product has offer
-  const getInvoice = async (req, res) => {
+const getInvoice = async (req, res) => {
     try {
       const orderId = req.query.id;
       const order = await Order.findById(orderId);
@@ -1452,7 +1376,7 @@ const cancelOneProduct = async (req, res) => {
       console.log(error);
       res.status(500).send({ message: "Error generating invoice", error: error.message });
     }
-  };
+};
    
 const verify=(req,res)=>{
   console.log(req.body.payment,"end")
@@ -1503,6 +1427,7 @@ const retryPayment=async(req,res)=>{
     console.log(error)
   }
 }
+
 module.exports=
 {
     my_Orders,

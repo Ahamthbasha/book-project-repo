@@ -105,6 +105,7 @@
 </div>
 
                     </div>
+                    
 
                     <!-- Pagination Section -->
                     <div class="pagination-area mt-15 mb-sm-5 mb-lg-0">
@@ -227,7 +228,7 @@
                             </a>
                         </div>
                         <div class="product-action-1">
-                            <a aria-label="Quick view" class="action-btn hover-up" href="/productDetails/${product._id}" data-bs-target="#quickViewModal">
+                            <a aria-label="Quick view" class="action-btn hover-up" href="/productview/?id=${product._id}" data-bs-target="#quickViewModal">
                                 <i class="fi-rs-search"></i>
                             </a>
                             <a data-id="${product._id}" aria-label="Add To Wishlist" class="wish action-btn hover-up" href="#">
@@ -389,53 +390,53 @@ function sortZA() {
     // Wishlist action
     $(document).ready(function () {
         const userId = "";  // Make sure this is assigned correctly or removed if not needed
+        $('#pro_container').on('click', '.wish.action-btn', function (event) {
+    event.preventDefault();
+    var $button = $(this);
+    var id = $button.data('id');
 
-        $('#productList').on('click', '.wish.action-btn', function (event) {
-            event.preventDefault();
-            var $button = $(this);
-            var id = $button.data('id');
-
-            $.ajax({
-                type: 'POST',
-                url: '/addtowishlist',
-                contentType: 'application/json',
-                data: JSON.stringify({ id: id, userId: userId }),
-                success: function (productData) {
-                    if (productData.success) {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: 'Product Successfully added to Wishlist!!!',
-                            icon: 'success',
-                            confirmButtonText: 'Cool'
-                        });
-                    } else {
-                        if (productData.message) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops',
-                                text: productData.message,
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                text: 'Login Required',
-                                showCancelButton: true,
-                                confirmButtonText: 'Login',
-                                confirmButtonColor: "#088178",
-                                cancelButtonColor: "#d33",
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    window.location.href = '/login';
-                                }
-                            });
+    $.ajax({
+        type: 'POST',
+        url: '/addtowishlist',
+        contentType: 'application/json',
+        data: JSON.stringify({ id: id, userId: userId }),
+        success: function (productData) {
+            if (productData.success) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Product Successfully added to Wishlist!!!',
+                    icon: 'success',
+                    confirmButtonText: 'Cool'
+                });
+            } else {
+                if (productData.message) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops',
+                        text: productData.message,
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Login Required',
+                        showCancelButton: true,
+                        confirmButtonText: 'Login',
+                        confirmButtonColor: "#088178",
+                        cancelButtonColor: "#d33",
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/login';
                         }
-                    }
-                },
-                error: function (error) {
-                    console.log('Error adding to wishlist', error);
+                    });
                 }
-            });
-        });
+            }
+        },
+        error: function (error) {
+            console.log('Error adding to wishlist', error);
+        }
+    });
+});
+
     });
 </script>

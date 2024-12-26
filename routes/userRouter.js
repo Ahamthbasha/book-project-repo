@@ -46,7 +46,7 @@ router.get('/logout', userController.doLogout)
 router.get("/product",productController.getProduct)
 router.post("/search",productController.searchSortFilter)
 router.get("/productview",productController.productView)
-// router.get('/productDetails/:id',productDetails)
+//router.get('/productDetails/:id',productDetails)
 
 //profile management
 router.get("/profile",logedin,isBlocked,profileController.loadProfile)

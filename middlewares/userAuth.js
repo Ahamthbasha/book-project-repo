@@ -48,18 +48,32 @@ const logedin = async(req, res, next)=>{
 
 }
 
-const isBlocked = async ( req, res, next ) => {
+// const isBlocked = async ( req, res, next ) => {
 
+//     const userData = req.session.user;
+//     const id = userData._id
+//     const user = await User.findById(id)
+
+//      if(user.isBlocked){
+//        res.redirect('/logout')
+//      }else{
+//         next()
+//    }
+//  }
+
+const isBlocked = async (req, res, next) => {
     const userData = req.session.user;
-    const id = userData._id
-    const user = await User.findById(id)
+    if (!userData) {
+       return res.redirect('/home'); 
+    }
+    const id = userData._id;
+    const user = await User.findById(id);
+    if (user && user.isBlocked) {
+        return res.redirect('/logout');
+    }
+    next();
+};
 
-     if(user.isBlocked){
-       res.redirect('/logout')
-     }else{
-        next()
-   }
- }
 
 module.exports ={
     isLogin,

@@ -148,7 +148,6 @@ const orderDetails = async (req, res) => {
     }
 };
 
-
 const cancelOrder = async (req, res) => {
     try {
         const id = req.params.id;
@@ -440,6 +439,11 @@ const cancelOneProduct = async (req, res) => {
     // Use the offer price if there's an active offer, otherwise use the original price
     const productPrice = productOffer ? productOffer.discountPrice * productQuantity : result.product[0].price * productQuantity;
 
+    await Product.findOneAndUpdate(
+      {_id:PRODID},
+      {$inc:{stock:productQuantity}}
+    )
+
     // Get the total number of products in the order
     const totalProductsInOrder = updatedOrder.product.length;
 
@@ -504,211 +508,6 @@ const cancelOneProduct = async (req, res) => {
     console.log(error.message);
   }
 };
-
-
-// const cancelOneProduct = async (req, res) => {
-//   try {
-//     const { id, prodId } = req.body;
-//     console.log(id, prodId);
-
-//     if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
-//       return res.status(500).json({ error: 'Invalid order or product ID' });
-//     }
-
-//     const ID = new mongoose.Types.ObjectId(id);
-//     const PRODID = new mongoose.Types.ObjectId(prodId);
-
-//     // Find the updated order
-//     const updatedOrder = await Order.findOneAndUpdate(
-//       { _id: ID, 'product._id': PRODID },
-//       { $set: { 'product.$.isCancelled': true } },
-//       { new: true }
-//     ).lean();
-
-//     if (!updatedOrder) {
-//       return res.status(500).json({ error: 'Order or product not found' });
-//     }
-
-//     const result = await Order.findOne(
-//       { _id: ID, 'product._id': PRODID },
-//       { 'product.$': 1 }
-//     ).lean();
-
-//     const productQuantity = result.product[0].quantity;
-    
-//     // Check if there's an offer for the product
-//     const productOffer = await ProductOffer.findOne({
-//       productId: PRODID,
-//       currentStatus: true,
-//       startDate: { $lte: Date.now() },
-//       endDate: { $gte: Date.now() }
-//     });
-
-//     // Use the offer price if there's an active offer, otherwise use the original price
-//     const productPrice = productOffer ? productOffer.discountPrice * productQuantity : result.product[0].price * productQuantity;
-
-//     await Product.findOneAndUpdate(
-//       { _id: PRODID },
-//       { $inc: { stock: productQuantity } }
-//     );
-
-//     // Handle coupon refund logic
-//     if (updatedOrder.couponUsed) {
-//       const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
-//       const discountAmt = (productPrice * coupon.discount) / 100;
-//       const newTotal = productPrice - discountAmt;
-
-//       await User.updateOne(
-//         { _id: req.session.user._id },
-//         { $inc: { wallet: newTotal } }
-//       );
-//       await User.updateOne(
-//         { _id: req.session.user._id },
-//         {
-//           $push: {
-//             history: {
-//               amount: newTotal,
-//               status: `refund of: ${result.product[0].name}`,
-//               date: Date.now()
-//             }
-//           }
-//         }
-//       );
-//     } else {
-//       await User.updateOne(
-//         { _id: req.session.user._id },
-//         { $inc: { wallet: productPrice } }
-//       );
-//       await User.updateOne(
-//         { _id: req.session.user._id },
-//         {
-//           $push: {
-//             history: {
-//               amount: productPrice,
-//               status: `refund of: ${result.product[0].name}`,
-//               date: Date.now()
-//             }
-//           }
-//         }
-//       );
-//     }
-
-//     // Check if all products are cancelled, and if so, update the order status to "Cancelled"
-//     const allCancelled = updatedOrder.product.every(p => p.isCancelled);
-//     if (allCancelled) {
-//       // Update the order status to "Cancelled" even if the payment method is COD
-//       await Order.updateOne({ _id: ID }, { $set: { status: 'Cancelled' } });
-//     }
-
-//     res.json({ success: true, message: 'Successfully removed product' });
-//   } catch (error) {
-//     console.log(error.message);
-//   }
-// };
-
-
-
-  // const returnOneProduct = async (req, res) => {
-  //   try {
-  //     const { id, prodId } = req.body;
-  //     console.log(id, prodId);
-  
-  //     if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
-  //       return res.status(HttpStatus.BadRequest).json({ error: 'Invalid order or product ID' });
-  //     }
-  
-  //     const ID = new mongoose.Types.ObjectId(id);
-  //     const PRODID = new mongoose.Types.ObjectId(prodId);
-  
-  //     // Find the updated order
-  //     const updatedOrder = await Order.findOneAndUpdate(
-  //       { _id: ID, 'product._id': PRODID },
-  //       { $set: { 'product.$.isReturned': true } },
-  //       { new: true }
-  //     ).lean();
-  
-  //     if (!updatedOrder) {
-  //       return res.status(HttpStatus.NotFound).json({ error: 'Order or product not found' });
-  //     }
-  
-  //     const result = await Order.findOne(
-  //       { _id: ID, 'product._id': PRODID },
-  //       { 'product.$': 1 }
-  //     ).lean();
-  
-  //     const productQuantity = result.product[0].quantity;
-  
-  //     // Check if there's an offer for the product
-  //     const productOffer = await ProductOffer.findOne({
-  //       productId: PRODID,
-  //       currentStatus: true,
-  //       startDate: { $lte: Date.now() },
-  //       endDate: { $gte: Date.now() }
-  //     });
-  
-  //     // Use the offer price if there's an active offer, otherwise use the original price
-  //     const productPrice = productOffer ? productOffer.discountPrice * productQuantity : result.product[0].price * productQuantity;
-  
-  //     await Product.findOneAndUpdate(
-  //       { _id: PRODID },
-  //       { $inc: { stock: productQuantity } }
-  //     );
-  
-  //     // Handle coupon refund logic
-  //     if (updatedOrder.couponUsed) {
-  //       const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
-  //       const discountAmt = (productPrice * coupon.discount) / 100;
-  //       const newTotal = productPrice - discountAmt;
-  
-  //       await User.updateOne(
-  //         { _id: req.session.user._id },
-  //         { $inc: { wallet: newTotal } }
-  //       );
-  //       await User.updateOne(
-  //         { _id: req.session.user._id },
-  //         {
-  //           $push: {
-  //             history: {
-  //               amount: newTotal,
-  //               status: `[return] refund of: ${result.product[0].name}`,
-  //               date: Date.now()
-  //             }
-  //           }
-  //         }
-  //       );
-  //     } else {
-  //       await User.updateOne(
-  //         { _id: req.session.user._id },
-  //         { $inc: { wallet: productPrice } }
-  //       );
-  //       await User.updateOne(
-  //         { _id: req.session.user._id },
-  //         {
-  //           $push: {
-  //             history: {
-  //               amount: productPrice,
-  //               status: `[return]refund of: ${result.product[0].name}`,
-  //               date: Date.now()
-  //             }
-  //           }
-  //         }
-  //       );
-  //     }
-  
-  //       // Check if all products are returned, and if so, update the order status to "Returned"
-  //       const allReturned = updatedOrder.product.every(p => p.isReturned);
-  //       if (allReturned) {
-  //           await Order.updateOne({ _id: ID }, { $set: { status: 'Returned' } });
-  //       }
-
-  //     res.json({ success: true, message: 'Successfully removed product' });
-  //   } catch (error) {
-  //     console.log(error.message);
-      
-  //   }
-  // };
-
-//it is working finely if the product has offer
 
 const returnOneProduct = async (req, res) => {
   try {
@@ -820,8 +619,6 @@ const returnOneProduct = async (req, res) => {
     res.status(500).json({ error: 'An error occurred while processing the return' });
   }
 };
-
-
 
 const getInvoice = async (req, res) => {
     try {
@@ -945,7 +742,7 @@ const getInvoice = async (req, res) => {
       res.status(500).send({ message: "Error generating invoice", error: error.message });
     }
 };
-   
+
 const verify=(req,res)=>{
   console.log(req.body.payment,"end")
   const {orderId}=req.body

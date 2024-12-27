@@ -3,43 +3,95 @@ const Category=require("../../models/categoryModel")
 const fs=require("fs")
 const path=require("path")
 
-const getProduct=async(req,res)=>{
-    try{
-        var page=1
-        if(req.query.page){
-            page=req.query.page
-        }
-        const limit=10
-        const productData=await Product.aggregate([
-            {
-                $lookup:{
-                    from:"categories",
-                    localField:"category",
-                    foreignField:"_id",
-                    as:"category",
-                },
-            },
-            {
-                $unwind:"$category",
-            },
-            {
-                $limit:limit*1
-            }
-        ]);
-        const count=await Product.find({}).countDocuments();
-        // console.log(count)
+// const getProduct=async(req,res)=>{
+//     try{
+//         var page=1
+//         if(req.query.page){
+//             page=req.query.page
+//         }
+//         const limit=1
+//         const productData=await Product.aggregate([
+//             {
+//                 $lookup:{
+//                     from:"categories",
+//                     localField:"category",
+//                     foreignField:"_id",
+//                     as:"category",
+//                 },
+//             },
+//             {
+//                 $unwind:"$category",
+//             },
+//             {
+//                 $limit:limit*1
+//             }
+//         ]);
+//         const count=await Product.find({}).countDocuments();
+//         // console.log(count)
 
-        const totalPages=Math.ceil(count/limit)
-        const pages=Array.from({length:totalPages},(_, i)=>i+1)
+//         const totalPages=Math.ceil(count/limit)
+//         const pages=Array.from({length:totalPages},(_, i)=>i+1)
 
-        res.render("admin/products",{productData,pages,currendtPage:page,layout:'adminlayout'})
+//         res.render("admin/products",{productData,pages,currendtPage:page,layout:'adminlayout'})
 
-    }catch(error){
-        console.log(error)
-    }
-}
+//     }catch(error){
+//         console.log(error)
+//     }
+// }
 
 //add product page
+
+const getProduct = async (req, res) => {
+  try {
+      let page = 1;
+      if (req.query.page) {
+          page = parseInt(req.query.page, 10);  // Convert to an integer
+      }
+
+      const limit = 10; // Set the number of products per page
+      const skip = (page - 1) * limit; // Skip the appropriate number of products
+
+      // Fetch the product data with pagination and category lookup
+      const productData = await Product.aggregate([
+          {
+              $lookup: {
+                  from: "categories",
+                  localField: "category",
+                  foreignField: "_id",
+                  as: "category",
+              },
+          },
+          {
+              $unwind: "$category",
+          },
+          {
+              $skip: skip, // Skip products based on the current page
+          },
+          {
+              $limit: limit, // Limit the number of products per page
+          },
+      ]);
+
+      // Count the total number of products in the database (for pagination)
+      const count = await Product.countDocuments();
+
+      // Calculate total pages based on the count of products and the limit
+      const totalPages = Math.ceil(count / limit);
+      const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+      // Render the page with product data, pagination links, and current page
+      res.render("admin/products", {
+          productData,
+          pages,
+          currentPage: page,
+          layout: 'adminlayout',
+      });
+  } catch (error) {
+      console.log(error);
+      res.status(500).send('Internal Server Error');
+  }
+};
+
 
 const addProductPage=async(req,res)=>{
     try{

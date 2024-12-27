@@ -17,8 +17,8 @@ const { isLogin, isLogout, isBlocked, logedin } = auth
 require('../middlewares/googleAuth')
 
 
-router.get('/',userController.loadHome)
-
+router.get('/',isBlocked,userController.loadHome)
+router.get("/home",userController.loadHome)
 //signup
 router.get('/signup', isLogout, userController.usersignup)
 router.post('/signup', isLogout,userController.doSignup)
@@ -69,9 +69,11 @@ router.post('/forget_password',forgetPasswordController.submitMailPost)
 router.get('/otp',isLogout,forgetPasswordController.submitOtp)
 router.post('/otp',forgetPasswordController.submitOtpPost)
 
+
 //forgot password here we reset the password page
 router.get("/reset_password",isLogout,forgetPasswordController.resetPassword)
 router.post("/reset_password",forgetPasswordController.resetPasswordpost)
+
 
 //Order page
 router.get('/myOrders',logedin,isBlocked,orderController.my_Orders)

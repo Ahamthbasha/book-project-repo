@@ -27,7 +27,7 @@
                 </a>
 
             </li>
-            <li class="menu-item ">
+            <li class="menu-item active">
                 <a class="menu-link" href="/admin/category"> <i class="icon material-icons md-category"></i>
                     <span class="text">Category</span>
                 </a>
@@ -35,7 +35,7 @@
             </li>
             
 
-             <li class="menu-item active">
+             <li class="menu-item ">
                     <a class="menu-link" href="/admin/coupons"><i class="icon fa-solid fa-ticket"></i>
                         <span class="text">Coupons</span>
                     </a>
@@ -46,22 +46,29 @@
                 </a>
 
             </li>
+             <li class="menu-item">
+                    <a class="menu-link" href="/admin/productOffers"> <i class="icon material-icons md-local_offer"></i>
+                        <span class="text"> productOffers </span>
+                    </a>
+                </li>
+                     <li class="menu-item">
+                <a class="menu-link" href="/admin/categoryOffers"> <i class="icon material-icons md-comment"></i>
+                    <span class="text"> categoryOffers </span>
+                </a>
+            </li>
+            <li class="menu-item ">
+                {{!-- <a class="menu-link" href="/admin/brands"> <i class="icon material-icons md-stars"></i> --}}
+                    <span class="text"></span> </a>
+            </li>
+            
         </ul>
         <hr>
         <ul class="menu-aside">
-            <ul class="menu-aside">
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/productOffers"> 
-                <i class="icon material-icons md-local_offer"></i>
-                <span class="text">Product Offer</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/categoryOffers"> 
-                <i class="icon material-icons md-local_offer"></i>
-                <span class="text">Category Offer</span>
-            </a>
-        </li>
+            <li class="menu-item ">
+                <a class="menu-link" href="#"> <i class="icon material-icons md-settings"></i>
+                    <span class="text">Settings</span>
+                </a>
+            </li>
             <li class="menu-item">
                 <a class="menu-link btn btn-primary" href="/admin/logout"> <i
                         class="icon material-icons md-exit_to_app"></i>
@@ -91,12 +98,12 @@
                     <div class="row align-items-center">
                         <div class="col col-check flex-grow-0">
                             <div class="form-check ms-2">
-                                <input class="form-check-input" type="checkbox" value="">
+                                {{!-- <input class="form-check-input" type="checkbox" value=""> --}}
                             </div>
                         </div>
                         
                         <div class="col-md-2 col-6">
-                            <input type="date" value="02.05.2021" class="form-control">
+                            {{!-- <input type="date" value="02.05.2021" class="form-control"> --}}
                         </div>
                         
                     </div>

@@ -135,83 +135,83 @@
 
 
 <script>
-    
-
-    function Validation() {
-        let errors=[]
-        var username = document.getElementById('name').value;
-        var email = document.getElementById('email').value;
-        var password = document.getElementById('password').value;
-        var confirmPassword = document.getElementById('confirmPassword').value;
-        var phoneNumber = document.getElementById('phone').value;
+   function validate_email() {
+    var email = document.getElementById('email').value;
+    var emailPattern = /^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z])(?=.*\d.*\d.*\d.*\d.*\d)[A-Za-z\d._%+-]{10,}@[A-Za-z\d.-]+\.[A-Za-z]{2,}$/;
 
 
 
+    var emailerror = document.getElementById('emailError');
+    emailerror.innerHTML = ""; // Clear previous error message
 
+    if (!email.match(emailPattern)) {
+        emailerror.innerHTML ="Please enter a valid email address that contains atleast five characters and five numbers.";
+        return false; // Return false if validation fails
+    }
 
-        var usernameerror=document.getElementById('usernameError')
-        var emailerror=document.getElementById('emailError')
-        var passworderror=document.getElementById('passwordError')
-        var confirmpassworderror=document.getElementById('confirmpasswordError')
-        var phonenoerror=document.getElementById('phonenoError')
+    return true; // Return true if validation passes
+}
 
+function Validation() {
+    let errors = [];
+    var username = document.getElementById('name').value;
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password').value;
+    var confirmPassword = document.getElementById('confirmPassword').value;
+    var phoneNumber = document.getElementById('phone').value;
 
-        var userPattern = /^[a-zA-Z0-9]{3,}$/;
-        var emailPattern = /^\S+@\S+\.\S+$/;
-        var passwordPattern = /^.{8,}$/;
-        
-        var phonePattern = /^\d{10}$/;
+    // Error message elements
+    var usernameerror = document.getElementById('usernameError');
+    var emailerror = document.getElementById('emailError');
+    var passworderror = document.getElementById('passwordError');
+    var confirmpassworderror = document.getElementById('confirmpasswordError');
+    var phonenoerror = document.getElementById('phonenoError');
 
-        
+    // Regular expressions for validation
+    var userPattern = /^[a-zA-Z0-9]{5,}$/; // Username must be at least 5 characters long
+    var emailPattern = /^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z])(?=.*\d.*\d.*\d.*\d.*\d)[A-Za-z\d._%+-]{10,}@[A-Za-z\d.-]+\.[A-Za-z]{2,}$/; 
+    var passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; 
+    var phonePattern = /^(?!.*(\d)\1{9})\d{10}$/;
 
+    // Validation checks
+    if (!username.match(userPattern)) {
+        errors.push("Username must be at least 5 characters long and can contain letters and numbers only.");
+    }
 
+    if (!email.match(emailPattern)) {
+        errors.push("Please enter a valid email address that contains atleast five characters and five numbers.");
+    }
 
+    if (!password.match(passwordPattern)) {
+        errors.push("Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.");
+    }
 
+    if (confirmPassword !== password) {
+       errors.push("Confirm password must match the password.");
+    }
 
-
-
-        if (!username.match(userPattern)) {
-            errors.push("Required username")
-        }
-
-        if (!email.match(emailPattern)) {
-            errors.push("Required email")
-        }
-       
-
-        if (!password.match(passwordPattern)) {
-            errors.push("Required password")
-        }
-
-        if (confirmPassword !== password) {
-           errors.push("Required confirm password")
-        }
-
-        if (!phoneNumber.match(phonePattern)) {
-            errors.push("Required phone number")
-        }
-
-        
-    
-
+    if (!phoneNumber.match(phonePattern)) {
+        errors.push("Phone number must be exactly 10 digits and cannot be all the same digit.");
+    }
 
     // Display all error messages
-    if (errors.length > 0) {
-    usernameerror.innerHTML = errors.includes("Required username") ? "Required username" : "";
-    emailerror.innerHTML = errors.includes("Required email") ? "Required email" : "";
-    passworderror.innerHTML = errors.includes("Required password") ? "Required password" : "";
-    confirmpassworderror.innerHTML = errors.includes("Required confirm password") ? "Required confirm password" : "";
-    phonenoerror.innerHTML = errors.includes("Required phone number") ? "Required phone number" : "";
+    usernameerror.innerHTML = errors.includes("Username must be at least 5 characters long and can contain letters and numbers only.") ? "Username must be at least 5 characters long and can contain letters and numbers only." : "";
     
+    emailerror.innerHTML = errors.includes("Please enter a valid email address that contains atleast five characters and five numbers.") ? "Please enter a valid email address that contains atleast five characters and five numbers." : "";
+    
+    passworderror.innerHTML = errors.includes("Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.") ? "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character." : "";
+    
+    confirmpassworderror.innerHTML = errors.includes("Confirm password must match the password.") ? "Confirm password must match the password." : "";
+    
+    phonenoerror.innerHTML = errors.includes("Phone number must be exactly 10 digits and cannot be all the same digit.") ? "Phone number must be exactly 10 digits and cannot be all the same digit." : "";
 
+    // Prevent form submission if there are errors
+    if (errors.length > 0) {
         return false; // Prevent form submission
     }
 
     return true; // Allow form submission if no errors
-
-    }
-
-
+}
 
 
     function togglePasswordVisibility() {

@@ -22,195 +22,7 @@ let message2
 let redeemAmount
 let referalAmount
 let OwnerId
-
-// const loadHome = async (req, res) => {
-//   try {
-
-//     const loadProData = await Product.aggregate([
-//       {
-//         $match: { is_blocked: false },
-//       },
-//       {
-//         $lookup: {
-//           from: "productoffers",
-//           localField: "_id", 
-//           foreignField: "productId",
-//           as: "productOffer",
-//         },
-//       },
-//       {
-//         $unwind: {
-//           path: "$productOffer",
-//           preserveNullAndEmptyArrays: true,
-//         },
-//       },
-//       {
-//         $project: {
-//           _id: 1,
-//           name: 1,
-//           price: 1,
-//           description: 1,
-//           stock: 1,
-//           popularity: 1,
-//           imageUrl: 1,
-//           productOffer: 1,
-//           categoryOffer: 1,
-//           discountedPrice: {
-//             $cond: {
-//               if: {
-//                 $and: [
-//                   { $eq: ["$productOffer.currentStatus", true] },
-//                   { $ne: ["$productOffer.discountPrice", null] },
-//                 ],
-//               },
-//               then: "$productOffer.discountPrice",
-//               else: "$price", // No category offer check, just fall back to the regular price
-//             },
-//           },
-//           offerAvailable: {
-//             $cond: {
-//               if: {
-//                 $eq: ["$productOffer.currentStatus", true],
-//               },
-//               then: true,
-//               else: false,
-//             },
-//           },
-//         },
-//       },
-//     ]);
-    
-//     const newProduct = await Product.aggregate([
-//       {
-//         $match: { is_blocked: false },  // Filter products that are not blocked
-//       },
-//       {
-//         $lookup: {
-//           from: "productoffers",  // Reference to the 'productoffers' collection
-//           localField: "_id",  // The field in 'Product' that references 'productoffers'
-//           foreignField: "productId",  // Look for matching 'productId' in the 'productoffers' collection
-//           as: "productOffer",  // Store the result in the 'productOffer' field
-//         },
-//       },
-//       {
-//         $unwind: {
-//           path: "$productOffer",  // Unwind to flatten the 'productOffer' array into an object
-//           preserveNullAndEmptyArrays: true,  // Keep products without an offer
-//         },
-//       },
-//       {
-//         $project: {
-//           _id: 1,
-//           name: 1,
-//           price: 1,
-//           description: 1,
-//           stock: 1,
-//           popularity: 1,
-//           imageUrl: 1,
-//           category: {
-//             _id: 1,
-//             category: 1,
-//             imageUrl: 1,
-//             isListed: 1,
-//           },
-//           discountedPrice: {
-//             $cond: {
-//               if: { $eq: ["$productOffer.currentStatus", true] }, // Check if the offer is active
-//               then: "$productOffer.discountPrice",  // Apply the discount price if active
-//               else: "$price",  // Otherwise, use the original price
-//             },
-//           },
-//           offerAvailable: {
-//             $cond: {
-//               if: { $eq: ["$productOffer.currentStatus", true] },
-//               then: true,  // Offer is available
-//               else: false, // No offer
-//             },
-//           },
-//         },
-//       },
-//       {
-//         $sort: { _id: -1 },  // Sort products by latest first
-//       },
-//       {
-//         $limit: 8,  // Limit to 8 products
-//       },
-//     ]);
-    
-//     const popularbooks = await Product.aggregate([
-//       {
-//         $match: { 
-//           popularity: { $gt: 0 }, // Filter products with popularity greater than 0
-//           is_blocked: false,       // Ensure the product is not blocked
-//         },
-//       },
-//       {
-//         $lookup: {
-//           from: "productoffers",  // Reference to the 'productoffers' collection
-//           localField: "_id",  // The field in 'Product' that references 'productoffers'
-//           foreignField: "productId",  // Look for matching 'productId' in the 'productoffers' collection
-//           as: "productOffer",  // Store the result in the 'productOffer' field
-//         },
-//       },
-//       {
-//         $unwind: {
-//           path: "$productOffer",  // Unwind the 'productOffer' array into an object
-//           preserveNullAndEmptyArrays: true,  // Keep products without an offer
-//         },
-//       },
-//       {
-//         $project: {
-//           _id: 1,
-//           name: 1,
-//           price: 1,
-//           description: 1,
-//           stock: 1,
-//           popularity: 1,
-//           imageUrl: 1,
-//           category: {
-//             _id: 1,
-//             category: 1,
-//             imageUrl: 1,
-//             isListed: 1,
-//           },
-//           discountedPrice: {
-//             $cond: {
-//               if: { $eq: ["$productOffer.currentStatus", true] }, // Check if the offer is active
-//               then: "$productOffer.discountPrice",  // Apply the discount price if active
-//               else: "$price",  // Otherwise, use the original price
-//             },
-//           },
-//           offerAvailable: {
-//             $cond: {
-//               if: { $eq: ["$productOffer.currentStatus", true] },
-//               then: true,  // Offer is available
-//               else: false, // No offer
-//             },
-//           },
-//         },
-//       },
-//       {
-//         $sort: { popularity: -1 }, // Sort products by popularity (highest first)
-//       },
-//       {
-//         $limit: 8,  // Limit to 8 popular products
-//       },
-//     ]);
-    
-
-//     console.log(loadProData);
-//     console.log(newProduct)
-//     console.log(popularbooks)
-//     const userData = req.session.user;
-//     if (userData) {
-//       res.render("user/home", { userData, loadProData,newProduct,popularbooks});
-//     } else {
-//       res.render("user/home", { userData, loadProData,newProduct,popularbooks});
-//     }
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
+let otpTimestamp
 
 const loadHome = async (req, res) => {
   try {
@@ -426,8 +238,6 @@ const loadHome = async (req, res) => {
   }
 };
 
-
-
 const userLogin = (req, res) => {
 
     let regSuccessMsg = 'User registered sucessfully..!!'
@@ -462,11 +272,6 @@ const userLogin = (req, res) => {
     }
 }
 
-
-//user signup page
-
-
-
 const usersignup = (req, res) => {
     try {
       res.render('user/signup')
@@ -476,7 +281,7 @@ const usersignup = (req, res) => {
 }
 
 //user signup
-//changes
+//workingfinely
 // const doSignup = async (req, res) => {
 
 //     try {
@@ -486,17 +291,10 @@ const usersignup = (req, res) => {
 
 
 //         const userExist = await User.findOne({ email: userEmail })
-
-//         if(userExist){
-//             return res.render("user/signup",{message:"user with this email already exists"})
-//         }
-
 //         if (!userExist) {
 //             otp = await userHelper.verifyEmail(userEmail)
-//             //changes 1
-//             req.session.userData=userEmail
-//             //changes end
-//             res.render('user/submitOtp')
+//             res.redirect('/referals')
+//             //res.render('user/submitOtp')
 //         }
 //         else {
 //             message2 = true
@@ -510,35 +308,29 @@ const usersignup = (req, res) => {
 //     }
 // }
 
-//user signup
+//referal code
 
 const doSignup = async (req, res) => {
+  try {
+      hashedPassword = await userHelper.hashPassword(req.body.password);
+      userEmail = req.body.email;
+      userRegData = req.body;
 
-    try {
-        hashedPassword = await userHelper.hashPassword(req.body.password)
-        userEmail = req.body.email
-        userRegData = req.body
-
-
-        const userExist = await User.findOne({ email: userEmail })
-        if (!userExist) {
-            otp = await userHelper.verifyEmail(userEmail)
-            res.redirect('/referals')
-            //res.render('user/submitOtp')
-        }
-        else {
-            message2 = true
-
-            res.render('user/login', { message2 })
-
-        }
-
-    } catch (error) {
-        console.log(error);
-    }
+      const userExist = await User.findOne({ email: userEmail });
+      if (!userExist) {
+          // Pass req to verifyEmail to access session
+          const { otp } = await userHelper.verifyEmail(userEmail, req);
+          res.redirect('/referals'); // Redirect to referral page after sending OTP
+      } else {
+          message2 = true;
+          res.render('user/login', { message2 }); // Render login page if user already exists
+      }
+  } catch (error) {
+      console.log(error);
+  }
 }
 
-//referal code
+
 const loadReferalPage=async(req,res)=>{
   try{
     res.render('user/referals')
@@ -582,163 +374,161 @@ const getOtp = (req, res) => {
     }
 }
 
+//To resend otp
 
-
-//Submit otp and save user
-
-// const submitOtp = async (req, res) => {
-//     try {
-//         userOtp = req.body.otp;
-
-
-//         if (userOtp == otp) {
-//             const user = new User({
-//                 name: userRegData.name,
-//                 email: userRegData.email,
-//                 mobile: userRegData.phone,
-//                 password: hashedPassword,
-//                 isVerified: true,
-//                 isBlocked: false,
-//             });
-
-//             await user.save();
-
-//             const userWalletData=await User.findOne({email:userRegData.email})
-
-//             // const walletData={
-//             //   userId:new mongoose.Types.ObjectId(userWalletData._id),
-//             //   wallet:0,
-//             //   history:[]
-//             // }
-
-//             if(redeemAmount){
-//               walletData.wallet=redeemAmount
-//               walletData.history.push({
+// const submitOtp=async(req,res)=>{
+//   try{
+//     userOtp=req.body.otp
+//     const currentTime=Date.now()
+//     //below 60000 milliseconds is 60seconds
+//     if(userOtp === otp && (currentTime-otpTimestamp <= 60000)){
+//       const user=new User({
+//         name:userRegData.name,
+//         email:userRegData.email,
+//         mobile:userRegData.phone,
+//         password:hashedPassword,
+//         isVerified:true,
+//         isBlocked:false,
+//       })
+//       await user.save()
+//       if(redeemAmount){
+//         await User.updateOne(
+//           {_id:user._id},
+//           {
+//             $inc:{wallet:redeemAmount},
+//             $push:{
+//               history:{
 //                 amount:redeemAmount,
 //                 status:'Referred',
 //                 date:Date.now()
-//               })
-
-//               await User.updateOne(
-//                 {userId:OwnerId},
-//                 {
-//                   $inc:{wallet:referalAmount},
-//                   $push:{
-//                     history:{
-//                       amount:referalAmount,
-//                       status:"referred",
-//                       date:Date.now()
-//                     }
-//                   }
-//                 }
-//               )
-//               .then(data=>console.log("codeonwer Wallet=>",data))
+//               }
 //             }
+//           }
+//         )
+//       }
+//       const generateReferalCode=uuidv4()
+//       const referalCollection=new Referral({
+//         userId:user._id,
+//         referralCode:generateReferalCode
+//       })
+//       await referalCollection.save()
 
-//             const wallet=new Wallet(walletData)
-//             await user.save()
-
-//             const generateReferalCode=uuidv4()
-
-//             const referalCollection=new Referral({
-//               userId:new mongoose.Types.ObjectId(userWalletData._id),
-//               referralCode:generateReferalCode
-//             })
-
-//             await referalCollection.save()
-
-//             req.session.regSuccessMsg = true;
-
-//             // Send JSON response with success message
-//             res.json({ success: true, redirectUrl: '/login' });
-//         } else {
-//             otpError = 'incorrect otp';
-
-//             // Send JSON response with error message
-//             res.json({ error: otpError });
-//         }
-//     } catch (error) {
-//         console.log(error);
-
-//         // Send JSON response with error message
-//         res.json({ error: 'An error occurred while submitting the OTP.' });
+//       if(referalAmount && OwnerId){
+//         await User.updateOne(
+//           {_id:OwnerId},
+//           {
+//             $inc:{wallet:referalAmount},
+//             $push:{
+//               history:{
+//                 amount:referalAmount,
+//                 status:"Referred",
+//                 date:Date.now()
+//               }
+//             }
+//           }
+//         )
+//       }
+//       req.session.regSuccessMsg=true
+//       res.json({success:true,redirectUrl:'/login'})
+//     }else{
+//       let otpError;
+//             if (currentTime - otpTimestamp > 60000) { 
+//                 otpError = "OTP has expired. Please request a new one."; // Expired message
+//             } else {
+//                 otpError = "Incorrect OTP"; // Incorrect message
+//             }
+//             res.json({ error: otpError }); // Respond with error message
 //     }
-// };
+//   }catch(error){
+//     console.log(error)
+//   }
+// }
 
+const submitOtp = async (req, res) => {
+  try {
+      const userOtp = req.body.otp; // Get the OTP from request body
+      const currentTime = Date.now(); // Get current time
 
-const submitOtp=async(req,res)=>{
-  try{
-    userOtp=req.body.otp
-    if(userOtp === otp){
-      const user=new User({
-        name:userRegData.name,
-        email:userRegData.email,
-        mobile:userRegData.phone,
-        password:hashedPassword,
-        isVerified:true,
-        isBlocked:false,
-      })
-      await user.save()
-      if(redeemAmount){
-        await User.updateOne(
-          {_id:user._id},
-          {
-            $inc:{wallet:redeemAmount},
-            $push:{
-              history:{
-                amount:redeemAmount,
-                status:'Referred',
-                date:Date.now()
-              }
-            }
+      // Retrieve stored OTP from session
+      const storedOtp = req.session.otp;
+      const storedOtpTimestamp = req.session.otpTimestamp;
+
+      // Check if the submitted OTP is valid and within 60 seconds
+      if (userOtp === storedOtp && (currentTime - storedOtpTimestamp <= 60000)) { // 60000 ms = 60 seconds
+          const user = new User({
+              name: userRegData.name,
+              email: userRegData.email,
+              mobile: userRegData.phone,
+              password: hashedPassword,
+              isVerified: true,
+              isBlocked: false,
+          });
+          await user.save();
+
+          if(redeemAmount){
+                    await User.updateOne(
+                      {_id:user._id},
+                      {
+                        $inc:{wallet:redeemAmount},
+                        $push:{
+                          history:{
+                            amount:redeemAmount,
+                            status:'Referred',
+                            date:Date.now()
+                          }
+                        }
+                      }
+                    )
+                  }
+                  const generateReferalCode=uuidv4()
+                  const referalCollection=new Referral({
+                    userId:user._id,
+                    referralCode:generateReferalCode
+                  })
+                  await referalCollection.save()
+            
+                  if(referalAmount && OwnerId){
+                    await User.updateOne(
+                      {_id:OwnerId},
+                      {
+                        $inc:{wallet:referalAmount},
+                        $push:{
+                          history:{
+                            amount:referalAmount,
+                            status:"Referred",
+                            date:Date.now()
+                          }
+                        }
+                      }
+                    )
+                  }
+          req.session.regSuccessMsg = true; // Set success message in session
+          res.json({ success: true, redirectUrl: '/login' }); // Respond with success
+      } else {
+          let otpError;
+          if (currentTime - storedOtpTimestamp > 60000) { 
+              otpError = "OTP has expired. Please request a new one."; // Expired message
+          } else {
+              otpError = "Incorrect OTP"; // Incorrect message
           }
-        )
+          res.json({ error: otpError }); // Respond with error message
       }
-      const generateReferalCode=uuidv4()
-      const referalCollection=new Referral({
-        userId:user._id,
-        referralCode:generateReferalCode
-      })
-      await referalCollection.save()
-
-      if(referalAmount && OwnerId){
-        await User.updateOne(
-          {_id:OwnerId},
-          {
-            $inc:{wallet:referalAmount},
-            $push:{
-              history:{
-                amount:referalAmount,
-                status:"Referred",
-                date:Date.now()
-              }
-            }
-          }
-        )
-      }
-      req.session.regSuccessMsg=true
-      res.json({success:true,redirectUrl:'/login'})
-    }else{
-      otpError="IncorrectOtp"
-      res.json({error:otpError})
-    }
-  }catch(error){
-    console.log(error)
+  } catch (error) {
+      console.log(error);
+      res.json({ error: 'An error occurred while submitting the OTP.' }); // Handle errors
   }
 }
 
-
-
-//To resend otp
-
 const resendOtp = async (req, res) => {
-    try {
-        res.redirect('/get_otp')
-        otp = await userHelper.verifyEmail(userEmail)
-    } catch (error) {
-        console.log(error);
-    }
+  try {
+      // Ensure you pass req to verifyEmail to access session
+      otp = await userHelper.verifyEmail(userEmail, req); // Pass req here
+      res.redirect('/get_otp'); // Redirect to get a new OTP page
+  } catch (error) {
+      console.log(error);
+  }
 }
+
 
 const googleCallback = async (req, res) => {
     try {

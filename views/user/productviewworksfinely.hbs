@@ -63,7 +63,7 @@
                                     </div>
                                     <div class="detail-extralink">
                                         <div class="bt-1 border-color-1 mt-30 mb-30"></div>
-                                        {{!-- <div class="product-extra-link2">
+                                        <div class="product-extra-link2">
                                             {{#if outOfStock}}
                                             <span id="outofstock">
                                                 <button id="outofstock-btn" class="btn btn-md" style="background-color: #dc3545;">Out of stock</button>
@@ -76,36 +76,6 @@
                                             {{else}}
                                             <span id="addcart">
                                                 <button id="addcart-btn" data-product-id="{{proData._id}}" class="button button-add-to-cart">Add to cart</button>
-                                            </span>
-                                            {{/if}}
-                                            {{/if}}
-                                        </div> --}}
-                                        <div class="product-extra-link2">
-
-                                            {{#if outOfStock}}
-                                            <span id="outofstock">
-                                                <button id="outofstock-btn" class="btn btn-md "
-                                                    style="background-color: #dc3545;">Out of stock</button>
-                                            </span>
-                                            {{else}}
-                                            {{#if productExistInCart}}
-                                            <span id="gocart">
-                                                <button id="addcart-btn" onclick="window.location.href='/cart'"
-                                                    class="btn btn-md">Go to Cart</button>
-                                            </span>
-                                            {{else}}
-                                            <span id="addcart">
-                                                <button id="addcart-btn" data-product-id="{{proData._id}}"
-                                                    class="button button-add-to-cart">Add to Cart</button>
-                                            </span>
-                                            {{/if}}
-                                            {{#if productExistInWishlist}}
-                                            <span id="gotowishlist">
-                                                <button id="addwishlist-btn" onclick="window.location.href='/wishlist'" class="button button-add-to-wishlist">Go to Wishlist</button>
-                                            </span>
-                                            {{else}}
-                                            <span id="wishlist">
-                                                <button id="addwishlist-btn" data-product-id="{{proData._id}}" class="button button-add-to-wishlist">Add to Wishlist</button>
                                             </span>
                                             {{/if}}
                                             {{/if}}
@@ -227,66 +197,4 @@
             });
         });
     });
-
-    $(document).ready(function () {
-    const userId = "";  // Ensure this is assigned correctly
-    
-    // Check if the product is already in the wishlist on page load
-    if ({{productExistInWishlist}}) {
-        $('#wishlist').html('<button id="wishlist-btn" onclick="window.location.href=\'/wishlist\'" class="button button-add-to-wishlist">Go to Wishlist</button>');
-    }
-
-    $('#addwishlist-btn').on('click', function (event) {
-        event.preventDefault();
-        
-        const prodId = $(this).data('product-id'); // Get product ID from data attribute
-
-        $.ajax({
-            type: 'POST',
-            url: '/addtowishlist',
-            contentType: 'application/json',
-            data: JSON.stringify({ id: prodId, userId: userId }),
-            success: function (productData) {
-                if (productData.success) {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: 'Product Successfully added to Wishlist!!!',
-                        icon: 'success',
-                        confirmButtonText: 'Cool'
-                    });
-
-                    // Update the button to show "Go to Wishlist"
-                    $('#wishlist').html('<button id="wishlist-btn" onclick="window.location.href=\'/wishlist\'" class="button button-add-to-wishlist">Go to Wishlist</button>');
-                } else {
-                    if (productData.message) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops',
-                            text: productData.message,
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: 'Login Required',
-                            showCancelButton: true,
-                            confirmButtonText: 'Login',
-                            confirmButtonColor: "#088178",
-                            cancelButtonColor: "#d33",
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = '/login';
-                            }
-                        });
-                    }
-                }
-            },
-            error: function (error) {
-                console.log('Error adding to wishlist', error);
-            }
-        });
-    });
-});
-
-
 </script>

@@ -238,10 +238,57 @@ const showWishlistPage = async (req, res) => {
     }
 };
 
+// const addToWishList = async (req, res) => {
+//     try {
+//         let { id } = req.body;
+//         const userId = req.session.user._id;  // Make sure you're using the correct user ID from the session
+
+//         // Find the product by ID
+//         let productData = await Product.findById(id).lean();
+//         if (!productData) {
+//             return res.status(404).json({ success: false, message: 'Product not found' });
+//         }
+
+//         // Fetch any active offers for the product
+//         let productOffer = await ProductOffer.findOne({ productId: productData._id, currentStatus: true }).lean();
+
+//         // If the product has an active offer, use the offer price, else use the regular price
+//         const productPrice = productOffer ? productOffer.discountPrice : productData.price;
+
+//         // Check if the product is already in the user's wishlist
+//         let wishlist = await Wishlist.findOne({ user: userId });
+//         if (wishlist && wishlist.productId.includes(productData._id)) {
+//             // Product already exists in the wishlist
+//             return res.json({ success: false, message: 'Product already exists in your wishlist' });
+//         }
+
+//         // If the product is not in the wishlist, add it
+//         let wishlistData = await Wishlist.updateOne(
+//             { user: userId },
+//             {
+//                 $addToSet: { productId: productData._id }
+//             },
+//             {
+//                 upsert: true,  // If no wishlist exists, create a new one
+//                 new: true
+//             }
+//         );
+
+//         if (wishlistData.modifiedCount > 0 || wishlistData.upsertedCount > 0) {
+//             return res.json({ success: true });
+//         } else {
+//             return res.json({ success: false });
+//         }
+//     } catch (error) {
+//         console.log(error.message);
+//         res.status(500).send("Internal Server Error");
+//     }
+// };
+
 const addToWishList = async (req, res) => {
     try {
         let { id } = req.body;
-        const userId = req.session.user._id;  // Make sure you're using the correct user ID from the session
+        const userId = req.session.user._id;  // Ensure you're using the correct user ID from the session
 
         // Find the product by ID
         let productData = await Product.findById(id).lean();
@@ -257,8 +304,9 @@ const addToWishList = async (req, res) => {
 
         // Check if the product is already in the user's wishlist
         let wishlist = await Wishlist.findOne({ user: userId });
+
+        // If the product is already in the wishlist
         if (wishlist && wishlist.productId.includes(productData._id)) {
-            // Product already exists in the wishlist
             return res.json({ success: false, message: 'Product already exists in your wishlist' });
         }
 
@@ -266,7 +314,7 @@ const addToWishList = async (req, res) => {
         let wishlistData = await Wishlist.updateOne(
             { user: userId },
             {
-                $addToSet: { productId: productData._id }
+                $addToSet: { productId: productData._id }  // Ensures product is only added once
             },
             {
                 upsert: true,  // If no wishlist exists, create a new one
@@ -274,10 +322,20 @@ const addToWishList = async (req, res) => {
             }
         );
 
+        // Check if the update was successful
         if (wishlistData.modifiedCount > 0 || wishlistData.upsertedCount > 0) {
-            return res.json({ success: true });
+            return res.json({
+                success: true,
+                message: 'Product successfully added to wishlist',
+                product: {
+                    id: productData._id,
+                    name: productData.name,
+                    price: productPrice, // Pass the correct price (offer or regular)
+                    image: productData.image // Pass other relevant details if necessary
+                }
+            });
         } else {
-            return res.json({ success: false });
+            return res.json({ success: false, message: 'Failed to add product to wishlist' });
         }
     } catch (error) {
         console.log(error.message);

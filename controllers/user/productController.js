@@ -3,7 +3,8 @@ const Product=require('../../models/productModel')
 const User=require('../../models/userModel')
 const Cart=require('../../models/cartModel')
 const mongoose=require("mongoose")
-
+const Wishlist=require("../../models/wishlistModel")
+const ObjectId=mongoose.Types.ObjectId
 
 const getProduct = async (req, res) => {
   let userData = false;
@@ -390,6 +391,83 @@ const searchSortFilter = async (req, res) => {
   };
   
 
+// const productView = async (req, res) => {
+//   try {
+//     const userData = req.session.user; // Get the logged-in user data from session
+//     const proId = req.query.id; // Product ID from the query
+//     console.log("Product ID: ", proId);
+
+//     // Fetch product data along with the offer from productoffers collection using aggregation
+//     const products = await Product.aggregate([
+//       { $match: { _id: new mongoose.Types.ObjectId(proId) } }, // Match product by productID
+//       {
+//         $lookup: {
+//           from: "productoffers", // Lookup from the productoffers collection
+//           localField: "_id", // The field from Product that we are matching (product ID)
+//           foreignField: "productId", // The field in productoffers that refers to Product's ID
+//           as: "productOffer", // The name of the field where the offer data will be stored
+//         },
+//       },
+//       {
+//         $unwind: {
+//           path: "$productOffer",  // Unwind the array so that we can access individual offer data
+//           preserveNullAndEmptyArrays: true, // If no offer exists, it will be null
+//         },
+//       },
+//     ]);
+
+//     const proData = products[0]; // Assuming the aggregation returns an array, we take the first element
+//     console.log(proData);
+
+//     // If product is not found or is blocked, return a 404 error
+//     if (!proData || proData.is_blocked) {
+//       return res.status(404).json({ message: 'Product not found' });
+//     }
+
+//     // Check if the product is out of stock
+//     const outOfStock = proData.stock === 0;
+
+//     // Fetch related products based on category, excluding the current product
+//     const relatedProducts = await Product.find({
+//       category: proData.category,
+//       _id: { $ne: proId },
+//       is_blocked: false,
+//     }).limit(4).lean();
+
+//     // Increment product popularity (to track how often it's viewed)
+//     await Product.updateOne(
+//       { _id: proId },
+//       { $inc: { popularity: 1 } }
+//     );
+
+//     // Check if the product exists in the user's cart (if the user is logged in)
+//     let productExistInCart = false;
+//     if (userData) {
+//       const ProductExist = await Cart.find({
+//         userId: userData._id,
+//         product_Id: proId,
+//       });
+
+//       if (ProductExist.length > 0) {
+//         productExistInCart = true;
+//       }
+//     }
+
+//     // Render the product details page with all the necessary data, including productOffer
+//     res.render("user/productview", {
+//       proData,               // Pass product data
+//       productOffer: proData.productOffer, // Pass product offer data
+//       outOfStock,            // Pass outOfStock status
+//       productExistInCart,    // Pass cart status
+//       userData,              // Pass user data (if logged in)
+//       relatedProducts,       // Pass related products
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ message: 'An error occurred while loading the product view' });
+//   }
+// };
+
 const productView = async (req, res) => {
   try {
     const userData = req.session.user; // Get the logged-in user data from session
@@ -439,33 +517,51 @@ const productView = async (req, res) => {
       { $inc: { popularity: 1 } }
     );
 
-    // Check if the product exists in the user's cart (if the user is logged in)
+    // Initialize flags for cart and wishlist status
+    let productExistInWishlist = false;
     let productExistInCart = false;
+
     if (userData) {
-      const ProductExist = await Cart.find({
+      // Check if product exists in user's cart
+      const cartProductExist = await Cart.find({
+        userId: userData._id,
+        product_Id: proId,
+      });
+      console.log("cartProductExist",cartProductExist)
+      if (cartProductExist.length > 0) {
+        productExistInCart = true;
+      }
+      console.log("productExistInCart",productExistInCart)
+      // Check if product exists in user's wishlist
+      const wishlistProductExist = await Wishlist.find({
         userId: userData._id,
         product_Id: proId,
       });
 
-      if (ProductExist.length > 0) {
-        productExistInCart = true;
+      console.log("Wishlist products:", wishlistProductExist);
+      
+      if (wishlistProductExist.length > 0) {
+        productExistInWishlist = true;
       }
     }
+    console.log("wishlist product exist or not",productExistInWishlist)
 
-    // Render the product details page with all the necessary data, including productOffer
+    // Render the product details page with all necessary data
     res.render("user/productview", {
       proData,               // Pass product data
       productOffer: proData.productOffer, // Pass product offer data
       outOfStock,            // Pass outOfStock status
       productExistInCart,    // Pass cart status
+      productExistInWishlist, // Pass wishlist status
       userData,              // Pass user data (if logged in)
       relatedProducts,       // Pass related products
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);  // Use console.error for better error logging
     res.status(500).json({ message: 'An error occurred while loading the product view' });
   }
 };
+
 
 
 module.exports={

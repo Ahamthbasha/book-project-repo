@@ -153,139 +153,150 @@
                 <!--End nav-tabs-->
                 <div class="tab-content wow fadeIn animated" id="myTabContent">
                     <div class="tab-pane fade show active" id="tab-one" role="tabpanel" aria-labelledby="tab-one">
-                        <div class="row product-grid-4">
+                        {{!-- loadProData --}}
+                    <div class="row product-grid-4">
+  {{#each loadProData}}
+    <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+      <div class="product-cart-wrap mb-30">
+        <div class="product-img-action-wrap">
+          <div class="product-img product-img-zoom">
+            <a href="/productview?id={{this._id}}">
+              <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="">
+              <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="">
+            </a>
+          </div>
+          
+          <div class="product-badges product-badges-position product-badges-mrg">
+            <span class="hot">Hot</span>
+          </div>
+        </div>
+        
+        <div class="product-content-wrap">
+          <div class="product-category">
+            <a>{{this.category.category}}</a>
+          </div>
+          <h2><a href="/productDetails/{{this._id}}">{{name}}</a></h2>
+          <div class="rating-result" title="90%">
+            {{#if this.offerAvailable}}  <!-- Only show the offer percentage if the offer exists -->
+              <span>{{this.offerPercentage}}% Off</span>
+            {{/if}}
+          </div>
+          <div class="product-price">
+            <span>₹{{this.discountedPrice}}</span>
+            {{#if this.offerAvailable}}  <!-- Only show the old price and offer status if the offer exists -->
+              <span class="old-price">₹{{this.price}}</span>
+              <span class="offer-status">Offer Available</span>
+            {{/if}}
+          </div>
+          <div class="product-action-1 show">
+          </div>
+        </div>
+      </div>
+    </div>
+  {{/each}}
+</div>
+    
 
-                            {{#each loadProData}}
-                            <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-                                <div class="product-cart-wrap mb-30">
-                                    <div class="product-img-action-wrap">
-                                        <div class="product-img product-img-zoom">
-                                            <a href="/productview?id={{this._id}}">
-                                                <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="">
-                                                <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="">
-                                            </a>
-                                        </div>
-                                        
-                                        <div class="product-badges product-badges-position product-badges-mrg">
-                                            <span class="hot">Hot</span>
-                                        </div>
-                                    </div>
-                                    <div class="product-content-wrap">
-                                        <div class="product-category">
-                                            <a >{{this.category.category}}</a>
-                                        </div>
-                                        <h2><a href="/productDetails/{{this._id}}">{{name}}</a></h2>
-                                        <div class="rating-result" title="90%">
-                                            <span>
-                                                <span>90%</span>
-                                            </span>
-                                        </div>
-                                        <div class="product-price">
-                                            <span>₹{{this.discountedPrice}}</span>
-                                            {{#if this.offerAvailable}}
-                                            <span class="old-price">₹{{this.price}}</span>
-                                            <span class="offer-status">Offer Available</span>
-                                            {{/if}}
-                                        </div>
-                                        <div class="product-action-1 show">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {{/each}}
-                        </div>
                         
                         <!--End product-grid-4-->
                     </div>
                     <!--En tab one (Featured)-->
                     
                     <div class="tab-pane fade" id="tab-two" role="tabpanel" aria-labelledby="tab-two">
-    <div class="row product-grid-4">
-        {{#each popularbooks}}
-        <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-            <div class="product-cart-wrap mb-30">
-                <div class="product-img-action-wrap">
-                    <div class="product-img product-img-zoom">
-                        <a href="/productview?id={{this._id}}">
-                            <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="">
-                            <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="">
-                        </a>
-                    </div>
-                    <div class="product-badges product-badges-position product-badges-mrg">
-                        <span class="hot">Hot</span>
-                    </div>
-                </div>
-                <div class="product-content-wrap">
-                    <div class="product-category">
-                        <a>{{this.category.category}}</a>
-                    </div>
-                    <h2><a href="/productDetails/{{this._id}}">{{this.name}}</a></h2>
-                    <div class="rating-result" title="90%">
-                        <span>
-                            <span>90%</span>
-                        </span>
-                    </div>
-                    <div class="product-price">
-                        <span>₹{{this.discountedPrice}}</span>
-                        {{#if this.offerAvailable}}
-                        <span class="old-price">₹{{this.price}}</span>
-                        <span class="offer-status">Offer Available</span>
-                        {{/if}}
-                    </div>
-                    <div class="product-action-1 show"></div>
-                </div>
-            </div>
+                        {{!-- popularbooks --}}
+                   <div class="row product-grid-4">
+  {{#each popularbooks}}
+    <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+      <div class="product-cart-wrap mb-30">
+        <div class="product-img-action-wrap">
+          <div class="product-img product-img-zoom">
+            <a href="/productview?id={{this._id}}">
+              <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="">
+              <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="">
+            </a>
+          </div>
+          
+          <div class="product-badges product-badges-position product-badges-mrg">
+            <span class="hot">Hot</span>
+          </div>
         </div>
-        {{/each}}
+        
+        <div class="product-content-wrap">
+          <div class="product-category">
+            <a>{{this.category.category}}</a>
+          </div>
+          <h2><a href="/productDetails/{{this._id}}">{{name}}</a></h2>
+          <div class="rating-result">
+            <span>
+              {{#if this.offerAvailable}}  <!-- Only show the offer percentage if the offer is available -->
+                <span>{{this.offerPercentage}}% Off</span>
+              {{/if}}  <!-- No 'else' block needed, 'No Offer' is omitted entirely -->
+            </span>
+          </div>
+          <div class="product-price">
+            <span>₹{{this.discountedPrice}}</span>
+            {{#if this.offerAvailable}}  <!-- Only show the old price and offer status if the offer is available -->
+              <span class="old-price">₹{{this.price}}</span>
+              <span class="offer-status">Offer Available</span>
+            {{/if}}
+          </div>
+          <div class="product-action-1 show">
+          </div>
+        </div>
+      </div>
     </div>
+  {{/each}}
+</div>
 </div>
 
                     <!--En tab two (Popular)-->
                     <div class="tab-pane fade" id="tab-three" role="tabpanel" aria-labelledby="tab-three">
+                        {{!-- new product --}}
                         <div class="row product-grid-4">
-                            {{#each newProduct}}
-                            <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-                                <div class="product-cart-wrap mb-30">
-                                    <div class="product-img-action-wrap">
-                                        <div class="product-img product-img-zoom">
-                                            <a href="/productview?id={{this._id}}">
-                                                <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="">
-                                                <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="">
-                                            </a>
-                                        </div>
-                                        
-                                        <div class="product-badges product-badges-position product-badges-mrg">
-                                            <span class="hot">Hot</span>
-                                        </div>
-                                    </div>
-                                    <div class="product-content-wrap">
-                                        <div class="product-category">
-                                            <a href="shop-grid-right.html">{{this.category.category}}</a>
-                                        </div>
-                                        <h2><a href="/productDetails/{{this._id}}">{{name}}</a></h2>
-                                        <div class="rating-result" title="90%">
-                                            <span>
-                                                <span>90%</span>
-                                            </span>
-                                        </div>
-                                        {{!-- <div class="product-price">
-                                            <span>₹{{price}}</span>
-                                            <span class="old-price">₹{{price}}</span>
-                                        </div> --}}
-                                        <div class="product-price">
-                                            <span>₹{{this.discountedPrice}}</span>
-                                            {{#if this.offerAvailable}}
-                                            <span class="old-price">₹{{this.price}}</span>
-                                            <span class="offer-status">Offer Available</span>
-                                            {{/if}}
-                                        </div>
-                                        <div class="product-action-1 show">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {{/each}}
-                        </div>
+  {{#each newProduct}}
+    <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+      <div class="product-cart-wrap mb-30">
+        <div class="product-img-action-wrap">
+          <div class="product-img product-img-zoom">
+            <a href="/productview?id={{this._id}}">
+              <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="">
+              <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="">
+            </a>
+          </div>
+          
+          <div class="product-badges product-badges-position product-badges-mrg">
+            <span class="hot">Hot</span>
+          </div>
+        </div>
+        
+        <div class="product-content-wrap">
+          <div class="product-category">
+            <a>{{this.category.category}}</a>
+          </div>
+          <h2><a href="/productDetails/{{this._id}}">{{name}}</a></h2>
+          <div class="rating-result">
+            <span>
+              {{#if this.offerAvailable}}  <!-- Only show the offer percentage if the offer is available -->
+                <span>{{this.offerPercentage}}% Off</span>
+              {{/if}}  <!-- No 'else' block needed, 'No Offer' is omitted entirely -->
+            </span>
+          </div>
+          <div class="product-price">
+            <span>₹{{this.discountedPrice}}</span>
+            {{#if this.offerAvailable}}  <!-- Only show the old price and offer status if the offer is available -->
+              <span class="old-price">₹{{this.price}}</span>
+              <span class="offer-status">Offer Available</span>
+            {{/if}}
+          </div>
+          <div class="product-action-1 show">
+          </div>
+        </div>
+      </div>
+    </div>
+  {{/each}}
+</div>
+
+
                         <!--End product-grid-4-->
                     </div>
                     <!--En tab three (New added)-->

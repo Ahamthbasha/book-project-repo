@@ -16,119 +16,119 @@ let totalSales=0
 let categories=[]
 let revenues=[]
 
-const loadDashboard=async(req,res)=>{
-    try{
-        const categoryCount=await Category.countDocuments()
-        const categoryRevenue=await Order.aggregate([
-            {$unwind:"$product"},
-            {
-                $lookup:{
-                    from:"products",
-                    localField:"product._id",
-                    foreignField:"_id",
-                    as:"productDetails"
-                }
-            },
-            {$unwind:"$productDetails"},
-            {
-                $group:{
-                    _id:"productDetails.category",
-                    totalRevenue:{$sum:{$multiply:["$product.quantity","$productDetails.price"]}}
-                }
-            },
-            {
-                $lookup:{
-                    from:"categories",
-                    localField:"_id",
-                    foreignField:"_id",
-                    as:"categoryDetails"
-                }
-            },
-            {$unwind:"$categoryDetails"},
-            {
-                $project:{
-                    _id:0,
-                    category:"$categoryDetails.category",
-                    totalRevenue:1
-                }
-            },
-            {$sort:{totalRevenue:-1}}
-        ])
+// const loadDashboard=async(req,res)=>{
+//     try{
+//         const categoryCount=await Category.countDocuments()
+//         const categoryRevenue=await Order.aggregate([
+//             {$unwind:"$product"},
+//             {
+//                 $lookup:{
+//                     from:"products",
+//                     localField:"product._id",
+//                     foreignField:"_id",
+//                     as:"productDetails"
+//                 }
+//             },
+//             {$unwind:"$productDetails"},
+//             {
+//                 $group:{
+//                     _id:"productDetails.category",
+//                     totalRevenue:{$sum:{$multiply:["$product.quantity","$productDetails.price"]}}
+//                 }
+//             },
+//             {
+//                 $lookup:{
+//                     from:"categories",
+//                     localField:"_id",
+//                     foreignField:"_id",
+//                     as:"categoryDetails"
+//                 }
+//             },
+//             {$unwind:"$categoryDetails"},
+//             {
+//                 $project:{
+//                     _id:0,
+//                     category:"$categoryDetails.category",
+//                     totalRevenue:1
+//                 }
+//             },
+//             {$sort:{totalRevenue:-1}}
+//         ])
 
-        categories=categoryRevenue.map(item=>item.category)
-        revenues=categoryRevenue.map(item=>item.totalRevenue)
+//         categories=categoryRevenue.map(item=>item.category)
+//         revenues=categoryRevenue.map(item=>item.totalRevenue)
 
-        console.log(categories)
-        console.log("////////////////",categoryRevenue)
+//         console.log(categories)
+//         console.log("////////////////",categoryRevenue)
 
-        const sales=await Sale.find({}).lean()
+//         const sales=await Sale.find({}).lean()
 
-        const salesByMonth={}
+//         const salesByMonth={}
 
-        sales.forEach((sale)=>{
-            const monthYear=moment(sale.date).format('MMMM YYYY')
-            if(!salesByMonth[monthYear]){
-                salesByMonth[monthYear]={
-                    totalOrders:0,
-                    totalRevenue:0
-                }
-            }
-            salesByMonth[monthYear].totalOrders +=1
-            salesByMonth[monthYear].totalRevenue+=sale.total
-        })
+//         sales.forEach((sale)=>{
+//             const monthYear=moment(sale.date).format('MMMM YYYY')
+//             if(!salesByMonth[monthYear]){
+//                 salesByMonth[monthYear]={
+//                     totalOrders:0,
+//                     totalRevenue:0
+//                 }
+//             }
+//             salesByMonth[monthYear].totalOrders +=1
+//             salesByMonth[monthYear].totalRevenue+=sale.total
+//         })
 
-        const chartData=[]
+//         const chartData=[]
 
-        Object.keys(salesByMonth).forEach((monthYear)=>{
-            const {totalOrders,totalRevenue}=salesByMonth[monthYear]
-            chartData.push({
-                month:monthYear.split(' ')[0],
-                totalOrders:totalOrders || 0,
-                totalRevenue:totalRevenue||0
-            })
-        })
-        console.log(chartData)
+//         Object.keys(salesByMonth).forEach((monthYear)=>{
+//             const {totalOrders,totalRevenue}=salesByMonth[monthYear]
+//             chartData.push({
+//                 month:monthYear.split(' ')[0],
+//                 totalOrders:totalOrders || 0,
+//                 totalRevenue:totalRevenue||0
+//             })
+//         })
+//         console.log(chartData)
 
-        months=[]
-        odersByMonth=[]
-        revnueByMonth=[]
-        totalRevnue=0
-        totalSales=0
+//         months=[]
+//         odersByMonth=[]
+//         revnueByMonth=[]
+//         totalRevnue=0
+//         totalSales=0
 
-        chartData.forEach((data)=>{
-            months.push(data.month)
-            odersByMonth.push(data.totalOrders)
-            revnueByMonth.push(data.totalRevenue)
-            totalRevnue+=Number(data.totalRevenue)
-            totalSales+=Number(data.totalOrders)
-        })
+//         chartData.forEach((data)=>{
+//             months.push(data.month)
+//             odersByMonth.push(data.totalOrders)
+//             revnueByMonth.push(data.totalRevenue)
+//             totalRevnue+=Number(data.totalRevenue)
+//             totalSales+=Number(data.totalOrders)
+//         })
 
-        const thisMonthOrder=odersByMonth.length > 0? odersByMonth[odersByMonth.length - 1]:0
-        const thisMonthSales=revnueByMonth.length > 0?revnueByMonth[revnueByMonth.length -1]:0
+//         const thisMonthOrder=odersByMonth.length > 0? odersByMonth[odersByMonth.length - 1]:0
+//         const thisMonthSales=revnueByMonth.length > 0?revnueByMonth[revnueByMonth.length -1]:0
 
-        let bestSellings=await Product.find().sort({bestSelling:-1}).limit(5).lean()
-        let popuarProducts=await Product.find().sort({popularity:-1}).limit(5).lean()
-        let bestSellingCategory=await Category.find().sort({bestSelling:-1}).limit(5).lean()
+//         let bestSellings=await Product.find().sort({bestSelling:-1}).limit(5).lean()
+//         let popuarProducts=await Product.find().sort({popularity:-1}).limit(5).lean()
+//         let bestSellingCategory=await Category.find().sort({bestSelling:-1}).limit(5).lean()
 
-        res.render("admin/home",{
-            categoryCount,
-            revnueByMonth,
-            bestSellingCategory,
-            bestSellings,
-            popuarProducts,
-            months,
-            odersByMonth,
-            totalRevnue,
-            categoryRevenue,
-            totalSales,
-            thisMonthOrder,
-            thisMonthSales,
-            layout:'adminLayout',
-        })
-    }catch(error){
-        console.log(error)
-    }
-}
+//         res.render("admin/home",{
+//             categoryCount,
+//             revnueByMonth,
+//             bestSellingCategory,
+//             bestSellings,
+//             popuarProducts,
+//             months,
+//             odersByMonth,
+//             totalRevnue,
+//             categoryRevenue,
+//             totalSales,
+//             thisMonthOrder,
+//             thisMonthSales,
+//             layout:'adminLayout',
+//         })
+//     }catch(error){
+//         console.log(error)
+//     }
+// }
 // const getSales = async (req, res) => {  
 //     const { stDate, edDate } = req.query;
 //     console.log('Received dates:', stDate, edDate);
@@ -218,7 +218,260 @@ const loadDashboard=async(req,res)=>{
 // };
 
 
+
+const loadDashboard = async (req, res) => {
+    try {
+// Get the count of categories
+        const categoryCount = await Category.countDocuments();
+// Aggregation to calculate category revenue
+        const categoryRevenue = await Order.aggregate([
+            {
+                $match:{
+                    status:"Delivered"
+                }
+            },
+            { $unwind: "$product" },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "product._id",
+                    foreignField: "_id",
+                    as: "productDetails"
+                }
+            },
+            { $unwind: "$productDetails" },
+            {
+                $group: {
+                    _id: "$productDetails.category",
+                    totalRevenue: { $sum: { $multiply: ["$product.quantity", "$productDetails.price"] } }
+                }
+            },
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "categoryDetails"
+                }
+            },
+            { $unwind: "$categoryDetails" },
+            {
+                $project: {
+                    _id: 0,
+                    category: "$categoryDetails.category",
+                    totalRevenue: 1
+                }
+            },
+            { $sort: { totalRevenue: -1 } }
+        ]);
+// Debugging categoryRevenue
+console.log("Category Revenue Data:", categoryRevenue);
+//[{category:categoryname,totalRevenue:1500},..]
+
+// Ensure that categoryRevenue is not empty
+        categories = categoryRevenue.map(item => item.category);//['ctegory name',..]
+        revenues = categoryRevenue.map(item => item.totalRevenue);//['revenue',..]
+
+// Fetch sales data and organize it by month
+        const sales = await Sale.find({status: "Delivered"}).lean();
+        //[{"date":"2024-12-01",total:2000},...]
+//create the object
+        const salesByMonth = {};
+
+sales.forEach((sale) => {
+            const monthYear = moment(sale.date).format('MMMM YYYY');
+            if (!salesByMonth[monthYear]) {
+                salesByMonth[monthYear] = { totalOrders: 0, totalRevenue: 0 };
+            }
+            salesByMonth[monthYear].totalOrders += 1;
+            salesByMonth[monthYear].totalRevenue += sale.total;
+        });//{"month year":{"totalOrders":3,"totalRevenue":7500}}
+
+// Prepare data for the chart
+        const chartData = [];
+//it will take the keys from the salesByMonth object.
+        Object.keys(salesByMonth).forEach((monthYear) => {
+            const { totalOrders, totalRevenue } = salesByMonth[monthYear];//here destructure the totalOrders and totalRevenue from the salesByMonth
+            chartData.push({
+                month: monthYear.split(' ')[0],//assume you have keys like "December 2024".By this line it will take December
+                totalOrders: totalOrders || 0,//total orders
+                totalRevenue: totalRevenue || 0//totalRevenue
+            });
+        });
+//Atlast the chartData has array of objects
+
+// Reset and prepare the final dashboard data
+        months = [];
+        odersByMonth = [];
+        revnueByMonth = [];
+        totalRevnue = 0;
+        totalSales = 0;
+
+        chartData.forEach((data) => {
+            months.push(data.month);
+            odersByMonth.push(data.totalOrders);
+            revnueByMonth.push(data.totalRevenue);
+            totalRevnue += Number(data.totalRevenue);
+            totalSales += Number(data.totalOrders);
+        });
+
+// Get data for best selling products, popular products, and best-selling categories
+        let bestSellings = await Product.find().sort({ bestSelling: -1 }).limit(5).lean();
+        let popuarProducts = await Product.find().sort({ popularity: -1 }).limit(5).lean();
+        let bestSellingCategory = await Category.find().sort({ bestSelling: -1 }).limit(5).lean();
+
+        // Render the dashboard page with data
+        res.render("admin/home", {
+            categoryCount,
+            revnueByMonth,
+            bestSellingCategory,
+            bestSellings,
+            popuarProducts,
+            months,
+            odersByMonth,
+            totalRevnue,
+            categoryRevenue,
+            totalSales,
+            thisMonthOrder: odersByMonth.length > 0 ? odersByMonth[odersByMonth.length - 1] : 0,//here it will get the recent month data
+            thisMonthSales: revnueByMonth.length > 0 ? revnueByMonth[revnueByMonth.length - 1] : 0,
+            layout: 'adminLayout',
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+// const loadDashboard = async (req, res) => {
+//     try {
+//         // Get the count of categories
+//         const categoryCount = await Category.countDocuments();
+
+//         // Aggregation to calculate category revenue, excluding canceled or returned orders
+//         const categoryRevenue = await Order.aggregate([
+//             { 
+//                 $match: { 
+//                     status: { $ne: 'Returned' }  // Exclude orders with 'returned' status
+//                 }
+//             },
+//             { 
+//                 $match: { 
+//                     status: { $ne: 'Canceled' }  // Exclude orders with 'canceled' status
+//                 }
+//             },
+//             { $unwind: "$product" },
+//             {
+//                 $lookup: {
+//                     from: "products",
+//                     localField: "product._id",
+//                     foreignField: "_id",
+//                     as: "productDetails"
+//                 }
+//             },
+//             { $unwind: "$productDetails" },
+//             {
+//                 $group: {
+//                     _id: "$productDetails.category",
+//                     totalRevenue: { $sum: { $multiply: ["$product.quantity", "$productDetails.price"] } }
+//                 }
+//             },
+//             {
+//                 $lookup: {
+//                     from: "categories",
+//                     localField: "_id",
+//                     foreignField: "_id",
+//                     as: "categoryDetails"
+//                 }
+//             },
+//             { $unwind: "$categoryDetails" },
+//             {
+//                 $project: {
+//                     _id: 0,
+//                     category: "$categoryDetails.category",
+//                     totalRevenue: 1
+//                 }
+//             },
+//             { $sort: { totalRevenue: -1 } }
+//         ]);
+
+//         // Debugging categoryRevenue
+//         console.log("Category Revenue Data:", categoryRevenue);
+
+//         // Ensure that categoryRevenue is not empty
+//         const categories = categoryRevenue.map(item => item.category);
+//         const revenues = categoryRevenue.map(item => item.totalRevenue);
+
+//         // Fetch sales data and organize it by month
+//         const sales = await Sale.find({status: "Delivered"}).lean();
+//         const salesByMonth = {};
+
+//         sales.forEach((sale) => {
+//             const monthYear = moment(sale.date).format('MMMM YYYY');
+//             if (!salesByMonth[monthYear]) {
+//                 salesByMonth[monthYear] = { totalOrders: 0, totalRevenue: 0 };
+//             }
+//             salesByMonth[monthYear].totalOrders += 1;
+//             salesByMonth[monthYear].totalRevenue += sale.total;
+//         });
+
+//         // Prepare data for the chart
+//         const chartData = [];
+//         Object.keys(salesByMonth).forEach((monthYear) => {
+//             const { totalOrders, totalRevenue } = salesByMonth[monthYear];
+//             chartData.push({
+//                 month: monthYear.split(' ')[0],
+//                 totalOrders: totalOrders || 0,
+//                 totalRevenue: totalRevenue || 0
+//             });
+//         });
+
+//         // Reset and prepare the final dashboard data
+//         const months = [];
+//         const odersByMonth = [];
+//         const revnueByMonth = [];
+//         let totalRevnue = 0;
+//         let totalSales = 0;
+
+//         chartData.forEach((data) => {
+//             months.push(data.month);
+//             odersByMonth.push(data.totalOrders);
+//             revnueByMonth.push(data.totalRevenue);
+//             totalRevnue += Number(data.totalRevenue);
+//             totalSales += Number(data.totalOrders);
+//         });
+
+//         // Get data for best selling products, popular products, and best-selling categories
+//         let bestSellings = await Product.find().sort({ bestSelling: -1 }).limit(5).lean();
+//         let popuarProducts = await Product.find().sort({ popularity: -1 }).limit(5).lean();
+//         let bestSellingCategory = await Category.find().sort({ bestSelling: -1 }).limit(5).lean();
+
+//         // Render the dashboard page with data
+//         res.render("admin/home", {
+//             categoryCount,
+//             revnueByMonth,
+//             bestSellingCategory,
+//             bestSellings,
+//             popuarProducts,
+//             months,
+//             odersByMonth,
+//             totalRevnue,
+//             categoryRevenue,
+//             totalSales,
+//             thisMonthOrder: odersByMonth.length > 0 ? odersByMonth[odersByMonth.length - 1] : 0,
+//             thisMonthSales: revnueByMonth.length > 0 ? revnueByMonth[revnueByMonth.length - 1] : 0,
+//             layout: 'adminLayout',
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send('Internal Server Error');
+//     }
+// };
+
+
+
+
 const getSales = async (req, res) => {  
+    //destructure the startDate and endDate
     const { stDate, edDate } = req.query;
     console.log('Received dates:', stDate, edDate);
 
@@ -236,12 +489,12 @@ const getSales = async (req, res) => {
 
         console.log('Orders from DB:', orders);
 
-        // Format the date using moment() and ensure it's mapped correctly
+// Format the date using moment() and ensure it's mapped correctly
         const formattedOrders = orders.map((order) => {
             const formattedDate = moment(order.date).format('DD-MM-YYYY'); // Ensure date is correctly formatted
             console.log(`Formatted Date for order ${order.orderId}:`, formattedDate);
 
-            // Map through the products and ensure product details (including discountAmt) are added for each product
+// Map through the products and ensure product details (including discountAmt) are added for each product
             const productsWithDetails = order.product.map((product) => {
                 return {
                     name: product.name,  // Assuming the product has a `name` property

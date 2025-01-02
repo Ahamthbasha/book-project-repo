@@ -24,134 +24,196 @@ let referalAmount
 let OwnerId
 
 // const loadHome = async (req, res) => {
-//     try {
-//       const userData = req.session.user;
-  
-//       if(userData){
-//           var id = userData._id;
-//           var user = await User.findById(id).lean();
-          
-//       }
+//   try {
 
-//       const loadProData = await Product.aggregate([
-//         { $match: { is_blocked: false } },
-//         {
-//           $lookup: {
-//             from: "categories",
-//             localField: "category",
-//             foreignField: "_id",
-//             as: "category",
+//     const loadProData = await Product.aggregate([
+//       {
+//         $match: { is_blocked: false },
+//       },
+//       {
+//         $lookup: {
+//           from: "productoffers",
+//           localField: "_id", 
+//           foreignField: "productId",
+//           as: "productOffer",
+//         },
+//       },
+//       {
+//         $unwind: {
+//           path: "$productOffer",
+//           preserveNullAndEmptyArrays: true,
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 1,
+//           name: 1,
+//           price: 1,
+//           description: 1,
+//           stock: 1,
+//           popularity: 1,
+//           imageUrl: 1,
+//           productOffer: 1,
+//           categoryOffer: 1,
+//           discountedPrice: {
+//             $cond: {
+//               if: {
+//                 $and: [
+//                   { $eq: ["$productOffer.currentStatus", true] },
+//                   { $ne: ["$productOffer.discountPrice", null] },
+//                 ],
+//               },
+//               then: "$productOffer.discountPrice",
+//               else: "$price", // No category offer check, just fall back to the regular price
+//             },
+//           },
+//           offerAvailable: {
+//             $cond: {
+//               if: {
+//                 $eq: ["$productOffer.currentStatus", true],
+//               },
+//               then: true,
+//               else: false,
+//             },
 //           },
 //         },
-//         {
-//           $unwind: "$category",
+//       },
+//     ]);
+    
+//     const newProduct = await Product.aggregate([
+//       {
+//         $match: { is_blocked: false },  // Filter products that are not blocked
+//       },
+//       {
+//         $lookup: {
+//           from: "productoffers",  // Reference to the 'productoffers' collection
+//           localField: "_id",  // The field in 'Product' that references 'productoffers'
+//           foreignField: "productId",  // Look for matching 'productId' in the 'productoffers' collection
+//           as: "productOffer",  // Store the result in the 'productOffer' field
 //         },
-//       ]);
-  
-
-//       const category=await Category.find({isListed:true})
-  
-//       // console.log(userData);
-     
-//           res.render("user/home", { category,loadProData, userData:user});
-  
-  
-//     } catch (error) {
-//       console.log(error);
-//       res.status(500).send("server error");
-//     }
-//   };
-
-// const loadHome=async(req,res)=>{
-//   try{
-//     const loadProData=await Product.find({is_blocked:false}).limit(8).lean()
-//     const newProduct=await Product.find({is_blocked:false}).sort({_id:-1}).limit(8).lean()
-//     const loadCatData=await Category.find({isListed:true}).lean()
-//     const popularbooks=await Product.find({popularity:{$gt:0}}).sort({popularity:-1}).limit(8).lean()
+//       },
+//       {
+//         $unwind: {
+//           path: "$productOffer",  // Unwind to flatten the 'productOffer' array into an object
+//           preserveNullAndEmptyArrays: true,  // Keep products without an offer
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 1,
+//           name: 1,
+//           price: 1,
+//           description: 1,
+//           stock: 1,
+//           popularity: 1,
+//           imageUrl: 1,
+//           category: {
+//             _id: 1,
+//             category: 1,
+//             imageUrl: 1,
+//             isListed: 1,
+//           },
+//           discountedPrice: {
+//             $cond: {
+//               if: { $eq: ["$productOffer.currentStatus", true] }, // Check if the offer is active
+//               then: "$productOffer.discountPrice",  // Apply the discount price if active
+//               else: "$price",  // Otherwise, use the original price
+//             },
+//           },
+//           offerAvailable: {
+//             $cond: {
+//               if: { $eq: ["$productOffer.currentStatus", true] },
+//               then: true,  // Offer is available
+//               else: false, // No offer
+//             },
+//           },
+//         },
+//       },
+//       {
+//         $sort: { _id: -1 },  // Sort products by latest first
+//       },
+//       {
+//         $limit: 8,  // Limit to 8 products
+//       },
+//     ]);
     
-//     console.log(popularbooks);
+//     const popularbooks = await Product.aggregate([
+//       {
+//         $match: { 
+//           popularity: { $gt: 0 }, // Filter products with popularity greater than 0
+//           is_blocked: false,       // Ensure the product is not blocked
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "productoffers",  // Reference to the 'productoffers' collection
+//           localField: "_id",  // The field in 'Product' that references 'productoffers'
+//           foreignField: "productId",  // Look for matching 'productId' in the 'productoffers' collection
+//           as: "productOffer",  // Store the result in the 'productOffer' field
+//         },
+//       },
+//       {
+//         $unwind: {
+//           path: "$productOffer",  // Unwind the 'productOffer' array into an object
+//           preserveNullAndEmptyArrays: true,  // Keep products without an offer
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 1,
+//           name: 1,
+//           price: 1,
+//           description: 1,
+//           stock: 1,
+//           popularity: 1,
+//           imageUrl: 1,
+//           category: {
+//             _id: 1,
+//             category: 1,
+//             imageUrl: 1,
+//             isListed: 1,
+//           },
+//           discountedPrice: {
+//             $cond: {
+//               if: { $eq: ["$productOffer.currentStatus", true] }, // Check if the offer is active
+//               then: "$productOffer.discountPrice",  // Apply the discount price if active
+//               else: "$price",  // Otherwise, use the original price
+//             },
+//           },
+//           offerAvailable: {
+//             $cond: {
+//               if: { $eq: ["$productOffer.currentStatus", true] },
+//               then: true,  // Offer is available
+//               else: false, // No offer
+//             },
+//           },
+//         },
+//       },
+//       {
+//         $sort: { popularity: -1 }, // Sort products by popularity (highest first)
+//       },
+//       {
+//         $limit: 8,  // Limit to 8 popular products
+//       },
+//     ]);
     
 
-//     console.log(loadProData)
+//     console.log(loadProData);
 //     console.log(newProduct)
-//     console.log(loadCatData)
 //     console.log(popularbooks)
-
-//     const userData=req.session.user
-//     console.log(userData)
-
-//     if(userData){
-//       res.render('user/home',{userData,loadProData,loadCatData,newProduct,popularbooks})
-//     }else{
-//       res.render('user/home',{userData,loadProData,loadCatData,newProduct,popularbooks})
+//     const userData = req.session.user;
+//     if (userData) {
+//       res.render("user/home", { userData, loadProData,newProduct,popularbooks});
+//     } else {
+//       res.render("user/home", { userData, loadProData,newProduct,popularbooks});
 //     }
-
-//   }catch(error){
-//     console.log(error)
+//   } catch (error) {
+//     console.log(error);
 //   }
-// }
-
-// const loadHome=async(req,res)=>{
-//   try{
-//     const loadProData=await Product.aggregate([
-//       {$match:{is_blocked:false}},
-//       {
-//         $lookup:{
-//           from:"categories",
-//           localField:"category",
-//           foreignField:"_id",
-//           as:"category",
-//         },
-//       },
-//       {
-//         $unwind:{
-//           path:"$productOffer",
-//           preserveNullAndEmptyArrays:true,
-//         },
-//       },
-//       {
-//         $project:{
-//           _id:1,
-//           name:1,
-//           price:1,
-//           description:1,
-//           stock:1,
-//           popularity:1,
-//           imageUrl:1,
-//           category:{
-//             _id:1,
-//             category:1,
-//             imageUrl:1,
-//             isListed:1,
-//           },
-//           discountPrice:{
-//             $cond:{
-//               if:{$eq:["$productOffer.currentStatus",true]},
-//               then:"$productOffer.discountPrice",
-//               else:"$price"
-//             }
-//           }
-//         }
-//       }
-//     ])
-
-//     console.log(loadProData)
-
-//     const userData=req.session.user
-//     console.log(userData)
-//     if(userData){
-//       res.render("user/home",{userData,loadProData})
-//     }else{
-//       res.render("user/home",{userData,loadProData})
-//     }
-//   }catch(error){
-//     console.log(error)
-//   }
-// }
+// };
 
 const loadHome = async (req, res) => {
   try {
-
     const loadProData = await Product.aggregate([
       {
         $match: { is_blocked: false },
@@ -171,20 +233,6 @@ const loadHome = async (req, res) => {
         },
       },
       {
-        $lookup: {
-          from: "categoryoffers",
-          localField: "category._id",
-          foreignField: "categoryId",
-          as: "categoryOffer",
-        },
-      },
-      {
-        $unwind: {
-          path: "$categoryOffer",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $project: {
           _id: 1,
           name: 1,
@@ -193,12 +241,6 @@ const loadHome = async (req, res) => {
           stock: 1,
           popularity: 1,
           imageUrl: 1,
-          category: {
-            _id: 1,
-            category: 1,
-            imageUrl: 1,
-            isListed: 1,
-          },
           productOffer: 1,
           categoryOffer: 1,
           discountedPrice: {
@@ -210,36 +252,32 @@ const loadHome = async (req, res) => {
                 ],
               },
               then: "$productOffer.discountPrice",
-              else: {
-                $cond: {
-                  if: {
-                    $and: [
-                      { $eq: ["$categoryOffer.currentStatus", true] },
-                      { $ne: ["$categoryOffer.discountPrice", null] },
-                    ],
-                  },
-                  then: "$categoryOffer.discountPrice",
-                  else: "$price",
-                },
-              },
+              else: "$price", // No category offer check, just fall back to the regular price
             },
           },
           offerAvailable: {
             $cond: {
               if: {
-                $or: [
-                  { $eq: ["$productOffer.currentStatus", true] },
-                  { $eq: ["$categoryOffer.currentStatus", true] },
-                ],
+                $eq: ["$productOffer.currentStatus", true],
               },
               then: true,
               else: false,
             },
           },
+          offerPercentage: {
+            $cond: {
+              if: {
+                $eq: ["$productOffer.currentStatus", true],
+              },
+              then: "$productOffer.productOfferPercentage", // Directly use the stored offer percentage
+              else: 0, // No offer
+            },
+          },
         },
       },
     ]);
-    
+
+
     const newProduct = await Product.aggregate([
       {
         $match: { is_blocked: false },  // Filter products that are not blocked
@@ -287,6 +325,13 @@ const loadHome = async (req, res) => {
               else: false, // No offer
             },
           },
+          offerPercentage: {
+            $cond: {
+              if: { $eq: ["$productOffer.currentStatus", true] },
+              then: "$productOffer.productOfferPercentage", // Include the offer percentage if the offer is active
+              else: 0, // No offer, set percentage to 0
+            },
+          },
         },
       },
       {
@@ -297,24 +342,25 @@ const loadHome = async (req, res) => {
       },
     ]);
     
+    
     const popularbooks = await Product.aggregate([
       {
-        $match: { 
+        $match: {
           popularity: { $gt: 0 }, // Filter products with popularity greater than 0
-          is_blocked: false,       // Ensure the product is not blocked
+          is_blocked: false,      // Ensure the product is not blocked
         },
       },
       {
         $lookup: {
-          from: "productoffers",  // Reference to the 'productoffers' collection
-          localField: "_id",  // The field in 'Product' that references 'productoffers'
-          foreignField: "productId",  // Look for matching 'productId' in the 'productoffers' collection
-          as: "productOffer",  // Store the result in the 'productOffer' field
+          from: "productoffers",   // Reference to the 'productoffers' collection
+          localField: "_id",       // The field in 'Product' that references 'productoffers'
+          foreignField: "productId", // Look for matching 'productId' in the 'productoffers' collection
+          as: "productOffer",      // Store the result in the 'productOffer' field
         },
       },
       {
         $unwind: {
-          path: "$productOffer",  // Unwind the 'productOffer' array into an object
+          path: "$productOffer",    // Unwind to flatten the 'productOffer' array into an object
           preserveNullAndEmptyArrays: true,  // Keep products without an offer
         },
       },
@@ -347,6 +393,13 @@ const loadHome = async (req, res) => {
               else: false, // No offer
             },
           },
+          offerPercentage: {
+            $cond: {
+              if: { $eq: ["$productOffer.currentStatus", true] },
+              then: "$productOffer.productOfferPercentage", // Add the offer percentage if the offer is active
+              else: 0, // No offer, set percentage to 0
+            },
+          },
         },
       },
       {
@@ -356,6 +409,7 @@ const loadHome = async (req, res) => {
         $limit: 8,  // Limit to 8 popular products
       },
     ]);
+    
     
 
     console.log(loadProData);
@@ -371,7 +425,6 @@ const loadHome = async (req, res) => {
     console.log(error);
   }
 };
-
 
 
 

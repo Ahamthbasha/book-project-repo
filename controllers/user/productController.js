@@ -5,90 +5,6 @@ const Cart=require('../../models/cartModel')
 const mongoose=require("mongoose")
 
 
-// const getProduct = async (req, res) => {
-//   let userData = false;
-//   if (req.session.user) {
-//     const user = req.session.user;
-//     const id = user._id;
-//     userData = await User.findById(id).lean();
-//     console.log(userData);
-//   }
-//   try {
-//     let page = 1; // Initial page is always 1 for the GET request
-//     const limit = 9;
-//     const loadCatData = await Category.find({}).lean();
-
-//     // Use aggregation to include discounted price
-//     const proData = await Product.aggregate([
-//       { $match: { is_blocked: false } }, // Filter for non-blocked products
-//       { $skip: (page - 1) * limit },
-//       { $limit: limit },
-//       {
-//         $lookup: {
-//           from: "productoffers", // Reference to the productOffers collection
-//           localField: "productOfferId", // Product's offer reference
-//           foreignField: "_id", // Lookup the product offer by ID
-//           as: "productOffer", // Store the result in the productOffer array
-//         },
-//       },
-//       { $unwind: { path: "$productOffer", preserveNullAndEmptyArrays: true } },
-//       {
-//         $project: {
-//           _id: 1,
-//           name: 1,
-//           price: 1,
-//           description: 1,
-//           stock: 1,
-//           popularity: 1,
-//           imageUrl: 1,
-//           category: {
-//             _id: 1,
-//             category: 1,
-//             imageUrl: 1,
-//             isListed: 1,
-//           },
-//           productOffer: 1,
-//           discountedPrice: {
-//             $cond: {
-//               if: { $eq: ["$productOffer.currentStatus", true] }, // Check if the offer is active
-//               then: "$productOffer.discountPrice", // Apply the discount price if active
-//               else: "$price", // Otherwise, use the original price
-//             },
-//           },
-//           offerAvailable: {
-//             $cond: {
-//               if: { $eq: ["$productOffer.currentStatus", true] },
-//               then: true, // Offer is available
-//               else: false, // No offer
-//             },
-//           },
-//         },
-//       },
-//     ]);
-//     console.log(proData)
-//     const count = await Product.countDocuments({ is_blocked: false });
-//     const totalPages = Math.ceil(count / limit);
-//     const proCount = count;
-//     const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-
-//     // Fetch the latest 3 products for the 'new arrivals' section
-//     const newProduct = await Product.find({ is_blocked: false }).sort({ _id: -1 }).limit(3).lean();
-
-//     res.render('user/products', {
-//       userData,
-//       proData,
-//       pages,
-//       currentPage: page,
-//       loadCatData,
-//       newProduct,
-//       currentFunction: 'getProductsPage',
-//       proCount
-//     });
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
-
 const getProduct = async (req, res) => {
   let userData = false;
   if (req.session.user) {
@@ -102,8 +18,6 @@ const getProduct = async (req, res) => {
     let page = 1; // Initial page is always 1 for the GET request
     const limit = 9;
     const loadCatData = await Category.find({}).lean();
-
-    // Use aggregation to include discounted price and offer status for both product and category offers
     const loadProData = await Product.aggregate([
       { $match: { is_blocked: false } }, // Filter for non-blocked products
       { $skip: (page - 1) * limit },
@@ -120,17 +34,6 @@ const getProduct = async (req, res) => {
         $unwind: { path: "$productOffer", preserveNullAndEmptyArrays: true } 
       },
       {
-        $lookup: {
-          from: "categoryoffers", // Reference to the categoryOffers collection
-          localField: "category._id", // Product's category ID
-          foreignField: "categoryId", // Lookup by categoryId
-          as: "categoryOffer", // Store the result in the categoryOffer array
-        },
-      },
-      { 
-        $unwind: { path: "$categoryOffer", preserveNullAndEmptyArrays: true } 
-      },
-      {
         $project: {
           _id: 1,
           name: 1,
@@ -139,14 +42,7 @@ const getProduct = async (req, res) => {
           stock: 1,
           popularity: 1,
           imageUrl: 1,
-          category: {
-            _id: 1,
-            category: 1,
-            imageUrl: 1,
-            isListed: 1,
-          },
           productOffer: 1,
-          categoryOffer: 1,
           discountedPrice: {
             $cond: {
               if: {
@@ -155,36 +51,31 @@ const getProduct = async (req, res) => {
                   { $ne: ["$productOffer.discountPrice", null] },
                 ],
               },
-              then: "$productOffer.discountPrice", // Use the product offer discount price
-              else: {
-                $cond: {
-                  if: {
-                    $and: [
-                      { $eq: ["$categoryOffer.currentStatus", true] },
-                      { $ne: ["$categoryOffer.discountPrice", null] },
-                    ],
-                  },
-                  then: "$categoryOffer.discountPrice", // Use the category offer discount price
-                  else: "$price", // Otherwise, use the original price
-                },
-              },
+              then: "$productOffer.discountPrice",
+              else: "$price",
             },
           },
           offerAvailable: {
             $cond: {
               if: {
-                $or: [
-                  { $eq: ["$productOffer.currentStatus", true] },
-                  { $eq: ["$categoryOffer.currentStatus", true] },
-                ],
+                $eq: ["$productOffer.currentStatus", true],
               },
-              then: true, // Offer is available
-              else: false, // No offer
+              then: true,
+              else: false,
+            },
+          },
+          offerPercentage: {
+            $cond: {
+              if: { $eq: ["$productOffer.currentStatus", true] }, // Check if offer is active
+              then: "$productOffer.productOfferPercentage", // Fetch the offer percentage
+              else: null, // Set to null if no offer
             },
           },
         },
-      },
+      }
+      
     ]);
+    
 
     console.log("load the product data",loadProData); // To debug and check the results of the aggregation
 
@@ -211,20 +102,19 @@ const getProduct = async (req, res) => {
   }
 };
 
-
-
-
 // const searchSortFilter = async (req, res) => {
-//   const { searchQuery, sortOption, categoryFilter, page, limit } = req.body;
-  
-//   const matchStage = { $match: { is_blocked: false } };
+//   const { searchQuery, sortOption, categoryFilter, page = 1, limit = 9 } = req.body;
+
+//   // Match stage based on search query and category filter
+//   const matchStage = { $match: {} };
 //   if (searchQuery) {
-//     matchStage.$match.name = { $regex: searchQuery, $options: "i" };
+//     matchStage.$match.name = { $regex: searchQuery, $options: "i" };  // Case-insensitive search
 //   }
 //   if (categoryFilter) {
-//     matchStage.$match.category = new mongoose.Types.ObjectId(categoryFilter);
+//     matchStage.$match.category = new mongoose.Types.ObjectId(categoryFilter);  // Filter by category
 //   }
-  
+
+//   // Construct the sort stage
 //   const sortStage = { $sort: {} };
 //   switch (sortOption) {
 //     case "priceAsc":
@@ -246,54 +136,44 @@ const getProduct = async (req, res) => {
 //       sortStage.$sort.popularity = -1;
 //       break;
 //     default:
-//       sortStage.$sort.createdAt = 1;
+//       sortStage.$sort.createdAt = 1;  // Default sort by creation date
 //   }
 
-//   const skipStage = { $skip: (page - 1) * limit };
-//   const limitStage = { $limit: limit };
+//   // Pagination: skip and limit
+//   const skipStage = { $skip: (page - 1) * limit };  // Skip records based on the current page
+//   const limitStage = { $limit: limit };  // Limit the number of results per page
 
+//   // Fetch products with aggregation pipeline
 //   const products = await Product.aggregate([
-//     matchStage, // This is your custom matching stage (e.g., filtering blocked products or any other filters)
-    
-//     // Lookup for Category data
+//     matchStage, 
 //     {
 //       $lookup: {
-//         from: "categories",
-//         localField: "category",  // Use the category reference from the Product collection
-//         foreignField: "_id",  // Match it with _id in the categories collection
+//         from: "categories", 
+//         localField: "category", 
+//         foreignField: "_id", 
 //         as: "category",
 //       },
 //     },
-//     { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
-  
-//     // Lookup for Product Offer data
+//     {
+//       $unwind: {
+//         path: "$category", 
+//         preserveNullAndEmptyArrays: true, 
+//       },
+//     },
 //     {
 //       $lookup: {
-//         from: "productoffers",
-//         localField: "_id",  // Use the Product _id field
-//         foreignField: "productId",  // Match it with the productId in the productoffers collection
+//         from: "productoffers",  
+//         localField: "_id",  
+//         foreignField: "productId",  
 //         as: "productOffer",
 //       },
 //     },
-//     { $unwind: { path: "$productOffer", preserveNullAndEmptyArrays: true } },
-  
-//     // Lookup for Category Offer data
 //     {
-//       $lookup: {
-//         from: "categoryoffers",
-//         localField: "category._id",  // Use the category _id from the Product collection
-//         foreignField: "categoryId",  // Match it with the categoryId in the categoryoffers collection
-//         as: "categoryOffer",
+//       $unwind: {
+//         path: "$productOffer", 
+//         preserveNullAndEmptyArrays: true, 
 //       },
 //     },
-//     { $unwind: { path: "$categoryOffer", preserveNullAndEmptyArrays: true } },
-  
-//     // Sorting and pagination stages
-//     sortStage,  // Apply your custom sorting (e.g., by popularity, price, etc.)
-//     skipStage,  // Apply your custom skip logic for pagination (e.g., for page 2)
-//     limitStage, // Apply your custom limit for pagination (e.g., limit 9 products per page)
-  
-//     // Projecting the necessary fields and calculating the discounted price and offer availability
 //     {
 //       $project: {
 //         _id: 1,
@@ -302,191 +182,213 @@ const getProduct = async (req, res) => {
 //         description: 1,
 //         stock: 1,
 //         popularity: 1,
+//         bestSelling: 1,
 //         imageUrl: 1,
-//         category: 1,
-        
-//         // Calculate the discounted price based on available offers
-//         discountedPrice: {
+//         category: {
+//           _id: 1,
+//           category: 1,
+//           imageUrl: 1,
+//           isListed: 1,
+//           bestSelling: 1,
+//         },
+//         productOffer: 1,  
+//         discountPrice: {
 //           $cond: {
-//             if: {
-//               $and: [
-//                 { $eq: ["$productOffer.currentStatus", true] }, // Product offer is active
-//                 { $ne: ["$productOffer.discountPrice", null] }, // Product offer has a valid discount
-//               ],
-//             },
-//             then: "$productOffer.discountPrice", // Use product offer discount price
-//             else: {
-//               $cond: {
-//                 if: {
-//                   $and: [
-//                     { $eq: ["$categoryOffer.currentStatus", true] }, // Category offer is active
-//                     { $ne: ["$categoryOffer.discountPrice", null] }, // Category offer has a valid discount
-//                   ],
-//                 },
-//                 then: "$categoryOffer.discountPrice", // Use category offer discount price
-//                 else: "$price", // No discount, so use the original price
-//               },
-//             },
+//             if: { $eq: ["$productOffer.currentStatus", true] },  
+//             then: "$productOffer.discountPrice",  
+//             else: "$price",  
 //           },
 //         },
-        
-//         // Offer availability based on product or category offers
 //         offerAvailable: {
 //           $cond: {
-//             if: {
-//               $or: [
-//                 { $eq: ["$productOffer.currentStatus", true] }, // Product offer is active
-//                 { $eq: ["$categoryOffer.currentStatus", true] }, // Category offer is active
-//               ],
+//             if: { $eq: ["$productOffer.currentStatus", true] },
+//             then: true,
+//             else: false,
+//           },
+//         },
+//         offerPercentage: {
+//           $cond: {
+//             if: { $eq: ["$productOffer.currentStatus", true] },
+//             then: {
+//               $multiply: [
+//                 { $divide: [{ $subtract: ["$price", "$productOffer.discountPrice"] }, "$price"] },
+//                 100,
+//               ], // Calculate offer percentage
 //             },
-//             then: true, // Offer is available
-//             else: false, // No offer available
+//             else: 0,
 //           },
 //         },
 //       },
 //     },
+//     sortStage, 
+//     skipStage, 
+//     limitStage, 
 //   ]);
-  
-//   console.log(products); // You can log the products here to check the result
 
+//   // Calculate total products count
 //   const totalProducts = await Product.countDocuments(matchStage.$match);
 
-//   res.json({ products, totalProducts });
-// };
-
-
-// const productView = async (req, res) => {
-//   try {
-//     const proId = req.query.id;
-//     console.log(proId, "....");
-//     const proData = await Product.findById(proId).lean();
-//     console.log(proData);
-//     if (!proData || proData.is_blocked) {
-//       return res.status(404).json({ message: 'Product not found' });
-//     }
-//     const outOfStock = proData.stock === 0;
-//     const relatedProducts = await Product.find({
-//       category: proData.category,
-//       _id: { $ne: proId },
-//       is_blocked: false
-//     }).limit(4).lean();
-//     res.render('user/productview', { proData, relatedProducts, outOfStock });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({ message: 'An error occurred while loading the product view' });
-//   }
+//   // Calculate total number of pages
+//   const totalPages = Math.ceil(totalProducts / limit);
+  
+//   // Return paginated results along with page details
+//   res.json({
+//     products,
+//     totalProducts,
+//     totalPages,  // Total pages
+//     currentPage: page,  // Current page
+//     limit,
+//   });
 // };
 
 const searchSortFilter = async (req, res) => {
-  const { searchQuery, sortOption, categoryFilter, page, limit } = req.body;
-
-  const matchStage = { $match: {} };
-  if (searchQuery) {
-    matchStage.$match.name = { $regex: searchQuery, $options: "i" };
-  }
-  if (categoryFilter) {
-    matchStage.$match.category = new mongoose.Types.ObjectId(categoryFilter);
-  }
-
-  // Construct the sort stage
-  const sortStage = { $sort: {} };
-  switch (sortOption) {
-    case "priceAsc":
-      sortStage.$sort.price = 1;
-      break;
-    case "priceDesc":
-      sortStage.$sort.price = -1;
-      break;
-    case "nameAsc":
-      sortStage.$sort.name = 1;
-      break;
-    case "nameDesc":
-      sortStage.$sort.name = -1;
-      break;
-    case "newArrivals":
-      sortStage.$sort.createdAt = -1;
-      break;
-    case "popularity":
-      sortStage.$sort.popularity = -1;
-      break;
-    default:
-      sortStage.$sort.createdAt = 1;
-  }
-
-  const skipStage = { $skip: (page - 1) * limit };
-  const limitStage = { $limit: limit };
-
-  const products = await Product.aggregate([
-    matchStage, 
-    {
-      $lookup: {
-        from: "categories",
-        localField: "category",
-        foreignField: "_id",
-        as: "category",
-      },
-    },
-    {
-      $unwind: {
-        path: "$category",
-        preserveNullAndEmptyArrays: true, 
-      },
-    },
-    {
-      $lookup: {
-        from: "productoffers",  
-        localField: "_id",  
-        foreignField: "productId",  
-        as: "productOffer",
-      },
-    },
-    {
-      $unwind: {
-        path: "$productOffer",
-        preserveNullAndEmptyArrays: true, 
-      },
-    },
-    {
-      $project: {
-        _id: 1,
-        name: 1,
-        price: 1,
-        description: 1,
-        stock: 1,
-        popularity: 1,
-        bestSelling: 1,
-        imageUrl: 1,
-        category: {
-          _id: 1,
-          category: 1,
-          imageUrl: 1,
-          isListed: 1,
-          bestSelling: 1,
+    const { searchQuery, sortOption, categoryFilter, page = 1, limit = 9 } = req.body;
+  
+    // Match stage based on search query and category filter
+    const matchStage = { $match: {} };
+    if (searchQuery) {
+      matchStage.$match.name = { $regex: searchQuery, $options: "i" }; // Case-insensitive search
+    }
+    if (categoryFilter) {
+      matchStage.$match.category = new mongoose.Types.ObjectId(categoryFilter); // Filter by category
+    }
+  
+    // Construct the sort stage
+    const sortStage = { $sort: {} };
+    switch (sortOption) {
+      case "priceAsc":
+        sortStage.$sort.price = 1;
+        break;
+      case "priceDesc":
+        sortStage.$sort.price = -1;
+        break;
+      case "nameAsc":
+        sortStage.$sort.name = 1;
+        break;
+      case "nameDesc":
+        sortStage.$sort.name = -1;
+        break;
+      case "newArrivals":
+        sortStage.$sort.createdAt = -1;
+        break;
+      case "popularity":
+        sortStage.$sort.popularity = -1;
+        break;
+      default:
+        sortStage.$sort.createdAt = 1; // Default sort by creation date
+    }
+  
+    // Pagination: skip and limit
+    const skipStage = { $skip: (page - 1) * limit }; // Skip records based on the current page
+    const limitStage = { $limit: limit }; // Limit the number of results per page
+  
+    // Fetch products with aggregation pipeline
+    const products = await Product.aggregate([
+      matchStage,
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "category",
         },
-        productOffer: 1,  
-        discountPrice: {
-          $cond: {
-            if: { $eq: ["$productOffer.currentStatus", true] },  
-            then: "$productOffer.discountPrice",  
-            else: "$price",  
+      },
+      {
+        $unwind: {
+          path: "$category",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "productoffers",
+          localField: "_id",
+          foreignField: "productId",
+          as: "productOffer",
+        },
+      },
+      {
+        $unwind: {
+          path: "$productOffer",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          price: 1,
+          description: 1,
+          stock: 1,
+          popularity: 1,
+          bestSelling: 1,
+          imageUrl: 1,
+          category: {
+            _id: "$category._id",
+            category: "$category.category",
+            imageUrl: "$category.imageUrl",
+            isListed: "$category.isListed",
+            bestSelling: "$category.bestSelling",
+          },
+          productOffer: 1,
+          discountPrice: {
+            $cond: {
+              if: { $eq: ["$productOffer.currentStatus", true] },
+              then: "$productOffer.discountPrice",
+              else: "$price",
+            },
+          },
+          offerAvailable: {
+            $cond: {
+              if: { $eq: ["$productOffer.currentStatus", true] },
+              then: true,
+              else: false,
+            },
+          },
+          offerPercentage: {
+            $cond: {
+              if: { $eq: ["$productOffer.currentStatus", true] }, // Check if offer is active
+              then:
+                { 
+                  $multiply:
+                    [
+                      { 
+                        $divide:
+                          [
+                            { $subtract: ["$price", "$productOffer.discountPrice"] }, 
+                            "$price"
+                          ] 
+                      }, 
+                      100 
+                    ] 
+                }, // Calculate offer percentage
+              else:
+                null, // Set to null if no offer
+            },
           },
         },
       },
-    },
-    sortStage, 
-    skipStage, 
-    limitStage, 
-  ]);
+      sortStage,
+      skipStage,
+      limitStage,
+    ]);
   
-  console.log(products);
+    // Calculate total products count
+    const totalProducts = await Product.countDocuments(matchStage.$match);
   
-
-  const totalProducts = await Product.countDocuments(matchStage.$match);
-
-  res.json({ products, totalProducts });
-};
-
-
+    // Calculate total number of pages
+    const totalPages = Math.ceil(totalProducts / limit);
+  
+    // Return paginated results along with page details
+    res.json({
+      products,
+      totalProducts,
+      totalPages, // Total pages
+      currentPage: page, // Current page
+      limit,
+    });
+  };
+  
 
 const productView = async (req, res) => {
   try {

@@ -1,6 +1,6 @@
 const Cart = require("../../models/cartModel");
 const Product = require("../../models/productModel");
-const ProductOffer = require("../../models/productOfferModel");
+//const ProductOffer = require("../../models/productOfferModel");
 const mongoose = require("mongoose");
 
 const loadCart = async (req, res) => {
@@ -134,9 +134,8 @@ const addToCart = async (req, res) => {
         },
       },
     ]);
-
-    let productToCart = productToLookup[0];
-    
+let productToCart = productToLookup[0];//productToCart will be the array of objects now  
+//for visualizing purpose [{_id:"prod456",price:500,productOffer:[{productId:"orid456",discountPrice:450}]}]  
     if (!productToCart) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
@@ -196,7 +195,7 @@ const removeFromCart = async (req, res) => {
     }
   };
 
-  const updateCart = async (req, res) => {
+const updateCart = async (req, res) => {
     try {
       const userData = req.session.user;
       const ID = new mongoose.Types.ObjectId(userData._id);
@@ -258,7 +257,8 @@ const removeFromCart = async (req, res) => {
       updatedCart.forEach((data) => {
         const newDataItem = { ...data };
   
-        // If the product is out of stock, set the totalAmount as "Out of Stock"
+  // If the product is out of stock, set the totalAmount as "Out of Stock"
+  //here checking if the product has stock zero.totalAmount will be set as string "out of stock"
         if (cartquant.stock <= 0) {
           newDataItem.totalAmount = "Out of Stock"; // Set totalAmount to a string if out of stock
           newDataItem.outOfStock = true; // Mark the product as out of stock
@@ -271,7 +271,7 @@ const removeFromCart = async (req, res) => {
       });
       console.log(newData, "itemsitemssss");
   
-      // Calculate the total cart value
+// Calculate the total cart value.Here checking the totalAmount is number or string.if number it will show the totalAmount otherwise show zero 
       const cartValue = newData.reduce((acc, item) => acc + (typeof item.totalAmount === 'number' ? item.totalAmount : 0), 0);
       console.log(cartValue);
   
@@ -288,7 +288,7 @@ const removeFromCart = async (req, res) => {
       console.log(error.message);
       res.status(500).send("Internal Server Error");
     }
-  };
+};
   
 
   const checkOutOfStock = async (req, res) => {

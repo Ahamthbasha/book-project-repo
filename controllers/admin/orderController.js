@@ -1,8 +1,6 @@
 const Order=require("../../models/orderModel")
 const Address=require("../../models/addressModel")
 const Product=require("../../models/productModel")
-const Category=require("../../models/categoryModel")
-const Cart=require("../../models/cartModel")
 const User=require("../../models/userModel")
 const moment=require('moment')
 const mongoose=require("mongoose")
@@ -10,7 +8,7 @@ const ObjectId=require("mongoose")
 
 const ordersPage=async(req,res)=>{
     try {
-        const user=await User.findOne({_id:req.session.user_id})
+        //const user=await User.findOne({_id:req.session.user_id})
         var page=1
         if(req.query.page){
             page=req.query.page
@@ -55,9 +53,6 @@ const orderDetails = async (req, res) => {
         {
           $unwind: "$product",
         },
-        // {
-        //   $unwind: "$product", 
-        // },
         {
           $project: {
             _id: 0,

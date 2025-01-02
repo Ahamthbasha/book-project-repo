@@ -50,6 +50,7 @@ const addCouponPage= async(req,res)=>{
         
     }
 }
+
 const addCouponPost = async (req, res) => {
   try {
       const { code, percent, expDate, maxDiscount, minPurchase } = req.body;

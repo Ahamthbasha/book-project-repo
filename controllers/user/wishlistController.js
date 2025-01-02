@@ -228,7 +228,7 @@ const showWishlistPage = async (req, res) => {
         console.log(WishListProd, "WishListProd");
 
         if (WishListProd.length > 0) {
-            res.render('user/wishlist', { userData, WishListProd, wishCt: wishlistCount });
+            res.render('user/wishlist', { userData, WishListProd,});//wishCt: wishlistCount
         } else {
             res.render('user/emptyWishlist', { userData });
         }
@@ -293,7 +293,7 @@ const removeFromWishList = async (req, res) => {
 
 
 
-        let productIdToRemove = new mongoose.Types.ObjectId(id);
+        let productIdToRemove = new mongoose.Types.ObjectId(id);//The id we receive which is string.But based on the id we need to perform operations in the mongodb so we make it in the objectid format.
         const wishListId = new mongoose.Types.ObjectId(wishId);
 
        

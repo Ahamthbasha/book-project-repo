@@ -1,4 +1,5 @@
-const Category=require("../../models/categoryModel")
+const Category=require("../../models/categoryModel");
+
 
 let catSaveMsg = "Category added suceessfully..!!";
 
@@ -84,15 +85,6 @@ const getCategory = async (req, res) => {
     let catId = req.params.id;
   
     try {
-      // const catData = await Category.findById({ _id: catId }).lean();
-  
-      // if (req.session.catExist) {
-      //   res.render("admin/edit_category", { catData, catExistMsg, layout: 'adminlayout' });
-      //   // req.session.catExist = false
-      // } else {
-      //   res.render("admin/edit_category", { catData, layout: 'adminlayout' });
-      // }
-
       const catData = await Category.findById({ _id: catId }).lean();
 
       let catExistMsg = req.session.catExist 
@@ -201,5 +193,4 @@ module.exports={
   updateCategory,
   deleteCategory,
   unListCategory
-
 }

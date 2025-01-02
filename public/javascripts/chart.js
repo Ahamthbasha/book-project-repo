@@ -1,13 +1,13 @@
 
 const today = new Date().toISOString().split('T')[0];//format into(YYYY-MM-DD)
 const tomorrow = new Date();
-tomorrow.setDate(tomorrow.getDate());
-const maxDate = tomorrow.toISOString().split('T')[0];
+tomorrow.setDate(tomorrow.getDate());//i set explicitly todays date
+const maxDate = tomorrow.toISOString().split('T')[0];//get tomorrow date in the format of yyyy-mm-dd
 
 // {{!-- document.getElementById("start-date").setAttribute("min", today) --}}
-document.getElementById("start-date").setAttribute("max", maxDate);
-document.getElementById("end-date").setAttribute("min", today)
-document.getElementById("end-date").setAttribute("max", maxDate);
+document.getElementById("start-date").setAttribute("max", maxDate);//user selects date upto tomorrow
+document.getElementById("end-date").setAttribute("min", today)//end-date has minimum value which set as today
+document.getElementById("end-date").setAttribute("max", maxDate);//end date can not be earlier than today.
 
 // Ensure end date is greater than start date
 var startDateField = document.getElementById("start-date");
@@ -97,8 +97,7 @@ const salesReportTemplate = `
 
 
 function renderSalesReport(data) {
-  const compiledTemplate = Handlebars.compile(salesReportTemplate);//handlebar.compile() converts the template string into a callable function that generate dynamic html
-
+  const compiledTemplate = Handlebars.compile(salesReportTemplate);//handlebar.compile() converts the template string into a callable function that generate dynamic html.
 
   const salesReportHTML = compiledTemplate({ data: data });//invokes compiled handlebars templte with data passed as an argument.Data is sales object orders,grandTtoal.Atlast sales reportHtml is a string of html that display sales report
 

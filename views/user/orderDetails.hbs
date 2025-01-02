@@ -453,6 +453,7 @@ const amount = parseInt(grandTotalText.replace(/[^\d]/g, '')) * 100;
 // Log the amount to check if the parsing works
 console.log('Grand Total:', amount);
 
+//below function generate the invoice
 
     const getInvoice = async (id) => {
   try {
@@ -460,27 +461,27 @@ console.log('Grand Total:', amount);
       method: 'GET',
       headers: {
         'Content-Type': 'application/pdf'
-      }
+      }//expecting the response in the pdf format
     });
     
     if (!response.ok) {
       throw new Error('Failed to fetch invoice');
     }
     
-    const blob = await response.blob();
+    const blob = await response.blob();//This method converts the response body into a blob object.Blob represent binary data.It represents the pdf file.
 
     // Create a URL for the downloaded file
-    const url = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);//create a temporary url which used to access the file and download it.
 
     // Create a link element to trigger the download
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'invoice.pdf';
+    const link = document.createElement('a');//it create anchor tag programatically.
+    link.href = url;//href attribute set to the url
+    link.download = 'invoice.pdf';//the file download as invoice.pdf
 
-    link.click();
+    link.click();//simulates click on anchor tag,trigerring the download.It essentially tells the browser to start downloading the file.
 
     // Clean up the URL object
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(url);//after the file is downloaded.cleanup step to prevent the memory leaks.
   } catch (error) {
     console.error('Error fetching invoice:', error);    
   }
@@ -652,7 +653,7 @@ const payment = (orderId) => {
     
 
     var options = {
-        "key": "rzp_test_OsDtnewxAfAwm0", 
+        "key": "rzp_test_QhDPSiMt8ea6IF", 
         "amount": amount, // Amount in currency subunits (paise)
         "currency": "INR",
         "name": "Basha Book",
@@ -666,7 +667,7 @@ const payment = (orderId) => {
         }
     },
             
-    
+    //This is an event handler when razorpay modal is dismissed when the user closes the payment popup without completing the payment.
         "modal": {
             "ondismiss": function() {
                 console.log('Payment modal dismissed');
@@ -677,8 +678,8 @@ const payment = (orderId) => {
 
 
 
-        var options = {
-      "key": "rzp_test_OsDtnewxAfAwm0", // Enter the Key ID generated from the Dashboard
+    var options = {
+      "key": "rzp_test_QhDPSiMt8ea6IF", // Enter the Key ID generated from the Dashboard
       "amount": parseInt(amount), // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
       "currency": "INR",
         

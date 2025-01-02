@@ -9,14 +9,16 @@ const productOfferPage=async(req,res)=>{
             page=req.query.page
         }
         let limit=3
+        //here we take the productOfferData
         let productOfferData=await ProductOffer.find().skip((page-1)*limit).limit(limit*1).lean()
         const count=await ProductOffer.find({}).countDocuments()
         const totalPages=Math.ceil(count/limit)
+      //create a pages array based on the length of the totalPages  
         const pages=Array.from({length:totalPages},(_,i)=>i+1)
-
+//here we check the productOffer data has active status based on the start date and end date
         productOfferData.forEach(async(data)=>{
-            const isActive=data.endDate>=new Date() && data.startDate<=new Date()
-            await ProductOffer.updateOne(
+const isActive=data.endDate>=new Date() && data.startDate<=new Date()
+              await ProductOffer.updateOne(
                 {_id:data._id},
                 {
                     $set:{
@@ -26,9 +28,9 @@ const productOfferPage=async(req,res)=>{
             )
         })
 
-        console.log("product offer data",productOfferData)
-
-        productOfferData=productOfferData.map((data)=>{
+    console.log("product offer data",productOfferData)
+//here i format the data for the productoffer in a yyyy(year)-mm(month)-day(dd)
+    productOfferData=productOfferData.map((data)=>{
             data.startDate=moment(data.startDate).format('YYYY-MM-DD')
             data.endDate=moment(data.endDate).format('YYYY-MM-DD')
             return data
@@ -41,6 +43,7 @@ const productOfferPage=async(req,res)=>{
     }
 }
 
+//load the addproductOfferPage with the product data
 const addProductOfferPage=async(req,res)=>{
     try{
         const products=await Product.find({}).lean()
@@ -50,8 +53,10 @@ const addProductOfferPage=async(req,res)=>{
     }
 }
 
+//adding the productOffer
 const addProductOffer=async(req,res)=>{
     try{
+//destructure the admin entered details in the form
         const {productName,productOfferPercentage,startDate,endDate}=req.body
         console.log("received data:",req.body)
 
@@ -59,7 +64,7 @@ const addProductOffer=async(req,res)=>{
         if(!product){
             return res.status(404).send("there is no product based on that name")
         }
-
+//checking if the product has productOffer already there
         const existingOffer=await ProductOffer.findOne({
             productId:product._id,
             currentStatus:true
@@ -74,11 +79,13 @@ const addProductOffer=async(req,res)=>{
         if(isNaN(discount)||discount <5 ||discount >90){
             return res.status(400).send("discount is invalid")
         }
-
+//set the productOffer status active or not based on the startDate and endDate
         const isActive=new Date(endDate) >= new Date() && new Date(startDate) <= new Date()
 
+//here calculate the discount price
         const discountPrice=product.price - (product.price * discount)/100
 
+//saving the productOffer
         const proOffer=new ProductOffer({
             productId:product._id,
             productName:productName,
@@ -106,6 +113,7 @@ const addProductOffer=async(req,res)=>{
 const editProductOfferPage=async(req,res)=>{
     try{
         const {id}=req.params
+//based on the id take the productOffer details to edit in that page
         const editProductOfferData=await ProductOffer.findById(id).lean()
         if(!editProductOfferData){
             return res.status(404).send("product offer not found")
@@ -125,6 +133,7 @@ const editProductOfferPage=async(req,res)=>{
 
 const editProductOffer=async(req,res)=>{
     try{
+//destructure the data given in the editProductOffer page form
        const {offerId, productName,productOfferPercentage,startDate,endDate}=req.body
 
        const productOfferData=await ProductOffer.findById(offerId)
@@ -143,6 +152,7 @@ const editProductOffer=async(req,res)=>{
         res.status(400).send("Invalid discount percentage")
        }
 
+//checking if the product has offer or not
        const existingActiveOffer=await ProductOffer.findOne({
         productId:product._id,
         _id:{$ne:offerId},
@@ -153,10 +163,12 @@ const editProductOffer=async(req,res)=>{
         return res.status(400).send("An active product offer already exists for this product")
        }
 
+//checking the status of the offer of the product
        const isActive=new Date(endDate) >= new Date() && new Date(startDate)<=new Date()
 
+//discount price of the product
        const discountPrice=product.price - (product.price * discount)/100
-
+//saving the product offer here
        productOfferData.productName=productName
        productOfferData.productOfferPercentage=discount
        productOfferData.discountPrice=discountPrice
@@ -173,6 +185,7 @@ const editProductOffer=async(req,res)=>{
     }
 }
 
+//based on the id here i delete the productoffer
 const deleteProductOffer=async(req,res)=>{
     try{
         const {id}=req.params
@@ -182,6 +195,7 @@ const deleteProductOffer=async(req,res)=>{
         console.log(error)
     }
 }
+
 module.exports={
     productOfferPage,
     addProductOfferPage,

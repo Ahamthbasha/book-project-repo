@@ -620,6 +620,9 @@ const returnOneProduct = async (req, res) => {
   }
 };
 
+
+//below we use toString()?
+// productId and productItem._id are probably objectId.It is unique.When comparing objectId values you can't directly compare them using the === operator because objectId instances are complex object.For that reason we convert it into string representation and compare it.
 const getInvoice = async (req, res) => {
     try {
       const orderId = req.query.id;
@@ -628,8 +631,8 @@ const getInvoice = async (req, res) => {
       if (!order) {
         return res.status(500).send({ message: "Order not found" });
       }
-  
-      const { userId, address: addressId, product } = order;
+      //destructure the order it take userId,address and product
+  const { userId, address: addressId, product } = order;
       const [user, address] = await Promise.all([
         User.findById(userId),
         Address.findById(addressId),
@@ -645,7 +648,7 @@ const getInvoice = async (req, res) => {
   
       // Get product offers for the products in the order
       const productOffers = await ProductOffer.find({
-        productId: { $in: product.map(p => p._id) },  // Make sure we use the correct field (_id of the product)
+        productId: { $in: product.map(p => p._id) },  // Make sure we use the correct field (_id of the product).Matching the orders in the product array which has offer collection
         startDate: { $lte: new Date() },
         endDate: { $gte: new Date() },
         currentStatus: true,
@@ -732,10 +735,14 @@ const getInvoice = async (req, res) => {
   
       easyinvoice.createInvoice(data, function (result) {
         const fileName = `invoice_${orderId}.pdf`;
-        const pdfBuffer = Buffer.from(result.pdf, "base64");
-        res.setHeader("Content-Type", "application/pdf");
+        const pdfBuffer = Buffer.from(result.pdf, "base64");//convert it into the buffer format pdfBuffer = <Buffer 25 50 44 46 2d 31 2e 34 0a 25 ... >;
+
+        res.setHeader("Content-Type", "application/pdf");//browser will understand content is in pdf format
         res.setHeader("Content-Disposition", `attachment;filename=${fileName}`);
-        res.send(pdfBuffer);
+        //content-disposition -it tells the browser how to handle the file
+        //attachment tells the browser to treat the content as a downloadable file
+        //filename the browser suggest this filename when downloading
+        res.send(pdfBuffer);//response body will be in the binary format but the content will be transmitted to the client with the headers set earlier
       });
     } catch (error) {
       console.log(error);
@@ -746,14 +753,15 @@ const getInvoice = async (req, res) => {
 const verify=(req,res)=>{
   console.log(req.body.payment,"end")
   const {orderId}=req.body
+  //destructuring the razorpay order id,payment id,signature proovided by the razorpay that verify the integrity of the payment
   const{razorpay_order_id,razorpay_payment_id,razorpay_signature}=req.body.payment
 
+  //create a hash based message authentication code.hmac created using crypto module.sha256 is a hashing algorithm
   let hmac=crypto.createHmac("sha256",process.env.KEY_SECRET)
 
   hmac.update(
     `${razorpay_order_id}|${razorpay_payment_id}`
-  )
-
+  )//standardway razorpay creates the HMAC signature.After updating the hmac with the info.We get the final HMAC value in a hexadecimal string format.
   hmac=hmac.digest("hex")
 
   console.log(hmac,"hmac")
@@ -761,7 +769,7 @@ const verify=(req,res)=>{
 
   if(hmac === razorpay_signature){
     console.log("true")
-    changeOrderStatusToConfirmed(orderId)
+    changeOrderStatusToConfirmed(orderId)//call the function to change the order status
     res.json({status:true})
   }else{
     console.log("false")

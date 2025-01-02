@@ -23,7 +23,6 @@ router.get('/get_sales',adminAuth.isLogin,dashboardController.getSales)
 router.get('/get_chart_data',adminAuth.isLogin,dashboardController.getChartData)
 //user management
 router.get('/manage_users', adminAuth.isLogin, customerController.loadUsersData)
-
 router.get('/block_user/:id', adminAuth.isLogin, customerController.blockUser)
 
 //category management
@@ -75,4 +74,5 @@ router.post('/addCatOffers',adminAuth.isLogin, categoryOfferController.addCatego
 router.get('/editCategoryOffer/:id',adminAuth.isLogin, categoryOfferController.editCategoryOfferPage)
 router.post("/editCategoryOffer/:id",adminAuth.isLogin, categoryOfferController.editCategoryOffer);
 router.delete('/deleteCatOffer/:id',adminAuth.isLogin, categoryOfferController.deleteCategoryOffer)
+
 module.exports=router

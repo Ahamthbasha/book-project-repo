@@ -209,7 +209,7 @@
         });
     };
 
-    const updateProductList = (products) => {
+  const updateProductList = (products) => {
     const productList = $('#pro_container .row.product-grid-4');
     productList.empty(); // Clear previous products
 
@@ -218,7 +218,7 @@
         return;
     }
 
-    products.forEach((product) => {
+      products.forEach((product) => {
         const productHtml = `
             <div class="col-lg-3 col-md-4 col-12 col-sm-6">
                 <div class="product-cart-wrap mb-30">
@@ -247,14 +247,16 @@
                         </div>
                         <h2><a href="/productview/${product._id}">${product.name}</a></h2>
                         <div class="rating-result">
-                            ${product.offerAvailable ? `<span>${product.offerPercentage}% Off</span>` : ''}
+                        {{#if product.offerAvailable}}
+                            <span><span>${product.offerPercentage}%</span></span>
+                        {{/if}}
                         </div>
                         <div class="product-price">
                             ${
                                 product.discountPrice && product.discountPrice < product.price
                                     ? `<span>₹${product.discountPrice}</span>
                                        <span class="old-price">₹${product.price}</span>
-                                       <span>Offer Available</span>` 
+                                       <span >offer Available</span>` 
                                     : `<span>₹${product.price}</span>`
                             }
                         </div>

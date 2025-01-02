@@ -237,7 +237,9 @@ const editProduct = async (req, res) => {
 
 
   //changes
-  const deleteProImage = async (req, res) => {
+  
+  
+const deleteProImage = async (req, res) => {
     try {
       const { id, image } = req.query;
   
@@ -261,7 +263,7 @@ const editProduct = async (req, res) => {
       }
   
       // Remove the image from the array
-      const deletedImage = product.imageUrl.splice(imageIndex, 1)[0];
+      const deletedImage = product.imageUrl.splice(imageIndex, 1)[0];//it delete the image based on the imageIndex starting and delete it.The [0] extracts the first element of the array returned by splice()
       console.log("Deleted image:", deletedImage);
   
       // Save the product after removing the image

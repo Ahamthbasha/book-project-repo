@@ -447,8 +447,9 @@
 
 const getChartData = async () => {
     try {
+        //below makes the get request to the route using fetch api
         const response = await fetch('/admin/get_chart_data', {
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' },//here response is convereted into json format
         });
 
         const data = await response.json();
@@ -462,7 +463,7 @@ const getChartData = async () => {
          categories = data.cat;
          revenues = data.revenue;
 
-        
+//pass the data to the below functions
         salesGraph(months, ordersByMonth);
         revenue(months, revenueByMonth);
         categoryRevenue(categories, revenues); 
@@ -475,11 +476,13 @@ const getChartData = async () => {
 getChartData();
 
 
-
+//This function creates the bar chart to visualize no of sales per month
 function salesGraph(months, ordersByMonth) {
     const ctx = document.getElementById('myChart1').getContext('2d');
+    //it grabs the 2d context of the canvas element with the id myChart1
+    //new Chart which use the chart.js library 
     new Chart(ctx, {
-        type: 'bar',
+        type: 'bar',//setting the chart type to bar
         data: {
             labels: months,
             datasets: [{
@@ -517,11 +520,11 @@ function salesGraph(months, ordersByMonth) {
             }]
         },
         options: {
-            responsive: true,
+            responsive: true,//chart adapts to different screen sizes
             plugins: {
                 legend: {
                     position: 'top',
-                },
+                },//below tooltip,showing no of sales when hovering over a bar
                 tooltip: {
                     callbacks: {
                         label: function(tooltipItem) {
@@ -614,6 +617,7 @@ function categoryRevenue(categories, revenues) {
             }]
         },
         options: {
+            //customize the chart with the datalabels plugin to show category labels on the pie slices in bold ,black text
             plugins: {
                 datalabels: {
                     color: '#000',

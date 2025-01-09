@@ -1,4 +1,5 @@
 const Product=require("../../models/productModel")
+const productOffer=require("../../models/productOfferModel")
 const Category=require("../../models/categoryModel")
 const fs=require("fs")
 const path=require("path")
@@ -171,7 +172,7 @@ const editProduct = async (req, res) => {
         updImages = exImage;
       }
   
-      const { name, price, description, category, stock, brand } = req.body;
+      const { name, price, description, category, stock} = req.body;
       await Product.findByIdAndUpdate(
         proId,
         {
@@ -186,6 +187,19 @@ const editProduct = async (req, res) => {
         },
         { new: true }
       );
+
+      if(product.price !== price){
+        const existingOffer=await productOffer.findOne({
+          productId:product._id,
+          currentStatus:true
+        })
+
+        if(existingOffer){
+          const newDiscountPrice=price - (price * existingOffer.productOfferPercentage)/100
+          existingOffer.discountPrice=newDiscountPrice
+          await existingOffer.save()
+        }
+      }
   
       // req.session.productSave = true
       res.redirect("/admin/product");

@@ -19,7 +19,7 @@ const productSchema = new mongoose.Schema(
 
     category: {
       type: mongoose.Schema.Types.ObjectId,//It store a unique identifier for a document in another collection.This enables a relationship or link between two collections
-      ref: "category",//refer the category collection
+      ref: "Category",//refer the category collection
       required: true,
     },
 
@@ -32,14 +32,14 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    productOfferId:{
-      type:mongoose.Types.ObjectId,
-      default:null
-    },
-    productOfferPercentage:{
-      type:Number,
-      default:null
-    },
+    // productOfferId:{
+    //   type:mongoose.Types.ObjectId,
+    //   default:null
+    // },
+    // productOfferPercentage:{
+    //   type:Number,
+    //   default:null
+    // },
     discountedPrice:{
       type:Number
     },

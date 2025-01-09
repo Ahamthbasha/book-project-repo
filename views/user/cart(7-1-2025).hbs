@@ -123,154 +123,159 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <script>
+
+
     $(document).ready(function () {
+        $('.action').click(function () {
+            var id = $(this).data('product-id');
+            //var wishId = $(this).data('whishlist-id'); // Corrected variable name to wishId
 
-    // Handle Product Removal
-    $('.action').click(function () {
-        var id = $(this).data('product-id');
-        var $this = $(this);
+            // Store reference to $(this) in a variable for use inside AJAX success and error callbacks
+            var $this = $(this);
 
-        Swal.fire({
-            title: "Are you sure?",
-            text: "You won't be able to revert this!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#088178",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, delete it!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    type: 'POST',
-                    url: '/removeFromCart',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ id: id }),
-                    success: function (productData) {
-                        $this.closest('tr').remove(); // Remove the product row
-                        Swal.fire({
-                            title: 'Removed!',
-                            text: 'Product Successfully Removed from Cart!',
-                            icon: 'success',
-                            confirmButtonText: 'Cool'
-                        }).then(() => window.location.reload())
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error removing product from cart:", error);
-                        swal("Error", "Something went wrong. Please try again later.", "error");
-                    }
-                });
-            }
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#088178",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'POST',
+                        url: '/removeFromCart',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ id: id }),
+                        success: function (productData) {
+                            console.log("Product removed from Cart successfully");
+                            // If you want to remove the row from the table upon successful removal
+                            $this.closest('tr').remove(); // Use $this instead of $(this)                        
+                            {
+                                Swal.fire({
+                                    title: 'Removed!',
+                                    text: 'Product Succesfully Removed from Cart!!!',
+                                    icon: 'success',
+                                    confirmButtonText: 'Cool'
+                                }).then(()=> window.location.reload())
+                            }
+
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error removing product from wishlist:", error);
+                            swal("Error", "Something went wrong. Please try again later.", "error");
+                        }
+                    });
+                    Swal.fire({
+                        title: "Deleted!",
+                        text: "Your file has been deleted.",
+                        icon: "success"
+                    });
+                }
+            });
+
+
         });
     });
 
     // Increment and Decrement quantity
-    $('.fa-plus, .fa-minus').click(function () {
+  
+        $('.fa-plus, .fa-minus').click(function () {
         const cartId = $(this).closest('tr').find('.num-product').prop('id');
-        const currentQuantity = parseInt($(`#${cartId}`).val());
-        
-        let newValue;
-        
-        // If it's incrementing
-        if ($(this).hasClass('fa-plus')) {
-            newValue = currentQuantity + 1;
-            updateCartItemQuantity(cartId, newValue, "plus");
-        }
-        
-        // If it's decrementing
-        else if ($(this).hasClass('fa-minus')) {
-            // Ensure quantity does not go below 1
-            if (currentQuantity > 1) {
-                newValue = currentQuantity - 1;
-                updateCartItemQuantity(cartId, newValue , "minus");
-            }
+        const newValue = $(this).hasClass('fa-plus') ? parseInt($(`#${cartId}`).val()) + 1 : parseInt($(`#${cartId}`).val()) - 1;
+        if (newValue > 0) {
+            $(`#${cartId}`).val(newValue);
+            updateCartItemQuantity(cartId, newValue);
         }
     });
 
     // Update cart item quantity
-    function updateCartItemQuantity(cartId, newValue, operation) {
-        const availableStock = $(`#${cartId}`).data('stock'); // Assuming stock is added as a data attribute to input
-
-        // Validate if the new quantity is within the available stock (only for increasing)
-        if (newValue > availableStock) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: `You can only choose up to ${availableStock} units of this product!`,
-            });
-            return; // Don't update if the quantity exceeds available stock
-        }
-
-        // Update the value of the input field
-        $(`#${cartId}`).val(newValue);
-        // Make an AJAX call to update the backend cart data
+    function updateCartItemQuantity(cartId, newValue) {
         $.ajax({
             url: '/updatecart',
             method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({ cartIdForUpdate: cartId, newValue: newValue, operation }),
+            data: JSON.stringify({ cartIdForUpdate: cartId, newValue: newValue }),
             success: function (data) {
+                console.log("received from javascript BROOOOOOOOO", data)
                 if (data.success) {
+
+
+                    console.log('Response from server:', data);
                     // Update the total amount for the specific cart item
-                    $(`#totalPerItem-${cartId}`).text(`₹${data.items[0].totalAmount}`);
+                    $(`#totalPerItem-${cartId}`).text(data.items[0].totalAmount);
                     // Update the subtotal and total in the UI
+                  //  $('#Subtotal').text(data.cartValue[0].total);
+                   // $('#total').text(data.cartValue[0].total);
                     updateCartTotal();
+
+
                 } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Oops...',
                         text: data.message,
-                    }).then(() => window.location.reload());
+                    }).then(() => window.location.reload())
+
+
                 }
+
             },
             error: function (error) {
-                console.log(error);
+                console.log(error)
             },
+
         });
     }
 
-    // Update cart totals (Subtotal and Total)
     function updateCartTotal() {
-        let subtotal = 0;
-        $('.shopping-summery tbody tr').each(function () {
-            const itemTotal = parseFloat($(this).find('td[data-title="Cart"] span').text().replace('₹', ''));
-            subtotal += isNaN(itemTotal) ? 0 : itemTotal;
-        });
-        $('#Subtotal').text(`₹${subtotal}`);
-        const shipping = 50;  // Add a fixed shipping fee
-        const total = subtotal + shipping;
+            let subtotal = 0;
+            $('.shopping-summery tbody tr').each(function () {
+                const itemTotal = parseFloat($(this).find('td[data-title="Cart"] span').text().replace('₹', ''));
+                subtotal += isNaN(itemTotal) ? 0 : itemTotal;
+            });
+            $('#Subtotal').text(`₹${subtotal}`);
+            const shipping = 50; 
+        const total = subtotal + shipping; 
         $('#total').text(`₹${total}`);
-    }
+        }
 
-    // Initial cart total calculation
-    updateCartTotal();
+        // Initial cart total calculation
+        updateCartTotal();
+    
 
-    // Handle Checkout Button Click
-    $('#proceedToCheckoutBtn').on('click', function () {
-        $.ajax({
-            url: '/checkOutOfStock',
-            method: 'POST',
-            contentType: 'application/json',
-            success: function (data) {
-                if (!data.success) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: data.message,
-                    });
-                } else {
-                    window.location.href = "/cart/checkout";  // Redirect to checkout if all products are in stock
-                }
-            },
-            error: function (error) {
-                console.log("Error:", error);
+$('#proceedToCheckoutBtn').on('click', function() {
+    $.ajax({
+        url: '/checkOutOfStock',
+        method: 'POST',
+        contentType: 'application/json',
+        success: function(data) {
+            console.log("Response from server:", data);
+            
+            if (!data.success) {
+                // If out of stock, show the message in SweetAlert
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
-                    text: 'Something went wrong, please try again.',
+                    text: data.message,
                 });
+            } else {
+                // If all products are in stock, redirect to checkout page
+                window.location.href = "/cart/checkout";
             }
-        });
+        },
+        error: function(error) {
+            console.log("Error:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong, please try again.',
+            });
+        }
     });
 });
+
 
 </script>

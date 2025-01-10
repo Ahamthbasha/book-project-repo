@@ -1,3 +1,5 @@
+
+
 <aside class="navbar-aside" id="offcanvas_aside">
     <div class="aside-top">
         <a href="/admin/home" class="brand-wrap">
@@ -99,6 +101,12 @@
                         <h4>Basic</h4>
                     </div>
                     <div class="card-body">
+                        {{#if errorMessage}}
+    <div class="alert alert-danger" role="alert" id="errorMessage">
+        {{errorMessage}}
+    </div>
+{{/if}}
+
                         <form method="post" class="form-add-product" action="/admin/update_product/{{proData._id}}"
                             enctype="multipart/form-data" onsubmit="return Validation()">
                             <div class="mb-4">
@@ -500,5 +508,20 @@ const deleteProImg = () => {
 
 
         });
+    });
+</script>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    // Check if there's an error message
+    $(document).ready(function() {
+        // If the error message exists
+        if ($('#errorMessage').length > 0) {
+            // Fade out the error message after 5 seconds
+            setTimeout(function() {
+                $('#errorMessage').fadeOut();
+            }, 2000); // 5000 milliseconds = 5 seconds
+        }
     });
 </script>

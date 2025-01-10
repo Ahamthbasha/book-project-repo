@@ -274,61 +274,265 @@ const addNewProduct = async (req, res) => {
     }
 };
 
+  // const updateProduct = async (req, res) => {
+  //   try {
+  //     const proId = req.params.id;
+  //     const product = await Product.findById(proId);
+  //     const exImage = product.imageUrl;
+  //     const files = req.files;
+  //     let updImages = [];
+  
+  //     if (files && files.length > 0) {
+  //       const newImages = req.files.map((file) => file.filename);
+  //       updImages = [...exImage, ...newImages];
+  //       product.imageUrl = updImages;
+  //     } else {
+  //       updImages = exImage;
+  //     }
+  
+  //     const { name, price, description, category, stock} = req.body;
+  //     await Product.findByIdAndUpdate(
+  //       proId,
+  //       {
+  //         name: name,
+  //         price: price,
+  //         description: description,
+  //         category: category,
+  //         stock: stock,
+  //         is_blocked: false,
+  
+  //         imageUrl: updImages,
+  //       },
+  //       { new: true }
+  //     );
 
-  const updateProduct = async (req, res) => {
-    try {
+  //     if(product.price !== price){
+  //       const existingOffer=await productOffer.findOne({
+  //         productId:product._id,
+  //         currentStatus:true
+  //       })
+
+  //       if(existingOffer){
+  //         const newDiscountPrice=price - (price * existingOffer.productOfferPercentage)/100
+  //         existingOffer.discountPrice=newDiscountPrice
+  //         await existingOffer.save()
+  //       }
+  //     }
+  
+  //     // req.session.productSave = true
+  //     res.redirect("/admin/product");
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+  
+
+
+  // To delete Product ///
+  
+//   const updateProduct = async (req, res) => {
+//     try {
+//         const proId = req.params.id;
+//         const { name, price, description, category, stock } = req.body;
+
+//         // Check if another product with the same name exists
+//         const existingProduct = await Product.findOne({ name: name, _id: { $ne: proId } });
+
+//         if (existingProduct) {
+//             // If a duplicate is found, send an error message
+//             return res.status(400).render("admin/edit_product", {
+//                 proData: req.body, // Keep the current input values
+//                 catogories: await Category.find({ isListed: true }).lean(),
+//                 errorMessage: "A product with this name already exists.",
+//                 layout: 'adminlayout'
+//             });
+//         }
+
+//         const product = await Product.findById(proId);
+//         const exImage = product.imageUrl;
+//         const files = req.files;
+//         let updImages = [];
+
+//         if (files && files.length > 0) {
+//             const newImages = req.files.map((file) => file.filename);
+//             updImages = [...exImage, ...newImages];
+//             product.imageUrl = updImages;
+//         } else {
+//             updImages = exImage;
+//         }
+
+//         await Product.findByIdAndUpdate(
+//             proId,
+//             {
+//                 name: name,
+//                 price: price,
+//                 description: description,
+//                 category: category,
+//                 stock: stock,
+//                 is_blocked: false,
+//                 imageUrl: updImages,
+//             },
+//             { new: true }
+//         );
+
+//         if (product.price !== price) {
+//             const existingOffer = await productOffer.findOne({
+//                 productId: product._id,
+//                 currentStatus: true
+//             });
+
+//             if (existingOffer) {
+//                 const newDiscountPrice = price - (price * existingOffer.productOfferPercentage) / 100;
+//                 existingOffer.discountPrice = newDiscountPrice;
+//                 await existingOffer.save();
+//             }
+//         }
+
+//         res.redirect("/admin/product");
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send('Server Error');
+//     }
+// };
+ 
+// const updateProduct = async (req, res) => {
+//   try {
+//       const proId = req.params.id;
+//       const { name, price, description, category, stock } = req.body;
+
+//       // Check if another product with the same name exists
+//       const existingProduct = await Product.findOne({ name: name, _id: { $ne: proId } });
+
+//       if (existingProduct) {
+//         return res.status(400).render("admin/edit_product", {
+//             proData: {
+//                 ...req.body,
+//                 imageUrl: product.imageUrl // Ensure existing images are included
+//             },
+//             catogories: await Category.find({ isListed: true }).lean(),
+//             errorMessage: "A product with this name already exists.",
+//             layout: 'adminlayout'
+//         });
+//     }
+    
+
+//       const product = await Product.findById(proId);
+//       const exImage = product.imageUrl;
+//       const files = req.files;
+//       let updImages = [];
+
+//       if (files && files.length > 0) {
+//           const newImages = req.files.map((file) => file.filename);
+//           updImages = [...exImage, ...newImages];
+//           product.imageUrl = updImages;
+//       } else {
+//           updImages = exImage;
+//       }
+
+//       await Product.findByIdAndUpdate(
+//           proId,
+//           {
+//               name: name,
+//               price: price,
+//               description: description,
+//               category: category,
+//               stock: stock,
+//               is_blocked: false,
+//               imageUrl: updImages,
+//           },
+//           { new: true }
+//       );
+
+//       if (product.price !== price) {
+//           const existingOffer = await productOffer.findOne({
+//               productId: product._id,
+//               currentStatus: true
+//           });
+
+//           if (existingOffer) {
+//               const newDiscountPrice = price - (price * existingOffer.productOfferPercentage) / 100;
+//               existingOffer.discountPrice = newDiscountPrice;
+//               await existingOffer.save();
+//           }
+//       }
+
+//       res.redirect("/admin/product");
+//   } catch (error) {
+//       console.log(error);
+//       res.status(500).send('Server Error');
+//   }
+// };
+
+const updateProduct = async (req, res) => {
+  try {
       const proId = req.params.id;
+      const { name, price, description, category, stock } = req.body;
+
+      // Fetch the product first
       const product = await Product.findById(proId);
+      
+      // Check if another product with the same name exists
+      const existingProduct = await Product.findOne({ name: name, _id: { $ne: proId } });
+
+      if (existingProduct) {
+          return res.status(400).render("admin/edit_product", {
+              proData: {
+                  ...req.body,
+                  imageUrl: product.imageUrl // Ensure existing images are included
+              },
+              catogories: await Category.find({ isListed: true }).lean(),
+              errorMessage: "A product with this name already exists.",
+              layout: 'adminlayout'
+          });
+      }
+
       const exImage = product.imageUrl;
       const files = req.files;
       let updImages = [];
-  
+
       if (files && files.length > 0) {
-        const newImages = req.files.map((file) => file.filename);
-        updImages = [...exImage, ...newImages];
-        product.imageUrl = updImages;
+          const newImages = req.files.map((file) => file.filename);
+          updImages = [...exImage, ...newImages];
+          product.imageUrl = updImages;
       } else {
-        updImages = exImage;
+          updImages = exImage;
       }
-  
-      const { name, price, description, category, stock} = req.body;
+
       await Product.findByIdAndUpdate(
-        proId,
-        {
-          name: name,
-          price: price,
-          description: description,
-          category: category,
-          stock: stock,
-          is_blocked: false,
-  
-          imageUrl: updImages,
-        },
-        { new: true }
+          proId,
+          {
+              name: name,
+              price: price,
+              description: description,
+              category: category,
+              stock: stock,
+              is_blocked: false,
+              imageUrl: updImages,
+          },
+          { new: true }
       );
 
-      if(product.price !== price){
-        const existingOffer=await productOffer.findOne({
-          productId:product._id,
-          currentStatus:true
-        })
+      if (product.price !== price) {
+          const existingOffer = await productOffer.findOne({
+              productId: product._id,
+              currentStatus: true
+          });
 
-        if(existingOffer){
-          const newDiscountPrice=price - (price * existingOffer.productOfferPercentage)/100
-          existingOffer.discountPrice=newDiscountPrice
-          await existingOffer.save()
-        }
+          if (existingOffer) {
+              const newDiscountPrice = price - (price * existingOffer.productOfferPercentage) / 100;
+              existingOffer.discountPrice = newDiscountPrice;
+              await existingOffer.save();
+          }
       }
-  
-      // req.session.productSave = true
+
       res.redirect("/admin/product");
-    } catch (error) {
+  } catch (error) {
       console.log(error);
-    }
-  };
-  
-  / To delete Product ///
-  
+      res.status(500).send('Server Error');
+  }
+};
+
+
   const deleteProduct = async (req, res) => {
     const proId = req.params.id;
     await Product.findByIdAndDelete(proId)

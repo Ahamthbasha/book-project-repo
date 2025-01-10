@@ -165,47 +165,86 @@ const getCategory = async (req, res) => {
       console.log(error);
     }
   };
+
+  // const updateCategory = async (req, res) => {
+  //   try {
+  //     const catName = req.body.name;
+  //     const image = req.file;
+  //     const catId = req.params.id;
+  
+  //     const cat = await Category.findById(catId);
+  //     const catImg = cat.imageUrl;
+  //     let updImge;
+  
+  //     if (image) {
+  //       updImge = image.filename;
+  //     } else {
+  //       updImge = catImg;
+  //     }
   
   
+  //     const catExist = await Category.findOne({ category: { $regex: new RegExp("^" + catName + "$", "i") } });
   
+  //     if (!catExist) {
+  //       await Category.findByIdAndUpdate(
+  //         catId,
+  //         {
+  //           category: req.body.name,
+  //           imageUrl: updImge,
+  //         },
+  //         { new: true }
+  //       );
+  
+  //       req.session.categoryUpdate = true;
+  //       res.redirect("/admin/category");
+  //     } else {
+  //       // req.session.catExist = true
+  //       res.redirect("/admin/category");
+  //     }
+  //   } catch (error) { }
+  // };
   const updateCategory = async (req, res) => {
     try {
-      const catName = req.body.name;
-      const image = req.file;
-      const catId = req.params.id;
-  
-      const cat = await Category.findById(catId);
-      const catImg = cat.imageUrl;
-      let updImge;
-  
-      if (image) {
-        updImge = image.filename;
-      } else {
-        updImge = catImg;
-      }
-  
-  
-      const catExist = await Category.findOne({ category: { $regex: new RegExp("^" + catName + "$", "i") } });
-  
-      if (!catExist) {
+        const catName = req.body.name;
+        const image = req.file;
+        const catId = req.params.id;
+
+        // Check if another category with the same name exists
+        const catExist = await Category.findOne({ category: { $regex: new RegExp("^" + catName + "$", "i") }, _id: { $ne: catId } });
+
+        if (catExist) {
+            // If a duplicate is found, set the session flag and redirect back to edit page
+            req.session.catExist = true; // Set session flag for duplicate category
+            return res.redirect(`/admin/edit_category/${catId}`); // Redirect back to the edit page
+        }
+
+        const cat = await Category.findById(catId);
+        const catImg = cat.imageUrl;
+        let updImge;
+
+        if (image) {
+            updImge = image.filename;
+        } else {
+            updImge = catImg;
+        }
+
         await Category.findByIdAndUpdate(
-          catId,
-          {
-            category: req.body.name,
-            imageUrl: updImge,
-          },
-          { new: true }
+            catId,
+            {
+                category: catName,
+                imageUrl: updImge,
+            },
+            { new: true }
         );
-  
-        req.session.categoryUpdate = true;
+
+        req.session.categoryUpdate = true; // Set session flag for successful update
         res.redirect("/admin/category");
-      } else {
-        // req.session.catExist = true
-        res.redirect("/admin/category");
-      }
-    } catch (error) { }
-  };
-  
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Server Error');
+    }
+};
+
   
   
   const deleteCategory = async (req, res) => {

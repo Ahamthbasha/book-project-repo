@@ -1,3 +1,40 @@
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css" />
+    <style>
+        #image-preview-container {
+        display: none;
+        margin-top: 20px;
+        width: 50%; /* Take up half of the container width */
+        max-width: 300px; /* Optional, limit the maximum width */
+        aspect-ratio: 1; /* Ensures the container maintains a square shape */
+        position: relative;
+    }
+
+    #imagePreview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    #cropped-image-container {
+        display: none;
+        margin-top: 20px;
+        width: 50%; /* Take up half of the container width */
+        max-width: 300px; /* Optional, limit the maximum width */
+        aspect-ratio: 1; /* Ensures the container maintains a square shape */
+    }
+
+    #croppedImage {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    </style>
+</head>
+
+
 <aside class="navbar-aside" id="offcanvas_aside">
     <div class="aside-top">
         <a href="/admin/home" class="brand-wrap">
@@ -163,7 +200,7 @@
         <input type="file" class="form-control-file" id="productImage" multiple name="image">
         <h6 id="imgAlert" class=" mt-2" style="color: red;"></h6>
       </div>  --}}
-<div class="form-group">
+{{!-- <div class="form-group">
     <label for="productImage">Product Image:</label>
     <div class="d-flex border p-10 m-tb-10">
         <input name="product-id" type="hidden" value="{{proData._id}}">
@@ -186,10 +223,46 @@
           <p>{{errorMessage}}</p>
       </div>
     {{/if}}
+</div> --}}
+
+<div class="form-group">
+    <label for="productImage">Product Image:</label>
+    <div class="d-flex border p-10 m-tb-10">
+        <input name="product-id" type="hidden" value="{{proData._id}}">
+
+        <!-- Existing images display area (if any) -->
+        {{#each proData.imageUrl}}
+            <div class="image-container" onclick="deleteProImg()">
+                <div class="badge rounded-pill alert-danger">
+                    <p class="close-button" data-image-index="{{@index}}" style="text-decoration: none;">×</p>
+                </div>
+                <img src="/images/products/{{this}}" alt="images" style="width: 80px; height: auto;" class="m-2 pro-image" data-image-index="{{@index}}">
+            </div>
+        {{/each}}
+    </div>
+    
+    <!-- Image file input (for uploading new image) -->
+    <input type="file" class="form-control-file" id="productImage" name="image" accept="image/*">
+    
+    <!-- Image preview container (hidden initially) -->
+        <!-- Image preview container -->
+    <div id="image-preview-container" style="display:none; margin-top: 20px;">
+        <img id="imagePreview" src="" alt="Image Preview" style="width: 100%; max-height: 300px; object-fit: cover;">
+    </div>
+
+    <!-- Cropper options (display only after image is selected) -->
+    <div id="cropper-container" style="display:none; margin-top: 20px;">
+        <button type="button" id="cropSaveButton" class="btn btn-primary">Save Cropped Image</button>
+    </div>
+
+    <!-- Display the cropped image below -->
+    <div id="cropped-image-container" style="display:none; margin-top: 20px;">
+        <h5>Cropped Image:</h5>
+        <img id="croppedImage" src="" alt="Cropped Image" style="width: 100%; max-height: 300px; object-fit: cover;">
+    </div>
+    
+    <h6 id="imgAlert" class=" mt-2" style="color: red;"></h6>
 </div>
-
-
-
 
 
                             <div class="d-flex g-2">
@@ -227,6 +300,84 @@
         </div>
     </footer>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+
+<script>
+let cropper; // Store the Cropper.js instance
+
+// Handle the file input change (image selection)
+document.getElementById('productImage').addEventListener('change', function(event) {
+    const file = event.target.files[0]; // Get the selected file
+
+    // Check if a file is selected
+    if (file) {
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/avif'];
+        
+        // Validate image type
+        if (!allowedTypes.includes(file.type)) {
+            alert("Invalid image type. Please upload only images (PNG, JPEG, JPG, AVIF).");
+            return;
+        }
+
+        // Create a URL for the selected file
+        const imageUrl = URL.createObjectURL(file);
+
+        // Set the preview image to the selected file
+        const imagePreview = document.getElementById('imagePreview');
+        imagePreview.src = imageUrl;
+
+        // Show the preview container and initialize the cropper
+        document.getElementById('image-preview-container').style.display = 'block';
+        document.getElementById('cropper-container').style.display = 'none'; // Hide cropper save button initially
+
+        // Destroy any previous cropper instance to avoid conflicts
+        if (cropper) {
+            cropper.destroy();
+        }
+
+        // Initialize the cropper
+        cropper = new Cropper(imagePreview, {
+            aspectRatio: 1,  // Fixed aspect ratio (square crop)
+            viewMode: 1,     // Ensures the crop box stays inside the image
+            autoCropArea: 0.8, // Set the auto-crop area to 80% of the image
+            responsive: true,
+            zoomable: true,
+            movable: true,
+            cropBoxResizable: true,
+            ready() {
+                // Show the cropper save button after cropper is ready
+                document.getElementById('cropper-container').style.display = 'block';
+            }
+        });
+    }
+});
+
+// Handle saving the cropped image
+document.getElementById('cropSaveButton').addEventListener('click', function() {
+    // Get the cropped image as a canvas
+    const canvas = cropper.getCroppedCanvas();
+
+    // Convert the canvas to a base64 image
+    const croppedImage = canvas.toDataURL('image/jpeg');
+
+    // Display the cropped image in the container (which will take half the width)
+    document.getElementById('cropped-image-container').style.display = 'block';
+    document.getElementById('croppedImage').src = croppedImage;
+
+    // Update the input field with the cropped image (optional, for form submission)
+    canvas.toBlob(function(blob) {
+        const file = new File([blob], 'cropped-image.jpg', {
+            type: 'image/jpeg'
+        });
+
+        // Create a new DataTransfer object and update the input's files
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        document.getElementById('productImage').files = dataTransfer.files;
+    });
+});
+</script>
+
 
 <script>
 function validateImage() {

@@ -2,9 +2,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
 </head>
 
-
-
-
 <aside class="navbar-aside" id="offcanvas_aside">
     <div class="aside-top">
         <a href="/admin/home" class="brand-wrap">
@@ -86,6 +83,7 @@
         <br>
     </nav>
 </aside>
+
 <main class="main-wrap">
     <section class="content-main">
         <div class="row">
@@ -101,6 +99,11 @@
                         <h4>Basic</h4>
                     </div>
                     <div class="card-body">
+                        {{#if productExists}}
+                            <div class="alert alert-danger mt-3">
+                                Product already exists.
+                            </div>
+                        {{/if}}
                         <form method="post" id="product_form" class="form-add-product" action="/admin/add_new_product"
                             enctype="multipart/form-data" onsubmit="return submitform(this)">
                             <div class="mb-4">
@@ -297,8 +300,9 @@
 </main>
 
 
-<script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
 
+
+<script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

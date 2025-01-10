@@ -1,5 +1,6 @@
 const Handlebars = require('handlebars');
 const moment = require('moment');
+const {ObjectId}=require('mongodb')
 
 Handlebars.registerHelper('ifeq', function (a, b, options) {
     if (a == b) { return options.fn(this); }
@@ -159,7 +160,9 @@ Handlebars.registerHelper('isActive', function(route, options) {
   }
 });
 
-
+Handlebars.registerHelper('equalsObjectId',function(a,b){
+  return a.equals(b)
+})
 
   
 module.exports = Handlebars;

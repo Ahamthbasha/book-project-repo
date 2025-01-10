@@ -79,7 +79,7 @@
         <br>
     </nav>
 </aside>
-<main class="main-wrap">
+{{!-- <main class="main-wrap">
     <section class="content-main">
         <div class="content-header">
             <div>
@@ -157,49 +157,101 @@
             </div>
         </div>
     </footer>
+</main> --}}
+
+<main class="main-wrap">
+    <section class="content-main">
+        <div class="content-header">
+            <div>
+                <h2 class="content-title card-title">Add Categories</h2>
+            </div>
+            <div>
+                <input type="text" placeholder="Search Categories" class="form-control bg-white">
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                {{#if catSaveMsg}}
+                    <div class="alert alert-success mt-3 alert-dismissible fade {{#if catSaveMsg}}show{{/if}}" role="alert">
+                        {{catSaveMsg}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {{/if}}
+                {{#if catExistMsg}}
+                    <div class="alert alert-danger mt-3 alert-dismissible fade {{#if catExistMsg}}show{{/if}}" role="alert">
+                        {{catExistMsg}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {{/if}}
+                <div class="row">
+                    <div class="col-md-12">
+                        <form action="/admin/add_category" method="post" id="product_form" enctype="multipart/form-data" onsubmit="return validateForm()">
+                            <div class="mb-4">
+                                <label for="categoryName" class="form-label">Category Name:</label>
+                                <input type="text" placeholder="Type here" class="form-control" name="name" id="name" />
+                                <div class="error" style="color: red;" id="nameError"></div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="categoryImage" class="form-label">Category Image:</label>
+                                <input type="file" placeholder="Type here" class="form-control-file" name="image" accept="image/*" id="image" />
+                                <div class="error" style="color: red;" id="imageError"></div>
+                            </div>
+
+                            <div class="d-flex g-2">
+                                <div class="m-2">
+                                    <button type="submit" class="btn btn-primary">Create category</button>
+                                </div>
+                                <div class="m-2">
+                                    <a href="/admin/Category" type="button" class="btn btn-primary" id="backbutton">Back</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div> <!-- .row // -->
+            </div> <!-- card body .// -->
+        </div> <!-- card .// -->
+    </section> <!-- content-main end// -->
 </main>
 
+
 <script>
-    function Validation() {
-        let errors = []
+    function validateForm() {
+        let errors = [];
 
+        // Validate Category Name
         var name = document.getElementById('name').value;
-        var image = document.getElementById('image')
+        var nameerror = document.getElementById('nameError');
+        var namePattern = /^[a-zA-Z0-9\s]{5,}$/; // Allow letters, numbers, and spaces
 
-        var nameerror = document.getElementById('nameError')
-        var imageerror = document.getElementById('imageError')
-
-        var categoryPattern = /^[a-zA-Z]{3,}$/;
-
-
-        if (!name.match( categoryPattern)) {
-        errors.push("Name Not Valid");
-    }
-        if (image.files.length === 0) {
-            errors.push("Please choose an image");
+        if (!name.match(namePattern)) {
+            errors.push("Name Not Valid");
         }
 
+        // Validate Category Image File Type
+        var image = document.getElementById('image');
+        var imageerror = document.getElementById('imageError');
+        var validImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/avif'];
 
+        if (image.files.length === 0) {
+            errors.push("Please choose an image");
+        } else {
+            var file = image.files[0];
+            if (!validImageTypes.includes(file.type)) {
+                errors.push("Invalid image type. Only PNG, JPEG, JPG, and AVIF are allowed.");
+            }
+        }
 
-
-
+        // Display errors if any
         if (errors.length > 0) {
-            nameError.innerHTML = errors.includes("Name Not Valid") ? "Name Not Valid" : "";
-            imageError.innerHTML = errors.includes("Please choose an image") ? "Please choose an image" : "";
-
-
-
-
-
+            nameerror.innerHTML = errors.includes("Name Not Valid") ? "Name Not Valid" : "";
+            imageerror.innerHTML = errors.includes("Please choose an image") ? "Please choose an image" : "";
+            imageerror.innerHTML = errors.includes("Invalid image type. Only PNG, JPEG, JPG, and AVIF are allowed.") ? "Invalid image type. Only PNG, JPEG, JPG, and AVIF are allowed." : "";
             return false; // Prevent form submission
         }
 
-        return true;
-
-
-
+        return true; // Allow form submission if no errors
     }
-
 </script>
 
 

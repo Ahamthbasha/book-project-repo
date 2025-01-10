@@ -1,25 +1,11 @@
-<main>
-    {{!-- <header class="main-header style-2 navbar">
-        <div class="col-nav">
-            <ul class="nav">
-                <li class="nav-item">
-                    <!-- Changed anchor tag to a button with pill style -->
-                    <button class="nav-link btn btn-outline-primary rounded-pill darkmode" href="#">
-                        <i class="material-icons md-nights_stay"></i>
-                    </button>
-                </li>
-            </ul>
-        </div>
-    </header> --}}
+{{!-- <main>
+    
     <button class="nav-link btn btn rounded-pill darkmode m-3 " href="#">
         <i class="material-icons md-nights_stay"></i>
     </button>
 
 
     <section class="content-main mt-80 mb-0">
-        {{!-- <button class="nav-link btn btn-outline-primary rounded-pill darkmode" href="#">
-            <i class="material-icons md-nights_stay"></i>
-        </button> --}}
         <div class="card mx-auto card-login">
             <div class="card-body">
                 <h4 class="card-title m-auto mb-4">Login</h4>
@@ -47,16 +33,9 @@
                 <p class="text-center small text-muted mb-15">BASHA BOOK ADMIN LOGIN</p>
                 <div class="d-grid gap-3 mb-4">
                     
-                    {{!-- <a href="#" class="btn w-100 btn-light font-sm">
-                        <svg aria-hidden="true" class="icon-svg" width="20" height="20" viewBox="0 0 20 20">
-                            <path
-                                d="M3 1a2 2 0 00-2 2v12c0 1.1.9 2 2 2h12a2 2 0 002-2V3a2 2 0 00-2-2H3zm6.55 16v-6.2H7.46V8.4h2.09V6.61c0-2.07 1.26-3.2 3.1-3.2.88 0 1.64.07 1.87.1v2.16h-1.29c-1 0-1.19.48-1.19 1.18V8.4h2.39l-.31 2.42h-2.08V17h-2.5z"
-                                fill="#4167B2"></path>
-                        </svg> Sign in using Facebook
-                    </a> --}}
+                    
                 </div>
-                {{!-- <p class="text-center mb-4">Don't have account? <a href="#">Sign up</a></p>
-            </div> --}}
+                
         </div>
     </section>
     <footer class="main-footer text-center">
@@ -67,7 +46,70 @@
         </p>
         <p class="font-xs mb-30">All rights reserved</p>
     </footer>
+</main> --}}
+
+<style>
+  .fade-out {
+    opacity: 1;
+    transition: opacity 1s ease-out;
+  }
+
+  .fade-out.hidden {
+    opacity: 0;
+    pointer-events: none; /* Prevents interaction with hidden message */
+  }
+</style>
+
+<main>
+  <button class="nav-link btn btn rounded-pill darkmode m-3 " href="#">
+      <i class="material-icons md-nights_stay"></i>
+  </button>
+
+  <section class="content-main mt-80 mb-0">
+      <div class="card mx-auto card-login">
+          <div class="card-body">
+              <h4 class="card-title m-auto mb-4">Login</h4>
+              <form method="post" action="/admin/login">
+                  <div class="mb-3">
+                      <input class="form-control" placeholder="Username or email" id="email" name="email" type="email" required>
+                      <div class="error" style="color: red;" id="emailError"></div>
+                  </div><!-- form-group// -->
+                  <div class="mb-3">
+                      <input class="form-control" placeholder="Password" id="password" name="password" type="password" required>
+                      <div class="error" style="color: red;" id="passwordError"></div>
+                  </div><!-- form-group// -->
+                  <div class="mb-3">
+                      <label class="form-check">
+                          <input type="checkbox" class="form-check-input" id="showPasswordCheckbox" onchange="togglePasswordVisibility()">
+                          <span class="form-check-label">show password</span>
+                      </label>
+                  </div><!-- form-group form-check .// -->
+                  <div class="mb-4">
+                      <button type="submit" class="btn btn-primary w-100"> Login </button>
+                  </div><!-- form-group// -->
+              </form>
+
+              <!-- Display error message if exists -->
+              {{#if message}}
+              <div id="error-message" class="alert alert-danger fade-out">
+                  {{message}}
+              </div>
+              {{/if}}
+
+              <p class="text-center small text-muted mb-15">BASHA BOOK ADMIN LOGIN</p>
+          </div>
+      </div>
+  </section>
+  <footer class="main-footer text-center">
+      <p class="font-xs">
+          <script>
+              document.write(new Date().getFullYear())
+          </script> ©, ConsoleHaven.
+      </p>
+      <p class="font-xs mb-30">All rights reserved</p>
+  </footer>
 </main>
+
 <script>
     /**
      * Email validation
@@ -116,7 +158,14 @@
                     }
                 }
 
-
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const errorMessage = document.getElementById('error-message');
+    if (errorMessage) {
+      setTimeout(() => {
+        errorMessage.classList.add('hidden'); // Add class to hide the message
+      }, 3000); // 5 seconds
+    }
+  });
 
 </script>
 

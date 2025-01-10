@@ -94,68 +94,187 @@ const getProduct = async (req, res) => {
 };
 
 
-const addProductPage=async(req,res)=>{
-    try{
-        const category=await Category.find({}).lean()
+// const addProductPage=async(req,res)=>{
+//     try{
+//         const category=await Category.find({}).lean()
 
-        res.render("admin/addproduct",{layout:"adminlayout",category})
+//         res.render("admin/addproduct",{layout:"adminlayout",category})
 
-    }catch(error){
-        console.log(error)
-    }
-}
+//     }catch(error){
+//         console.log(error)
+//     }
+// }
 
-//post add product page
+// //post add product page
 
-const addNewProduct=async(req,res)=>{
-    try{
-        const files=req.files
-        const images=[]
+// const addNewProduct=async(req,res)=>{
+//     try{
+//         const files=req.files
+//         const images=[]
 
-        files.forEach((file)=>{
-            const image=file.filename
-            images.push(image)
-        })
+//         files.forEach((file)=>{
+//             const image=file.filename
+//             images.push(image)
+//         })
 
-        const product=new Product({
-            name:req.body.name,
-            price:req.body.price,
-            description:req.body.description,
-            category:req.body.category,
-            stock:req.body.stock,
-            imageUrl:images,
-        })
+//         const product=new Product({
+//             name:req.body.name,
+//             price:req.body.price,
+//             description:req.body.description,
+//             category:req.body.category,
+//             stock:req.body.stock,
+//             imageUrl:images,
+//         })
 
-        await product.save()
-        req.session.productsave=true
-        res.redirect("/admin/product")
-    }catch(error){
-        console.log(error)
-    }
-}
+//         await product.save()
+//         req.session.productsave=true
+//         res.redirect("/admin/product")
+//     }catch(error){
+//         console.log(error)
+//     }
+// }
+
+// const addNewProduct = async (req, res) => {
+//   try {
+//       const { name } = req.body;
+//       const existingProduct = await Product.findOne({ name });
+
+//       if (existingProduct) {
+//           req.session.productExist = true;  // Set session flag if product exists
+//           res.redirect('/admin/add_new_product'); // Redirect to the same page to show the message
+//       }
+
+//       // Proceed with saving the product if not a duplicate
+//       const files = req.files;
+//       const images = [];
+
+//       files.forEach((file) => {
+//           const image = file.filename;
+//           images.push(image);
+//       });
+
+//       const product = new Product({
+//           name,
+//           price: req.body.price,
+//           description: req.body.description,
+//           category: req.body.category,
+//           stock: req.body.stock,
+//           imageUrl: images,
+//       });
+
+//       await product.save();
+//       req.session.productsave = true;
+//       res.redirect("/admin/product");
+
+//   } catch (error) {
+//       console.log(error);
+//       res.status(500).send("Server Error");
+//   }
+// };
+
 
 /// To edit Product ///
 
-const editProduct = async (req, res) => {
-    try {
-      let proId = req.params.id;
-  
-      const proData = await Product.findById({ _id: proId }).lean()
-      const catogories = await Category.find({ isListed: true }).lean()
-      
-  
-      // console.log(".........................................................oo", proData);
-      // console.log(catogories);
-  
-  
-      res.render("admin/edit_product", {proData, catogories, layout: 'adminlayout' })
-    } catch (error) {
-      console.log(error);
+const addProductPage = async (req, res) => {
+  try {
+    const category = await Category.find({}).lean();
+    const productExists = req.session.productExists;
+    req.session.productExists = null; 
+
+    res.render("admin/addproduct", { layout: "adminLayout", category, productExists });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+
+
+// Add New Product
+const addNewProduct = async (req, res) => {
+  try {
+    const { name, price, description, category, stock } = req.body;
+    const files = req.files;
+    const images = [];
+    files.forEach((file) => {
+      const image = file.filename;
+      images.push(image);
+    });
+
+    const existingProduct = await Product.findOne({
+      name: { $regex: new RegExp("^" + name + "$", "i") }, 
+    });
+
+    if (existingProduct) {
+      req.session.productExists = true;
+      return res.redirect("/admin/new_Product"); 
     }
-  };
+
+    const newProduct = new Product({
+      name: req.body.name,
+      price: req.body.price,
+      description: req.body.description,
+      category: req.body.category,
+      stock: req.body.stock,
+      //imageUrl: req.body.image
+      imageUrl: images,
+    });
+    await newProduct
+      .save()
+      .then((result) => {
+        res.redirect("/admin/product");
+        console.log(newProduct);
+      })
+      .catch((err) => console.log(err));
+  } catch (error) {
+    console.error("Error creating Product:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+// const editProduct = async (req, res) => {
+//     try {
+//       let proId = req.params.id;
+//       const proData = await Product.findById({ _id: proId }).lean()
+//       const catogories = await Category.find({ isListed: true }).lean()
+//       catogories.forEach((category) => {
+//         category.isSelected = category._id.toString() === proData.category.toString();
+//       });
+//       res.render("admin/edit_product", {proData, catogories, layout: 'adminlayout' })
+//     } catch (error) {
+//       console.log(error);
+//     }
+//   };
   
   /// To update Product post///
   
+  const editProduct = async (req, res) => {
+    try {
+        let proId = req.params.id;
+        const proData = await Product.findById(proId).lean();
+        const catogories = await Category.find({ isListed: true }).lean();
+
+        // Log the retrieved product data and categories
+        console.log("Product Data:", proData);
+        console.log("Categories:", catogories);
+
+        // Check if proData is found
+        if (!proData) {
+            return res.status(404).send('Product not found');
+        }
+
+        catogories.forEach((category) => {
+            category.isSelected = category._id.toString() === proData.category.toString();
+        });
+
+        res.render("admin/edit_product", { proData, catogories, layout: 'adminlayout' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+};
+
+
   const updateProduct = async (req, res) => {
     try {
       const proId = req.params.id;

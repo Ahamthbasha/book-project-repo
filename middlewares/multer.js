@@ -29,11 +29,11 @@
 
 // module.exports=store
 
-
+//it works very well
 const multer = require('multer');
 const path = require('path');
 
-// Allowed file types
+//Allowed file types
 const FILE_TYPE_MAP = {
   'image/png': 'png',
   'image/jpeg': 'jpeg',
@@ -59,6 +59,5 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 module.exports = upload;
-
 
 

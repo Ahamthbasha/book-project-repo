@@ -1,5 +1,5 @@
 const Category=require("../../models/categoryModel");
-
+const upload=require('../../middlewares/multer')
 
 let catSaveMsg = "Category added suceessfully..!!";
 
@@ -166,7 +166,6 @@ const getCategory = async (req, res) => {
     }
   };
 
-  // const updateCategory = async (req, res) => {
   //   try {
   //     const catName = req.body.name;
   //     const image = req.file;
@@ -244,6 +243,67 @@ const getCategory = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
+
+// const updateCategory = async (req, res) => {
+//   try {
+//     // Handle the file upload using multer
+//     upload.single('image')(req, res, async (err) => {
+//       if (err) {
+//         if (err.message === 'Invalid image type') {
+//           // Handle invalid image type error
+//           req.session.catExist = true;
+//           return res.redirect(`/admin/edit_category/${req.params.id}`);
+//         }
+//         // Handle other Multer errors
+//         return res.status(500).send('Server Error');
+//       }
+
+//       // Proceed with the category update logic if image validation passes
+//       const catName = req.body.name;
+//       const catId = req.params.id;
+//       const image = req.file;
+      
+//       // Check if another category with the same name exists
+//       const catExist = await Category.findOne({ 
+//         category: { $regex: new RegExp("^" + catName + "$", "i") },
+//         _id: { $ne: catId }
+//       });
+
+//       if (catExist) {
+//         req.session.catExist = true;
+//         return res.redirect(`/admin/edit_category/${catId}`);
+//       }
+
+//       const cat = await Category.findById(catId);
+//       const catImg = cat.imageUrl;
+//       let updImage;
+
+//       if (image) {
+//         updImage = image.filename;
+//       } else {
+//         updImage = catImg;
+//       }
+
+//       // Update the category with the new image or old image
+//       await Category.findByIdAndUpdate(
+//         catId,
+//         {
+//           category: catName,
+//           imageUrl: updImage,
+//         },
+//         { new: true }
+//       );
+
+//       req.session.categoryUpdate = true;
+//       res.redirect("/admin/category");
+
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send('Server Error');
+//   }
+// };
+
 
   
   

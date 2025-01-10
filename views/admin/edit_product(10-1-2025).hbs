@@ -1,3 +1,5 @@
+
+
 <aside class="navbar-aside" id="offcanvas_aside">
     <div class="aside-top">
         <a href="/admin/home" class="brand-wrap">
@@ -57,8 +59,12 @@
                 </a>
             </li>
             <li class="menu-item ">
+                {{!-- <a class="menu-link" href="/admin/brands"> <i class="icon material-icons md-stars"></i>
+                    <span class="text">Brands</span> </a> --}}
             </li>
             <li class="menu-item ">
+                {{!-- <a class="menu-link" href="/admin/brands"> <i class="icon material-icons md-stars"></i>
+                    <span class="text">Brands</span> </a> --}}
             </li>
         </ul>
         <hr>
@@ -100,6 +106,7 @@
         {{errorMessage}}
     </div>
 {{/if}}
+
                         <form method="post" class="form-add-product" action="/admin/update_product/{{proData._id}}"
                             enctype="multipart/form-data" onsubmit="return Validation()">
                             <div class="mb-4">
@@ -136,7 +143,16 @@
                                             placeholder="Quantity" type="text" id="Qty">
                                     </div>
                                     <h6 class="alertAddProduct mt-1" style="color: red" id="qtyAlert"></h6>
-                                </div>        
+                                </div>
+                                {{!-- <div class="col-lg-3">
+                                    <label class="form-label">Category:</label>
+                                    <select name="category" id="category" class="form-select">
+                                        {{#each catogories}}
+                                        <option value="{{this._id}}">{{this.category}}</option>
+                                        {{/each}}
+                                    </select>
+                                </div> --}}
+                                
                                 <div class="col-lg-3">
     <label class="form-label">Category:</label>
     <select name="category" id="category" class="form-select">
@@ -146,7 +162,7 @@
     </select>
 </div>
                             </div>
-                            {{!-- <div class="form-group">
+                            <div class="form-group">
         <label for="productImage">Product Image:</label>
         <div class="d-flex border p-10 m-tb-10">
           <input name="product-id" type="hidden" value="{{proData._id}}">
@@ -161,34 +177,7 @@
           {{/each}}
         </div>
         <input type="file" class="form-control-file" id="productImage" multiple name="image">
-        <h6 id="imgAlert" class=" mt-2" style="color: red;"></h6>
-      </div>  --}}
-<div class="form-group">
-    <label for="productImage">Product Image:</label>
-    <div class="d-flex border p-10 m-tb-10">
-        <input name="product-id" type="hidden" value="{{proData._id}}">
-        
-        {{#each proData.imageUrl}}
-            <div class="image-container" onclick="deleteProImg()">
-                <div class="badge rounded-pill alert-danger">
-                    <p class="close-button" data-image-index="{{@index}}" style="text-decoration: none;">×</p>
-                </div>
-                <img src="/images/products/{{this}}" alt="images" style="width: 80px; height: auto;" class="m-2 pro-image" data-image-index="{{@index}}">
-            </div>
-        {{/each}}
-    </div>
-    
-    <input type="file" class="form-control-file" id="productImage" multiple name="image" accept="image/*">
-    
-    <!-- Display error message if there is one -->
-    {{#if errorMessage}}
-      <div class="error" style="color: red;">
-          <p>{{errorMessage}}</p>
-      </div>
-    {{/if}}
-</div>
-
-
+      </div> <h6 id="imgAlert" class=" mt-2" style="color: red;"></h6>
 
 
 
@@ -229,76 +218,110 @@
 </main>
 
 <script>
-function validateImage() {
-    const fileInput = document.getElementById('productImage');
-    const imgAlert = document.getElementById('imgAlert');
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/avif'];
 
-    // Clear previous alert messages
-    imgAlert.innerHTML = '';
-
-    // Check if any files were selected
-    if (fileInput.files.length === 0) {
-        imgAlert.innerHTML = "Please choose an image.";
-        return false; // No files selected
-    }
-
-    // Validate each file type
-    for (let i = 0; i < fileInput.files.length; i++) {
-        const file = fileInput.files[i];
-        if (!allowedTypes.includes(file.type)) {
-            imgAlert.innerHTML = "Invalid image type. Please upload only images (PNG, JPEG, JPG, AVIF).";
-            return false; // Invalid file type
-        }
-    }
-
-    return true; // All validations passed
-}
-
-// Integrate into your main validation function
 function Validation() {
-    var errors = []; // Array to store validation errors
+        var errors = []; // Array to store validation errors
 
-    var productName = document.getElementById("productName").value;
-    var longdescription = document.getElementById("longdescription").value;
-    let price = document.getElementById("price").value;
+        var fileInput = document.getElementById('file-1');
+        var previewImage = document.getElementById('file-1-preview').querySelector('img');
 
-    let productNameRegex = /^\s*.\S.\s*$/;
-    let number = /^[1-9]\d*$/;
-    let descriptionRegex = /^(?!\s*$)[\s\S]{1,100}$/;
+        let productName = document.getElementById("productName").value;
 
-    let productNameAlert = document.getElementById("productNameAlert");
-    let priceAlert = document.getElementById("priceAlert");
-    let longAlert = document.getElementById("longAlert");
+        let longdescription = document.getElementById("longdescription").value;
+        //let Qty = document.getElementById("Qty").value;
+        let price = document.getElementById("price").value;
 
-    // Perform existing validations
-    if (!productName.match(productNameRegex)) {
+
+
+        let productNameRegex = /^\s*.\S.\s*$/;
+        let number = /^[1-9]\d*$/;
+        let descriptionRegex = /^(?!\s*$)[\s\S]{1,100}$/
+
+
+
+
+        let productNameAlert = document.getElementById("productNameAlert");
+        // let qtyAlert = document.getElementById("qtyAlert");
+        let priceAlert = document.getElementById("priceAlert");
+
+
+        let longAlert = document.getElementById("longAlert");
+        let imgAlert = document.getElementById('imgAlert')
+
+       if (!productName.match(productNameRegex)) {
         errors.push("Name Not Valid");
-        productNameAlert.innerHTML = "Name must not be empty.";
     }
+
+    //if (!Qty.match(number)) {
+      //  errors.push("Please Check Qty Again");
+    //}
 
     if (!price.match(number)) {
         errors.push("Please Check Price Again");
-        priceAlert.innerHTML = "Price must be a positive number.";
     }
 
     if (!longdescription.match(descriptionRegex)) {
         errors.push("Please Check about Again");
-        longAlert.innerHTML = "Description must be between 1 and 100 characters.";
     }
 
-    // Call the image validation function
-    if (!validateImage()) {
-        errors.push("Invalid image or no image uploaded.");
+    if (fileInput.files.length === 0) {
+        errors.push("Please choose an image");
     }
 
     // Display all error messages
     if (errors.length > 0) {
+        productNameAlert.innerHTML = errors.includes("Name Not Valid") ? "Name Not Valid" : "";
+        //qtyAlert.innerHTML = errors.includes("Please Check Qty Again") ? "Please Check Qty Again" : "";
+        priceAlert.innerHTML = errors.includes("Please Check Price Again") ? "Please Check Price Again" : "";
+        longAlert.innerHTML = errors.includes("Please Check about Again") ? "Please Check about Again" : "";
+        imgAlert.innerHTML = errors.includes("Please choose an image") ? "Please choose an image" : "";
+
         return false; // Prevent form submission
     }
 
     return true; // Allow form submission if no errors
-}
+    }
+
+
+//const deleteImage = async (productId, imageName) => {
+    //try {
+      //  const response = await fetch(`/admin/product_img_delete?id=${productId}&image=${imageName}`, {
+       //     method: "DELETE",
+       // });
+       // const result = await response.json();
+
+       // if (response.ok) {
+        //    setImages(result.updatedImages); // Update UI
+       //     alert("Image deleted successfully!");
+       // } else {
+        //    alert(result.error || "Failed to delete image");
+       // }
+   // } catch (error) {
+      //  console.error("Error:", error);
+    //}
+//};
+
+
+
+
+
+  //const deleteProImg = () => {
+
+    //const deleteButtons = document.querySelectorAll('.close-button')
+    //const productId = document.getElementsByName('product-id')[0].value
+
+    //deleteButtons.forEach((button )=> {
+      //button.addEventListener('click', async (event) => {
+      //  const imageIndex = event.target.dataset.imageIndex;
+    //    deleteImage(productId, imageIndex);
+   //   });
+   // });
+
+  //} 
+
+
+//changes
+//It works for removing the image
 
 const deleteImage = async (productId, imageName, imageElement) => {
   try {

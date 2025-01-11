@@ -11,9 +11,9 @@ const checkoutController=require('../controllers/user/checkoutController')
 const productController=require('../controllers/user/productController')
 const wishlistController=require('../controllers/user/wishlistController')
 const walletController=require('../controllers/user/walletController')
+const errorController=require('../controllers/user/errorController')
 const auth=require('../middlewares/userAuth')
 const { isLogin, isLogout, isBlocked, logedin } = auth
-
 require('../middlewares/googleAuth')
 
 
@@ -120,5 +120,7 @@ router.get('/wallet', logedin, isBlocked, walletController.walletpage)
 router.post('/addmoneytowallet',logedin,isBlocked,walletController.addMoneyToWallet)
 router.post('/verify_Payment',logedin,isBlocked,walletController.verifyPayment)
 
+//error showing purpose
+router.get("/error",logedin,isBlocked,errorController.showError)
 
 module.exports=router

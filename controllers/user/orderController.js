@@ -65,88 +65,185 @@ const my_Orders=async(req,res)=>{
     }
 }
 
+// const orderDetails = async (req, res) => {
+//     try {
+//         const orderId = req.params.id;
+//         const user = req.session.user;
+//         const userId = user._id;
+
+//         // Fetch user data and order details
+//         const userData = await User.findById(userId).lean();
+//         const myOrderDetails = await Order.findById(orderId).lean();
+
+//         if (!myOrderDetails) {
+//             return res.status(400).send("Order not found");
+//         }
+
+//         // Format the date
+//         myOrderDetails.date = moment(myOrderDetails.date).format('ddd MMM DD YYYY');
+
+//         // Fetch ordered product details
+//         const orderedProDet = await Order.aggregate([
+//             { $match: { _id: new mongoose.Types.ObjectId(orderId) } },
+//             { $unwind: "$product" },
+//             { $project: { _id: 1, product: 1 } }
+//         ]);
+
+//         // Fetch address
+//         const address = await Address.findOne({ userId: userId }).lean();
+
+//         // Fetch product offers for each product in the order
+//         const productIds = orderedProDet.map(item => item.product._id);
+//         const productOffers = await ProductOffer.find({
+//             productId: { $in: productIds },
+//             currentStatus: true,
+//             startDate: { $lte: new Date() },
+//             endDate: { $gte: new Date() }
+//         }).lean();
+
+//         // Create a map for quick access to offers
+//         const offerMap = {};
+//         productOffers.forEach(offer => {
+//             offerMap[offer.productId] = offer;
+//         });
+
+//         // Enhance ordered products with pricing logic
+//         const enhancedOrderedProDet = orderedProDet.map(item => {
+//             const offer = offerMap[item.product._id];
+//             if (offer) {
+//                 return {
+//                     ...item,
+//                     product: {
+//                         ...item.product,
+//                         discountPrice: offer.discountPrice,
+//                         originalPrice: item.product.price,
+//                     }
+//                 };
+//             } else {
+//                 return {
+//                     ...item,
+//                     product: {
+//                         ...item.product,
+//                         discountPrice: item.product.price,
+//                         originalPrice: item.product.price,
+//                     }
+//                 };
+//             }
+//         });
+
+//         console.log("Address:", address);
+//         console.log("Order Details:", myOrderDetails);
+//         console.log("Ordered Product Details:", enhancedOrderedProDet);
+
+//         res.render("user/orderDetails", {
+//             totalprice: myOrderDetails.total,
+//             address,
+//             orderedProDet: enhancedOrderedProDet,
+//             myOrderDetails,
+//             userData
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send("Internal Server Error");
+//     }
+// };
+
 const orderDetails = async (req, res) => {
-    try {
-        const orderId = req.params.id;
-        const user = req.session.user;
-        const userId = user._id;
+  try {
+      const orderId = req.params.id;
+      const user = req.session.user;
 
-        // Fetch user data and order details
-        const userData = await User.findById(userId).lean();
-        const myOrderDetails = await Order.findById(orderId).lean();
+      if (!user) {
+          // If the user is not logged in, redirect to login
+          return res.redirect('/login');
+      }
 
-        if (!myOrderDetails) {
-            return res.status(400).send("Order not found");
-        }
+      const userId = user._id;
 
-        // Format the date
-        myOrderDetails.date = moment(myOrderDetails.date).format('ddd MMM DD YYYY');
+      // Fetch user data and order details
+      const userData = await User.findById(userId).lean();
+      const myOrderDetails = await Order.findById(orderId).lean();
 
-        // Fetch ordered product details
-        const orderedProDet = await Order.aggregate([
-            { $match: { _id: new mongoose.Types.ObjectId(orderId) } },
-            { $unwind: "$product" },
-            { $project: { _id: 1, product: 1 } }
-        ]);
+      if (!myOrderDetails) {
+          return res.status(400).send("Order not found");
+      }
 
-        // Fetch address
-        const address = await Address.findOne({ userId: userId }).lean();
+      // Check if the logged-in user is the owner of the order
+      if (myOrderDetails.userId.toString() !== userId.toString()) {
+          // If the user doesn't own the order, redirect them to an error page or home
+          return res.redirect('/error'); // Or use an appropriate route
+      }
 
-        // Fetch product offers for each product in the order
-        const productIds = orderedProDet.map(item => item.product._id);
-        const productOffers = await ProductOffer.find({
-            productId: { $in: productIds },
-            currentStatus: true,
-            startDate: { $lte: new Date() },
-            endDate: { $gte: new Date() }
-        }).lean();
+      // Format the date
+      myOrderDetails.date = moment(myOrderDetails.date).format('ddd MMM DD YYYY');
 
-        // Create a map for quick access to offers
-        const offerMap = {};
-        productOffers.forEach(offer => {
-            offerMap[offer.productId] = offer;
-        });
+      // Fetch ordered product details
+      const orderedProDet = await Order.aggregate([
+          { $match: { _id: new mongoose.Types.ObjectId(orderId) } },
+          { $unwind: "$product" },
+          { $project: { _id: 1, product: 1 } }
+      ]);
 
-        // Enhance ordered products with pricing logic
-        const enhancedOrderedProDet = orderedProDet.map(item => {
-            const offer = offerMap[item.product._id];
-            if (offer) {
-                return {
-                    ...item,
-                    product: {
-                        ...item.product,
-                        discountPrice: offer.discountPrice,
-                        originalPrice: item.product.price,
-                    }
-                };
-            } else {
-                return {
-                    ...item,
-                    product: {
-                        ...item.product,
-                        discountPrice: item.product.price,
-                        originalPrice: item.product.price,
-                    }
-                };
-            }
-        });
+      // Fetch address
+      const address = await Address.findOne({ userId: userId }).lean();
 
-        console.log("Address:", address);
-        console.log("Order Details:", myOrderDetails);
-        console.log("Ordered Product Details:", enhancedOrderedProDet);
+      // Fetch product offers for each product in the order
+      const productIds = orderedProDet.map(item => item.product._id);
+      const productOffers = await ProductOffer.find({
+          productId: { $in: productIds },
+          currentStatus: true,
+          startDate: { $lte: new Date() },
+          endDate: { $gte: new Date() }
+      }).lean();
 
-        res.render("user/orderDetails", {
-            totalprice: myOrderDetails.total,
-            address,
-            orderedProDet: enhancedOrderedProDet,
-            myOrderDetails,
-            userData
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send("Internal Server Error");
-    }
+      // Create a map for quick access to offers
+      const offerMap = {};
+      productOffers.forEach(offer => {
+          offerMap[offer.productId] = offer;
+      });
+
+      // Enhance ordered products with pricing logic
+      const enhancedOrderedProDet = orderedProDet.map(item => {
+          const offer = offerMap[item.product._id];
+          if (offer) {
+              return {
+                  ...item,
+                  product: {
+                      ...item.product,
+                      discountPrice: offer.discountPrice,
+                      originalPrice: item.product.price,
+                  }
+              };
+          } else {
+              return {
+                  ...item,
+                  product: {
+                      ...item.product,
+                      discountPrice: item.product.price,
+                      originalPrice: item.product.price,
+                  }
+              };
+          }
+      });
+
+      console.log("Address:", address);
+      console.log("Order Details:", myOrderDetails);
+      console.log("Ordered Product Details:", enhancedOrderedProDet);
+
+      // Render the order details page for the correct user
+      res.render("user/orderDetails", {
+          totalprice: myOrderDetails.total,
+          address,
+          orderedProDet: enhancedOrderedProDet,
+          myOrderDetails,
+          userData
+      });
+  } catch (error) {
+      console.log(error);
+      res.status(500).send("Internal Server Error");
+  }
 };
+
 
 const cancelOrder = async (req, res) => {
     try {
@@ -623,132 +720,266 @@ const returnOneProduct = async (req, res) => {
 
 //below we use toString()?
 // productId and productItem._id are probably objectId.It is unique.When comparing objectId values you can't directly compare them using the === operator because objectId instances are complex object.For that reason we convert it into string representation and compare it.
-const getInvoice = async (req, res) => {
-    try {
-      const orderId = req.query.id;
-      const order = await Order.findById(orderId);
+// const getInvoice = async (req, res) => {
+//     try {
+//       const orderId = req.query.id;
+//       const order = await Order.findById(orderId);
   
-      if (!order) {
-        return res.status(500).send({ message: "Order not found" });
-      }
-      //destructure the order it take userId,address and product
-  const { userId, address: addressId, product } = order;
-      const [user, address] = await Promise.all([
-        User.findById(userId),
-        Address.findById(addressId),
-      ]);
+//       if (!order) {
+//         return res.status(500).send({ message: "Order not found" });
+//       }
+//       //destructure the order it take userId,address and product
+//   const { userId, address: addressId, product } = order;
+//       const [user, address] = await Promise.all([
+//         User.findById(userId),
+//         Address.findById(addressId),
+//       ]);
   
-      if (!user || !address) {
-        return res.status(500).send({ message: "User or address not found" });
-      }
+//       if (!user || !address) {
+//         return res.status(500).send({ message: "User or address not found" });
+//       }
   
-      // Log the fetched order and products
-      console.log("Fetched Order:", order);
-      console.log("Fetched Products:", product);
+//       // Log the fetched order and products
+//       console.log("Fetched Order:", order);
+//       console.log("Fetched Products:", product);
   
-      // Get product offers for the products in the order
-      const productOffers = await ProductOffer.find({
-        productId: { $in: product.map(p => p._id) },  // Make sure we use the correct field (_id of the product).Matching the orders in the product array which has offer collection
-        startDate: { $lte: new Date() },
-        endDate: { $gte: new Date() },
-        currentStatus: true,
-      });
+//       // Get product offers for the products in the order
+//       const productOffers = await ProductOffer.find({
+//         productId: { $in: product.map(p => p._id) },  // Make sure we use the correct field (_id of the product).Matching the orders in the product array which has offer collection
+//         startDate: { $lte: new Date() },
+//         endDate: { $gte: new Date() },
+//         currentStatus: true,
+//       });
   
-      // Log the fetched product offers
-      console.log("Fetched Active Product Offers:", productOffers);
+//       // Log the fetched product offers
+//       console.log("Fetched Active Product Offers:", productOffers);
   
-      // Map through products and apply offer if available
-      const products = await Promise.all(
-        product.map(async (productItem) => {
-          // Log each product before applying the offer
-          console.log("Processing Product:", productItem);
+//       // Map through products and apply offer if available
+//       const products = await Promise.all(
+//         product.map(async (productItem) => {
+//           // Log each product before applying the offer
+//           console.log("Processing Product:", productItem);
   
-          // Find the offer for the current product
-          const offer = productOffers.find(
-            (offer) => offer.productId.toString() === productItem._id.toString()
-          );
+//           // Find the offer for the current product
+//           const offer = productOffers.find(
+//             (offer) => offer.productId.toString() === productItem._id.toString()
+//           );
   
-          let price = productItem.price;
-          if (offer) {
-            // Apply the discount if an offer exists
-            console.log(`Found offer for ${productItem.name}:`, offer);
+//           let price = productItem.price;
+//           if (offer) {
+//             // Apply the discount if an offer exists
+//             console.log(`Found offer for ${productItem.name}:`, offer);
   
-            // If there's a discountPrice, apply it. Otherwise, apply the percentage discount.
-            price = offer.discountPrice || price - (price * offer.productOfferPercentage) / 100;
-            console.log(`Discounted Price for ${productItem.name}: ${price}`);
-          }
+//             // If there's a discountPrice, apply it. Otherwise, apply the percentage discount.
+//             price = offer.discountPrice || price - (price * offer.productOfferPercentage) / 100;
+//             console.log(`Discounted Price for ${productItem.name}: ${price}`);
+//           }
   
-          return {
-            quantity: productItem.quantity.toString(),
-            description: productItem.name,
-            tax: productItem.tax || 0,  // Make sure tax is set (default 0 if undefined)
-            price: price, // Use the offer price if available
-          };
-        })
-      );
+//           return {
+//             quantity: productItem.quantity.toString(),
+//             description: productItem.name,
+//             tax: productItem.tax || 0,  // Make sure tax is set (default 0 if undefined)
+//             price: price, // Use the offer price if available
+//           };
+//         })
+//       );
   
-      // Log the products array after applying offers
-      console.log("Products after applying offers:", products);
+//       // Log the products array after applying offers
+//       console.log("Products after applying offers:", products);
   
-      // Add the delivery charge
-      products.push({
-        quantity: "1",
-        description: "Delivery Charge",
-        tax: 0,
-        price: 50,
-      });
+//       // Add the delivery charge
+//       products.push({
+//         quantity: "1",
+//         description: "Delivery Charge",
+//         tax: 0,
+//         price: 50,
+//       });
   
-      // Log the complete products array with delivery charge
-      console.log("Final Products with Delivery Charge:", products);
+//       // Log the complete products array with delivery charge
+//       console.log("Final Products with Delivery Charge:", products);
   
-      const date = moment(order.date).format("MMMM D, YYYY");
+//       const date = moment(order.date).format("MMMM D, YYYY");
   
-      const data = {
-        mode: "development",
-        currency: "INR",
-        taxNotation: "vat",
-        marginTop: 25,
-        marginRight: 25,
-        marginLeft: 25,
-        marginBottom: 25,
+//       const data = {
+//         mode: "development",
+//         currency: "INR",
+//         taxNotation: "vat",
+//         marginTop: 25,
+//         marginRight: 25,
+//         marginLeft: 25,
+//         marginBottom: 25,
   
-        sender: {
-          company: "BASHA BOOK",
-          address: "Park Avenue",
-          zip: "600034",
-          city: "Chennai",
-          country: "India",
-        },
-        client: {
-          company: user.name,
-          address: address.adressLine1,
-          zip: address.pin,
-          city: address.city,
-          country: "India",
-        },
-        information: {
-          number: `INV-${orderId}`,
-          date: date,
-        },
-        products: products,
-      };
+//         sender: {
+//           company: "BASHA BOOK",
+//           address: "Park Avenue",
+//           zip: "600034",
+//           city: "Chennai",
+//           country: "India",
+//         },
+//         client: {
+//           company: user.name,
+//           address: address.adressLine1,
+//           zip: address.pin,
+//           city: address.city,
+//           country: "India",
+//         },
+//         information: {
+//           number: `INV-${orderId}`,
+//           date: date,
+//         },
+//         products: products,
+//       };
   
-      easyinvoice.createInvoice(data, function (result) {
-        const fileName = `invoice_${orderId}.pdf`;
-        const pdfBuffer = Buffer.from(result.pdf, "base64");//convert it into the buffer format pdfBuffer = <Buffer 25 50 44 46 2d 31 2e 34 0a 25 ... >;
+//       easyinvoice.createInvoice(data, function (result) {
+//         const fileName = `invoice_${orderId}.pdf`;
+//         const pdfBuffer = Buffer.from(result.pdf, "base64");//convert it into the buffer format pdfBuffer = <Buffer 25 50 44 46 2d 31 2e 34 0a 25 ... >;
 
-        res.setHeader("Content-Type", "application/pdf");//browser will understand content is in pdf format
-        res.setHeader("Content-Disposition", `attachment;filename=${fileName}`);
-        //content-disposition -it tells the browser how to handle the file
-        //attachment tells the browser to treat the content as a downloadable file
-        //filename the browser suggest this filename when downloading
-        res.send(pdfBuffer);//response body will be in the binary format but the content will be transmitted to the client with the headers set earlier
-      });
-    } catch (error) {
-      console.log(error);
-      res.status(500).send({ message: "Error generating invoice", error: error.message });
+//         res.setHeader("Content-Type", "application/pdf");//browser will understand content is in pdf format
+//         res.setHeader("Content-Disposition", `attachment;filename=${fileName}`);
+//         //content-disposition -it tells the browser how to handle the file
+//         //attachment tells the browser to treat the content as a downloadable file
+//         //filename the browser suggest this filename when downloading
+//         res.send(pdfBuffer);//response body will be in the binary format but the content will be transmitted to the client with the headers set earlier
+//       });
+//     } catch (error) {
+//       console.log(error);
+//       res.status(500).send({ message: "Error generating invoice", error: error.message });
+//     }
+// };
+
+const getInvoice = async (req, res) => {
+  try {
+    const orderId = req.query.id;
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(500).send({ message: "Order not found" });
     }
+
+    const { userId, address: addressId, product } = order;
+    const [user, address] = await Promise.all([User.findById(userId), Address.findById(addressId)]);
+
+    if (!user || !address) {
+      return res.status(500).send({ message: "User or address not found" });
+    }
+
+    console.log("Fetched Order:", order);
+    console.log("Fetched Products:", product);
+
+    const productOffers = await ProductOffer.find({
+      productId: { $in: product.map(p => p._id) },
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() },
+      currentStatus: true,
+    });
+
+    console.log("Fetched Active Product Offers:", productOffers);
+
+    let totalBeforeCoupon = 0;
+    const products = await Promise.all(
+      product.map(async (productItem) => {
+        console.log("Processing Product:", productItem);
+
+        const offer = productOffers.find(
+          (offer) => offer.productId.toString() === productItem._id.toString()
+        );
+
+        let price = productItem.price;
+        if (offer) {
+          console.log(`Found offer for ${productItem.name}:`, offer);
+          price = offer.discountPrice || price - (price * offer.productOfferPercentage) / 100;
+          console.log(`Discounted Price for ${productItem.name}: ${price}`);
+        }
+
+        totalBeforeCoupon += price * productItem.quantity;
+
+        return {
+          quantity: productItem.quantity.toString(),
+          description: productItem.name,
+          tax: productItem.tax || 0,
+          price: price,
+        };
+      })
+    );
+
+    console.log("Products after applying offers:", products);
+
+    // Add delivery charge to products
+    const deliveryCharge = order.deliveryCharge || 50; // Ensure you use the order's delivery charge
+    products.push({
+      quantity: "1",
+      description: "Delivery Charge",
+      tax: 0,
+      price: deliveryCharge,
+    });
+    totalBeforeCoupon += deliveryCharge;
+
+    console.log("Final Products with Delivery Charge:", products);
+
+    const date = moment(order.date).format("MMMM D, YYYY");
+
+    const totalAfterDiscount = totalBeforeCoupon - order.discountAmt; // Apply discountAmt to totalBeforeCoupon
+    const couponDiscount = order.couponUsed ? order.discountAmt : 0; // Apply coupon discount if used
+    const finalTotal = totalAfterDiscount - couponDiscount; // Final total after both discounts
+
+    const data = {
+      mode: "development",
+      currency: "INR",
+      taxNotation: "vat",
+      marginTop: 25,
+      marginRight: 25,
+      marginLeft: 25,
+      marginBottom: 25,
+
+      sender: {
+        company: "BASHA BOOK",
+        address: "Park Avenue",
+        zip: "600034",
+        city: "Chennai",
+        country: "India",
+      },
+      client: {
+        company: user.name,
+        address: address.adressLine1,
+        zip: address.pin,
+        city: address.city,
+        country: "India",
+      },
+      information: {
+        number: `INV-${orderId}`,
+        date: date,
+      },
+      products: products,
+
+      // Adding discount and coupon as products
+      products: [
+        ...products,
+        ...(order.discountAmt > 0 ? [{
+          quantity: "1",
+          description: `Discount`,
+          tax: 0,
+          price: -order.discountAmt, // Negative value for discount
+        }] : []),
+      ]
+    };
+
+    // Create the invoice and send the response
+    easyinvoice.createInvoice(data, function (result) {
+      const fileName = `invoice_${orderId}.pdf`;
+      const pdfBuffer = Buffer.from(result.pdf, "base64");
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment;filename=${fileName}`);
+      res.send(pdfBuffer);
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Error generating invoice", error: error.message });
+  }
 };
+
+
+
 
 const verify=(req,res)=>{
   console.log(req.body.payment,"end")

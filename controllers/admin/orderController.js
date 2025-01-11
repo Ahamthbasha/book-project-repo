@@ -1,7 +1,7 @@
 const Order=require("../../models/orderModel")
 const Address=require("../../models/addressModel")
 const Product=require("../../models/productModel")
-const User=require("../../models/userModel")
+// const User=require("../../models/userModel")
 const moment=require('moment')
 const mongoose=require("mongoose")
 const ObjectId=require("mongoose")
@@ -34,7 +34,6 @@ const ordersPage=async(req,res)=>{
         console.log(error)
     }
 }
-
 
 const orderDetails = async (req, res) => {
     try {
@@ -72,27 +71,10 @@ const orderDetails = async (req, res) => {
       console.log(error.message);
       res.status(500).send("Internal Server Error");
     }
-  };
+};
 
 
 
-// const changeOrderStatus=async(req,res)=>{
-//     console.log(req.body)
-
-//     try{
-//         const id=req.query.id
-//         const status=req.body.status
-//         console.log(status)
-//         const order=await Order.findByIdAndUpdate(
-//             id,
-//             {$set:{status:status}},
-//             {new:true}
-//         )
-//         res.redirect("/admin/orders")
-//     }catch(error){
-//         console.log(error)
-//     }
-// }
 
 const changeOrderStatus = async (req, res) => {
   console.log(req.body);
@@ -128,9 +110,6 @@ const changeOrderStatus = async (req, res) => {
       res.status(500).json({ message: 'An error occurred while updating the order status' });
   }
 };
-
-
-
 module.exports=
 {
     ordersPage,

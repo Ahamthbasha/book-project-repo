@@ -1,22 +1,58 @@
 const Address=require("../../models/addressModel")
 
 
+// const manageAddress = async (req, res) => {  
+//     try { 
+//         const userData = req.session.user;
+//          const id = userData._id; 
+//         const page = parseInt(req.query.page) || 1;
+//          const limit = parseInt(req.query.limit) || 4; const skip = (page - 1) * limit; 
+//          const userAddress = await Address.find({ userId: id }).skip(skip).limit(limit).lean(); 
+//          const totalAddress = await Address.countDocuments({ userId: id }); 
+//          const totalPages = Math.ceil(totalAddress / limit); 
+//          const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+         
+//          res.render('user/manage_address', { currentPage: page, totalPages, pages, userAddress, userData });
+//          } catch (error) {
+//              console.log(error)
+//          }
+//         }
+
 const manageAddress = async (req, res) => {  
     try { 
         const userData = req.session.user;
-         const id = userData._id; 
+        const id = userData._id; 
         const page = parseInt(req.query.page) || 1;
-         const limit = parseInt(req.query.limit) || 4; const skip = (page - 1) * limit; 
-         const userAddress = await Address.find({ userId: id }).skip(skip).limit(limit).lean(); 
-         const totalAddress = await Address.countDocuments({ userId: id }); 
-         const totalPages = Math.ceil(totalAddress / limit); 
-         const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+        const limit = parseInt(req.query.limit) || 4; 
+        const skip = (page - 1) * limit; 
+
+        // Fetch only active addresses for the user
+        const userAddress = await Address.find({ 
+            userId: id, 
+            isActive: true // Only fetch active addresses
+        }).skip(skip).limit(limit).lean(); 
+
+        const totalAddress = await Address.countDocuments({ 
+            userId: id, 
+            isActive: true // Count only active addresses
+        }); 
+
+        const totalPages = Math.ceil(totalAddress / limit); 
+        const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
          
-         res.render('user/manage_address', { currentPage: page, totalPages, pages, userAddress, userData });
-         } catch (error) {
-             console.log(error)
-         }
-        }
+        res.render('user/manage_address', { 
+            currentPage: page, 
+            totalPages, 
+            pages, 
+            userAddress, 
+            userData 
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
 
 const addNewAddress=async(req,res)=>{
     try{
@@ -84,7 +120,8 @@ const editAddressPost=async(req,res)=>{
 const deleteAddress=async(req,res)=>{
     try{
         const id=req.params.id
-        await Address.findByIdAndDelete(id)
+        await Address.updateOne({_id:id},{$set:{isActive:false}})
+        //await Address.findByIdAndDelete(id)
         res.redirect('/adresses')
     }catch(error){
         console.log(error)

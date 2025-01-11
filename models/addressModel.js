@@ -45,6 +45,10 @@ const addressSchema = new mongoose.Schema({
     is_default: {
         type: Boolean,
         required: true
+    },
+    isActive:{
+        type:Boolean,
+        default:true
     }
 })
 

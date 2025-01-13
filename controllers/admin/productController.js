@@ -141,145 +141,157 @@ const editProduct = async (req, res) => {
 };
 
 // const updateProduct = async (req, res) => {
-//   try {
-//       const proId = req.params.id;
-//       const { name, price, description, category, stock } = req.body;
+//     try {
+//         const proId = req.params.id;
 
-//       // Fetch the product first
-//       const product = await Product.findById(proId);
-      
-//       // Check if another product with the same name exists
-//       const existingProduct = await Product.findOne({ name: name, _id: { $ne: proId } });
+//         // Check for multer error (invalid image type)
+//         if (req.fileValidationError) {
+//             return res.status(400).render("admin/edit_product", {
+//                 proData: req.body,
+//                 catogories: await Category.find({ isListed: true }).lean(),
+//                 errorMessage: req.fileValidationError, // Send the error to the template
+//                 layout: 'adminlayout'
+//             });
+//         }
 
-//       if (existingProduct) {
-//           return res.status(400).render("admin/edit_product", {
-//               proData: {
-//                   ...req.body,
-//                   imageUrl: product.imageUrl // Ensure existing images are included
-//               },
-//               catogories: await Category.find({ isListed: true }).lean(),
-//               errorMessage: "A product with this name already exists.",
-//               layout: 'adminlayout'
-//           });
-//       }
+//         const { name, price, description, category, stock } = req.body;
 
-//       const exImage = product.imageUrl;
-//       const files = req.files;
-//       let updImages = [];
+//         // Fetch the product first
+//         const product = await Product.findById(proId);
 
-//       if (files && files.length > 0) {
-//           const newImages = req.files.map((file) => file.filename);
-//           updImages = [...exImage, ...newImages];
-//           product.imageUrl = updImages;
-//       } else {
-//           updImages = exImage;
-//       }
+//         // Check if another product with the same name exists
+//         const existingProduct = await Product.findOne({ name: name, _id: { $ne: proId } });
 
-//       await Product.findByIdAndUpdate(
-//           proId,
-//           {
-//               name: name,
-//               price: price,
-//               description: description,
-//               category: category,
-//               stock: stock,
-//               is_blocked: false,
-//               imageUrl: updImages,
-//           },
-//           { new: true }
-//       );
+//         if (existingProduct) {
+//             return res.status(400).render("admin/edit_product", {
+//                 proData: {
+//                     ...req.body,
+//                     imageUrl: product.imageUrl // Ensure existing images are included
+//                 },
+//                 catogories: await Category.find({ isListed: true }).lean(),
+//                 errorMessage: "A product with this name already exists.",
+//                 layout: 'adminlayout'
+//             });
+//         }
 
-//       if (product.price !== price) {
-//           const existingOffer = await productOffer.findOne({
-//               productId: product._id,
-//               currentStatus: true
-//           });
+//         const exImage = product.imageUrl;
+//         const files = req.files;
+//         let updImages = [];
 
-//           if (existingOffer) {
-//               const newDiscountPrice = price - (price * existingOffer.productOfferPercentage) / 100;
-//               existingOffer.discountPrice = newDiscountPrice;
-//               await existingOffer.save();
-//           }
-//       }
+//         if (files && files.length > 0) {
+//             const newImages = files.map((file) => file.filename);
+//             updImages = [...exImage, ...newImages];
+//             product.imageUrl = updImages;
+//         } else {
+//             updImages = exImage;
+//         }
 
-//       res.redirect("/admin/product");
-//   } catch (error) {
-//       console.log(error);
-//       res.status(500).send('Server Error');
-//   }
+//         await Product.findByIdAndUpdate(
+//             proId,
+//             {
+//                 name: name,
+//                 price: price,
+//                 description: description,
+//                 category: category,
+//                 stock: stock,
+//                 is_blocked: false,
+//                 imageUrl: updImages,
+//             },
+//             { new: true }
+//         );
+
+//         res.redirect("/admin/product");
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send('Server Error');
+//     }
 // };
 
-
-
 const updateProduct = async (req, res) => {
-    try {
-        const proId = req.params.id;
+  try {
+      const proId = req.params.id;
 
-        // Check for multer error (invalid image type)
-        if (req.fileValidationError) {
-            return res.status(400).render("admin/edit_product", {
-                proData: req.body,
-                catogories: await Category.find({ isListed: true }).lean(),
-                errorMessage: req.fileValidationError, // Send the error to the template
-                layout: 'adminlayout'
-            });
-        }
+      // Check for multer error (invalid image type)
+      if (req.fileValidationError) {
+          return res.status(400).render("admin/edit_product", {
+              proData: req.body,
+              catogories: await Category.find({ isListed: true }).lean(),
+              errorMessage: req.fileValidationError, // Send the error to the template
+              layout: 'adminlayout'
+          });
+      }
 
-        const { name, price, description, category, stock } = req.body;
+      const { name, price, description, category, stock } = req.body;
 
-        // Fetch the product first
-        const product = await Product.findById(proId);
+      // Fetch the product first
+      const product = await Product.findById(proId);
 
-        // Check if another product with the same name exists
-        const existingProduct = await Product.findOne({ name: name, _id: { $ne: proId } });
+      // Check if another product with the same name exists
+      const existingProduct = await Product.findOne({ name: name, _id: { $ne: proId } });
 
-        if (existingProduct) {
-            return res.status(400).render("admin/edit_product", {
-                proData: {
-                    ...req.body,
-                    imageUrl: product.imageUrl // Ensure existing images are included
-                },
-                catogories: await Category.find({ isListed: true }).lean(),
-                errorMessage: "A product with this name already exists.",
-                layout: 'adminlayout'
-            });
-        }
+      if (existingProduct) {
+          return res.status(400).render("admin/edit_product", {
+              proData: {
+                  ...req.body,
+                  imageUrl: product.imageUrl // Ensure existing images are included
+              },
+              catogories: await Category.find({ isListed: true }).lean(),
+              errorMessage: "A product with this name already exists.",
+              layout: 'adminlayout'
+          });
+      }
 
-        const exImage = product.imageUrl;
-        const files = req.files;
-        let updImages = [];
+      // Handle image files
+      const exImage = product.imageUrl;
+      const files = req.files;
+      let updImages = [];
 
-        if (files && files.length > 0) {
-            const newImages = files.map((file) => file.filename);
-            updImages = [...exImage, ...newImages];
-            product.imageUrl = updImages;
-        } else {
-            updImages = exImage;
-        }
+      if (files && files.length > 0) {
+          // Add new images to existing images
+          const newImages = files.map((file) => file.filename);
+          updImages = [...exImage, ...newImages];
+          product.imageUrl = updImages;
+      } else {
+          updImages = exImage; // Keep the existing images if no new images are uploaded
+      }
 
-        await Product.findByIdAndUpdate(
-            proId,
-            {
-                name: name,
-                price: price,
-                description: description,
-                category: category,
-                stock: stock,
-                is_blocked: false,
-                imageUrl: updImages,
-            },
-            { new: true }
-        );
+      // Update product details
+      await Product.findByIdAndUpdate(
+          proId,
+          {
+              name: name,
+              price: price,
+              description: description,
+              category: category,
+              stock: stock,
+              is_blocked: false,
+              imageUrl: updImages,
+          },
+          { new: true }
+      );
 
-        res.redirect("/admin/product");
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Server Error');
-    }
+      // If the price has changed, we need to update the offer (if any)
+      if (product.price !== price) {
+          const existingOffer = await productOffer.findOne({
+              productId: product._id,
+              currentStatus: true // Ensure we are looking for active offers
+          });
+
+          if (existingOffer) {
+              // Recalculate the discount price based on the new product price
+              const newDiscountPrice = price - (price * existingOffer.productOfferPercentage) / 100;
+              existingOffer.discountPrice = newDiscountPrice;
+              await existingOffer.save(); // Save the updated offer
+          }
+      }
+
+      // Redirect to the product list after update
+      res.redirect("/admin/product");
+  } catch (error) {
+      console.log(error);
+      res.status(500).send('Server Error');
+  }
 };
-
-  
-
 
   const deleteProduct = async (req, res) => {
     const proId = req.params.id;

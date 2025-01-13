@@ -1,28 +1,19 @@
 const User=require('../../models/userModel')
-const Category=require('../../models/categoryModel')
 const Product=require('../../models/productModel')
-const ProductOffer=require('../../models/productOfferModel')
-const Order=require("../../models/orderModel")
 const argon2 = require('argon2')
 const userHelper=require('../../helpers/userHelper')
 const Referral=require("../../models/referralSchema")
 const {v4:uuidv4}=require("uuid")
 const mongoose=require('mongoose')
 
-let otp
-let userOtp
 let hashedPassword
 let userRegData
-let otpError = ''
-let isLogedin = false
 let userData
 let userEmail
-let productSearched = false
 let message2
 let redeemAmount
 let referalAmount
 let OwnerId
-let otpTimestamp
 
 const loadHome = async (req, res) => {
   try {
@@ -280,36 +271,6 @@ const usersignup = (req, res) => {
     }
 }
 
-//user signup
-//workingfinely
-// const doSignup = async (req, res) => {
-
-//     try {
-//         hashedPassword = await userHelper.hashPassword(req.body.password)
-//         userEmail = req.body.email
-//         userRegData = req.body
-
-
-//         const userExist = await User.findOne({ email: userEmail })
-//         if (!userExist) {
-//             otp = await userHelper.verifyEmail(userEmail)
-//             res.redirect('/referals')
-//             //res.render('user/submitOtp')
-//         }
-//         else {
-//             message2 = true
-
-//             res.render('user/login', { message2 })
-
-//         }
-
-//     } catch (error) {
-//         console.log(error);
-//     }
-// }
-
-//referal code
-
 const doSignup = async (req, res) => {
   try {
       hashedPassword = await userHelper.hashPassword(req.body.password);
@@ -373,76 +334,6 @@ const getOtp = (req, res) => {
         console.log(error);
     }
 }
-
-//To resend otp
-
-// const submitOtp=async(req,res)=>{
-//   try{
-//     userOtp=req.body.otp
-//     const currentTime=Date.now()
-//     //below 60000 milliseconds is 60seconds
-//     if(userOtp === otp && (currentTime-otpTimestamp <= 60000)){
-//       const user=new User({
-//         name:userRegData.name,
-//         email:userRegData.email,
-//         mobile:userRegData.phone,
-//         password:hashedPassword,
-//         isVerified:true,
-//         isBlocked:false,
-//       })
-//       await user.save()
-//       if(redeemAmount){
-//         await User.updateOne(
-//           {_id:user._id},
-//           {
-//             $inc:{wallet:redeemAmount},
-//             $push:{
-//               history:{
-//                 amount:redeemAmount,
-//                 status:'Referred',
-//                 date:Date.now()
-//               }
-//             }
-//           }
-//         )
-//       }
-//       const generateReferalCode=uuidv4()
-//       const referalCollection=new Referral({
-//         userId:user._id,
-//         referralCode:generateReferalCode
-//       })
-//       await referalCollection.save()
-
-//       if(referalAmount && OwnerId){
-//         await User.updateOne(
-//           {_id:OwnerId},
-//           {
-//             $inc:{wallet:referalAmount},
-//             $push:{
-//               history:{
-//                 amount:referalAmount,
-//                 status:"Referred",
-//                 date:Date.now()
-//               }
-//             }
-//           }
-//         )
-//       }
-//       req.session.regSuccessMsg=true
-//       res.json({success:true,redirectUrl:'/login'})
-//     }else{
-//       let otpError;
-//             if (currentTime - otpTimestamp > 60000) { 
-//                 otpError = "OTP has expired. Please request a new one."; // Expired message
-//             } else {
-//                 otpError = "Incorrect OTP"; // Incorrect message
-//             }
-//             res.json({ error: otpError }); // Respond with error message
-//     }
-//   }catch(error){
-//     console.log(error)
-//   }
-// }
 
 const submitOtp = async (req, res) => {
   try {
@@ -555,7 +446,7 @@ const googleCallback = async (req, res) => {
       console.error(err);
       res.redirect("/login");
     }
-  };
+};
 
 
 //user login controller
@@ -613,7 +504,13 @@ const doLogout=async(req,res)=>{
     }
 }
 
-
+const aboutPage=async(req,res)=>{
+  try{
+    res.render("user/aboutPage")
+  }catch(error){
+    console.log(error)
+  }
+}
 
 
 module.exports={
@@ -628,5 +525,6 @@ module.exports={
     doLogin,
     doLogout,
     loadReferalPage,
-    verifyReferelCode
+    verifyReferelCode,
+    aboutPage
 }

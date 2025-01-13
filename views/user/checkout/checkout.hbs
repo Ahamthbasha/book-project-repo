@@ -332,10 +332,12 @@
         } else if (couponData.status === 'already_used') {
             ct=0
             setCouponStatus('Coupon already used!', couponMsg);
-        } else if (couponData.status === 'not_used') {
-            ct=0
-            setCouponStatus('Coupon not used yet!', couponMsg);
-        } else if (couponData.status === 'min_purchase_not_met') {
+        } 
+        else if (couponData.status === 'not_used') {
+          ct=0
+          setCouponStatus('Coupon not used yet!', couponMsg);
+        } 
+        else if (couponData.status === 'min_purchase_not_met') {
         ct = 0;
         setCouponStatus('Minimum purchase not met!', couponMsg);
         }else if (couponData.status === 'removed') {
@@ -393,7 +395,7 @@
          Swal.fire({
             icon: 'error',
             title: 'Not much available',
-            text: 'Sorry, update quantity',
+            text: 'Sorry, update quantity.otherwise go to the cart page',
         });
         return
     }

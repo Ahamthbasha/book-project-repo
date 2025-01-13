@@ -403,7 +403,7 @@ const loadCheckoutPage = async (req, res) => {
   
   
   
-  const placeorder = async (req, res) => {
+const placeorder = async (req, res) => {
     try {
       console.log("place order ", req.body);
       let userData = req.session.user;
@@ -725,7 +725,7 @@ const applyCoupon = async (req, res) => {
       console.log(error);
       res.status(500).json({ status: "error", error });
     }
-  };  
+};  
 
 const removeCoupon = async (req, res) => {
   try {
@@ -761,126 +761,6 @@ const removeCoupon = async (req, res) => {
     res.status(500).json({ status: "error", error });
   }
 };
-
-// const validateCoupon = async (req, res) => {
-//   try {
-//     const { couponVal, subTotal } = req.body;
-//     console.log(couponVal, subTotal);
-//     const coupon = await Coupon.findOne({ code: couponVal });
-
-//     if (!coupon) {
-//       res.json("invalid");
-//     } else if (coupon.expiryDate < new Date()) {
-//       res.json("expired");
-//     } else if (subTotal < coupon.minPurchase) {
-//       res.json("Minimum Amount Required");
-//     } else {
-//       const couponId = coupon._id;
-//       const discount = coupon.discount;
-//       const userId = req.session.user._id;
-
-//       const isCpnAlredyUsed = await Coupon.findOne({
-//         _id: couponId,
-//         usedBy: { $in: [userId] },
-//       });
-
-//       if (isCpnAlredyUsed) {
-//         res.json("already used");
-//       } else {
-        
-//         const discnt = Number(discount);
-//         const discountAmt = (subTotal * discnt) / 100;
-//         const newTotal = subTotal - discountAmt;
-
-//         const user = User.findById(userId);
-
-//         res.json({
-//           discountAmt,
-//           newTotal,
-//           discount,
-//           succes: "succes",
-//         });
-//       }
-//     }
-//   } catch (error) {
-//     console.log(error.message);
-//     res.status(500).send("Internal Server Error");
-//   }
-// };
-
-// const applyCoupon = async (req, res) => {
-//   try {
-//     const { couponVal, subTotal } = req.body;
-//     const coupon = await Coupon.findOne({ code: couponVal });
-//     const userId = req.session.user._id;
-
-//     if (!coupon) {
-//       return res.json({ status: "invalid" });
-//     } else if (coupon.expiryDate < new Date()) {
-//       return res.json({ status: "expired" });
-//     } else if (coupon.usedBy.includes(userId)) {
-//       return res.json({ status: "already_used" });
-//     } else if (subTotal < coupon.minPurchase) {
-//       return res.json({ status: "min_purchase_not_met" });
-//     } else {
-  
-//       await Coupon.updateOne(
-//         { _id: coupon._id },
-//         { $addToSet: { usedBy: userId } }
-//       );
-
-     
-//       let discountAmt = (subTotal * coupon.discount) / 100;
-//       if (discountAmt > coupon.maxDiscount) {
-//         discountAmt = coupon.maxDiscount;
-//       }
-//       const newTotal = subTotal - discountAmt;
-
-//       return res.json({
-//         discountAmt,
-//         newTotal,
-//         discount: coupon.discount,
-//         status: "applied",
-//         couponVal,
-//       });
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({ status: "error", error });
-//   }
-// };
-
-// const removeCoupon = async (req, res) => {
-//   try {
-//     const { couponVal, subTotal } = req.body;
-//     const coupon = await Coupon.findOne({ code: couponVal });
-//     const userId = req.session.user._id;
-
-//     if (!coupon) {
-//       return res.json({ status: "invalid" });
-//     } else if (!coupon.usedBy.includes(userId)) {
-//       return res.json({ status: "not_used" });
-//     } else {
-//       await Coupon.updateOne(
-//         { _id: coupon._id },
-//         { $pull: { usedBy: userId } }
-//       );
-//       const discountAmt = 0;
-//       const newTotal = subTotal;
-
-//       return res.json({
-//         discountAmt,
-//         newTotal,
-//         discount: coupon.discount,
-//         status: "removed",
-//         couponVal,
-//       });
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({ status: "error", error });
-//   }
-// };
 
 const payment_failed=(req,res)=>{
   try{

@@ -19,6 +19,10 @@ require('../middlewares/googleAuth')
 
 router.get('/',isBlocked,userController.loadHome)
 router.get("/home",userController.loadHome)
+
+//about page router
+router.get("/about",userController.aboutPage)
+
 //signup
 router.get('/signup', isLogout, userController.usersignup)
 router.post('/signup', isLogout,userController.doSignup)

@@ -136,5 +136,4 @@ module.exports=
     editAddress,
     editAddressPost,
     deleteAddress
-
 }

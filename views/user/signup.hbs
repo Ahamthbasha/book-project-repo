@@ -135,7 +135,8 @@
 
 
 <script>
-   function validate_email() {
+    
+function validate_email() {
     var email = document.getElementById('email').value;
     var emailPattern = /^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z])(?=.*\d.*\d.*\d.*\d.*\d)[A-Za-z\d._%+-]{10,}@[A-Za-z\d.-]+\.[A-Za-z]{2,}$/;
 
@@ -169,7 +170,7 @@ function Validation() {
 
     // Regular expressions for validation
     var userPattern = /^[a-zA-Z0-9]{5,}$/; // Username must be at least 5 characters long
-    var emailPattern = /^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z])(?=.*\d.*\d.*\d.*\d.*\d)[A-Za-z\d._%+-]{10,}@[A-Za-z\d.-]+\.[A-Za-z]{2,}$/; 
+    var emailPattern = /^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z])[A-Za-z\d._%+-]{10,}@[A-Za-z\d.-]+\.[A-Za-z]{2,}$/; 
     var passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; 
     var phonePattern = /^(?!.*(\d)\1{9})\d{10}$/;
 
@@ -179,7 +180,7 @@ function Validation() {
     }
 
     if (!email.match(emailPattern)) {
-        errors.push("Please enter a valid email address that contains atleast five characters and five numbers.");
+        errors.push("Please enter a valid email address that contains atleast five characters and optional five numbers.");
     }
 
     if (!password.match(passwordPattern)) {
@@ -197,7 +198,7 @@ function Validation() {
     // Display all error messages
     usernameerror.innerHTML = errors.includes("Username must be at least 5 characters long and can contain letters and numbers only.") ? "Username must be at least 5 characters long and can contain letters and numbers only." : "";
     
-    emailerror.innerHTML = errors.includes("Please enter a valid email address that contains atleast five characters and five numbers.") ? "Please enter a valid email address that contains atleast five characters and five numbers." : "";
+    emailerror.innerHTML = errors.includes("Please enter a valid email address that contains atleast five characters and optional five numbers.") ? "Please enter a valid email address that contains atleast five characters and optional five numbers." : "";
     
     passworderror.innerHTML = errors.includes("Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.") ? "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character." : "";
     
@@ -213,8 +214,7 @@ function Validation() {
     return true; // Allow form submission if no errors
 }
 
-
-    function togglePasswordVisibility() {
+function togglePasswordVisibility() {
         var passwordInput = document.getElementById('password');
         var checkbox = document.getElementById('showPasswordCheckbox');
 
@@ -225,7 +225,7 @@ function Validation() {
         }
     }
 
-    function togglePasswordVisibility2() {
+function togglePasswordVisibility2() {
         var confirmPasswordInput = document.getElementById('confirmPassword');
         var checkbox = document.getElementById('showPasswordCheckbox2');
 
@@ -235,5 +235,6 @@ function Validation() {
             confirmPasswordInput.type = "password";
         }
     }
+
 </script>
 

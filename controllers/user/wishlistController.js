@@ -9,150 +9,6 @@ const ObjectId = require("mongoose");
 
 const swal = require('sweetalert2')
 
-let userData
-// const showWishlistPage = async (req, res) => {
-//     const userData = req.session.user;
-
-//     try {
-//         const userId = userData._id;
-//         //new mongoose.Types.ObjectId()=>create or query by ObjectId field the value have string representation of the ObjectId.Helps in type consistencyand avoid errors during comparison or queries.
-//         // Find the user's wishlist
-//         const wishlist = await Wishlist.findOne({ user: new mongoose.Types.ObjectId(userId) });
-//         const wishlistCount = wishlist ? (wishlist.productId ? wishlist.productId.length : 0) : 0;
-
-//         // Fetch the cart items
-//         const cartItems = await Cart.find({ userId: new mongoose.Types.ObjectId(userId) });
-
-//         //It converts the objectId into string
-//         const cartProductIds = cartItems.map(item => item.product_Id.toString());
-
-//         // Aggregate the wishlist products
-//         const WishListProd = await Wishlist.aggregate([
-//             {
-//                 $match: { user: new mongoose.Types.ObjectId(userId) }
-//             },
-//             {
-//                 $unwind: '$productId'
-//             },
-//             {
-//                 $lookup: {
-//                     from: 'products',
-//                     foreignField: '_id',
-//                     localField: 'productId',
-//                     as: 'product'
-//                 }
-//             },
-//             {
-//                 $project: {
-//                     _id: 1,
-//                     productId: 1,
-//                     productName: { $arrayElemAt: ['$product.name', 0] },
-//                     productImage: { $arrayElemAt: ['$product.imageUrl', 0] },
-//                     productPrice: { $arrayElemAt: ['$product.price', 0] },
-//                     productQuantity: { $arrayElemAt: ['$product.stock', 0] },
-//                     outOfStock: { $cond: { if: { $lte: [{ $arrayElemAt: ['$product.stock', 0] }, 0] }, then: true, else: false } },
-//                     ProductExistInCart: { $in: [{ $toString: '$productId' }, cartProductIds] }
-//                 }
-//             }
-//         ]);
-
-//         console.log(WishListProd, "WishListProd");
-
-//         if (WishListProd.length > 0) {
-//             res.render('user/wishlist', { userData, WishListProd, wishCt: wishlistCount });
-//         } else {
-//             res.render('user/emptyWishlist', { userData });
-//         }
-//     } catch (error) {
-//         console.log(error.message);
-//         res.status(500).send("Internal Server Error");
-//     }
-// };
-
-// // const addToWishList = async (req, res) => {
-// //     try {
-// //         let { id } = (req.body)
-// //         // const Id = id.toString()
-// //         const userId = req.session.user
-// //         // console.log(Id)
-// //         let productData = await Product.findById(id).lean()
-// //         console.log(productData._id)
-// //         const productId = new mongoose.Types.ObjectId(id);
-
-
-// //         let wishlistData = await Wishlist.updateOne(
-// //             {
-// //                 user: userId
-// //             },
-// //             {
-// //                 $addToSet: {
-// //                     productId: productId,
-
-// //                 }
-
-// //             },
-// //             {
-// //                 upsert: true,
-// //                 new: true
-// //             }
-// //         )
-// //         if (wishlistData.modifiedCount > 0) {
-// //             res.json({ success: true });
-// //         } else {
-// //             res.json({ success: false });
-// //         }
-
-
-// //         console.log(wishlistData)
-// //     } catch (error) {
-// //         console.log(error.message);
-// //         res.status(500).send("Internal Server Error");
-// //     }
-
-// // }
-
-
-// const addToWishList = async (req, res) => {
-//     try {
-//         let { id } = req.body;
-//         const userId = req.session.user._id;  // Make sure you're using the correct user ID from the session
-
-//         // Find the product by ID
-//         let productData = await Product.findById(id).lean();
-//         if (!productData) {
-//             return res.status(404).json({ success: false, message: 'Product not found' });
-//         }
-
-//         // Check if the product is already in the user's wishlist
-//         let wishlist = await Wishlist.findOne({ user: userId });
-//         if (wishlist && wishlist.productId.includes(productData._id)) {
-//             // Product already exists in the wishlist
-//             return res.json({ success: false, message: 'Product already exists in your wishlist' });
-//         }
-
-//         // If the product is not in the wishlist, add it
-//         let wishlistData = await Wishlist.updateOne(
-//             { user: userId },
-//             {
-//                 $addToSet: { productId: productData._id }//avoid duplicate
-//             },
-//             {
-//                 upsert: true,  // If no wishlist exists, create a new one
-//                 new: true
-//             }
-//         );
-
-//         if (wishlistData.modifiedCount > 0 || wishlistData.upsertedCount > 0) {
-//             return res.json({ success: true });
-//         } else {
-//             return res.json({ success: false });
-//         }
-//     } catch (error) {
-//         console.log(error.message);
-//         res.status(500).send("Internal Server Error");
-//     }
-// }
-
 const showWishlistPage = async (req, res) => {
     const userData = req.session.user;
 
@@ -238,53 +94,6 @@ const showWishlistPage = async (req, res) => {
     }
 };
 
-// const addToWishList = async (req, res) => {
-//     try {
-//         let { id } = req.body;
-//         const userId = req.session.user._id;  // Make sure you're using the correct user ID from the session
-
-//         // Find the product by ID
-//         let productData = await Product.findById(id).lean();
-//         if (!productData) {
-//             return res.status(404).json({ success: false, message: 'Product not found' });
-//         }
-
-//         // Fetch any active offers for the product
-//         let productOffer = await ProductOffer.findOne({ productId: productData._id, currentStatus: true }).lean();
-
-//         // If the product has an active offer, use the offer price, else use the regular price
-//         const productPrice = productOffer ? productOffer.discountPrice : productData.price;
-
-//         // Check if the product is already in the user's wishlist
-//         let wishlist = await Wishlist.findOne({ user: userId });
-//         if (wishlist && wishlist.productId.includes(productData._id)) {
-//             // Product already exists in the wishlist
-//             return res.json({ success: false, message: 'Product already exists in your wishlist' });
-//         }
-
-//         // If the product is not in the wishlist, add it
-//         let wishlistData = await Wishlist.updateOne(
-//             { user: userId },
-//             {
-//                 $addToSet: { productId: productData._id }
-//             },
-//             {
-//                 upsert: true,  // If no wishlist exists, create a new one
-//                 new: true
-//             }
-//         );
-
-//         if (wishlistData.modifiedCount > 0 || wishlistData.upsertedCount > 0) {
-//             return res.json({ success: true });
-//         } else {
-//             return res.json({ success: false });
-//         }
-//     } catch (error) {
-//         console.log(error.message);
-//         res.status(500).send("Internal Server Error");
-//     }
-// };
-
 const addToWishList = async (req, res) => {
     try {
         let { id } = req.body;
@@ -312,11 +121,11 @@ const addToWishList = async (req, res) => {
 
         // If the product is not in the wishlist, add it
         let wishlistData = await Wishlist.updateOne(
-            { user: userId },
-            {
+        { user: userId },
+        {
                 $addToSet: { productId: productData._id }  // Ensures product is only added once
-            },
-            {
+        },
+        {
                 upsert: true,  // If no wishlist exists, create a new one
                 new: true
             }

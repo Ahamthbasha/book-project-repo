@@ -99,7 +99,7 @@ const salesReportTemplate = `
 function renderSalesReport(data) {
   const compiledTemplate = Handlebars.compile(salesReportTemplate);//handlebar.compile() converts the template string into a callable function that generate dynamic html.
 
-  const salesReportHTML = compiledTemplate({ data: data });//invokes compiled handlebars templte with data passed as an argument.Data is sales object orders,grandTtoal.Atlast sales reportHtml is a string of html that display sales report
+  const salesReportHTML = compiledTemplate({ data: data });//invokes compiled handlebars template with data passed as an argument.Data is sales object orders,grandTtoal.Atlast sales reportHtml is a string of html that display sales report
 
   document.getElementById('table').innerHTML = salesReportHTML;//this line inserts generates salesReporthtml INTO the dom element.
 

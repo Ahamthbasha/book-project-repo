@@ -146,7 +146,7 @@ function validate_email() {
     emailerror.innerHTML = ""; // Clear previous error message
 
     if (!email.match(emailPattern)) {
-        emailerror.innerHTML ="Please enter a valid email address that contains atleast five characters and five numbers.";
+        emailerror.innerHTML ="Please enter a valid email address that contains atleast five characters and optional five numbers.";
         return false; // Return false if validation fails
     }
 

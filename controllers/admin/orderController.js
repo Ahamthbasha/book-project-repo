@@ -1,7 +1,6 @@
 const Order=require("../../models/orderModel")
 const Address=require("../../models/addressModel")
 const Product=require("../../models/productModel")
-// const User=require("../../models/userModel")
 const moment=require('moment')
 const mongoose=require("mongoose")
 const ObjectId=require("mongoose")
@@ -72,9 +71,6 @@ const orderDetails = async (req, res) => {
       res.status(500).send("Internal Server Error");
     }
 };
-
-
-
 
 const changeOrderStatus = async (req, res) => {
   console.log(req.body);

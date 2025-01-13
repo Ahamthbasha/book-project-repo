@@ -65,89 +65,6 @@ const my_Orders=async(req,res)=>{
     }
 }
 
-// const orderDetails = async (req, res) => {
-//     try {
-//         const orderId = req.params.id;
-//         const user = req.session.user;
-//         const userId = user._id;
-
-//         // Fetch user data and order details
-//         const userData = await User.findById(userId).lean();
-//         const myOrderDetails = await Order.findById(orderId).lean();
-
-//         if (!myOrderDetails) {
-//             return res.status(400).send("Order not found");
-//         }
-
-//         // Format the date
-//         myOrderDetails.date = moment(myOrderDetails.date).format('ddd MMM DD YYYY');
-
-//         // Fetch ordered product details
-//         const orderedProDet = await Order.aggregate([
-//             { $match: { _id: new mongoose.Types.ObjectId(orderId) } },
-//             { $unwind: "$product" },
-//             { $project: { _id: 1, product: 1 } }
-//         ]);
-
-//         // Fetch address
-//         const address = await Address.findOne({ userId: userId }).lean();
-
-//         // Fetch product offers for each product in the order
-//         const productIds = orderedProDet.map(item => item.product._id);
-//         const productOffers = await ProductOffer.find({
-//             productId: { $in: productIds },
-//             currentStatus: true,
-//             startDate: { $lte: new Date() },
-//             endDate: { $gte: new Date() }
-//         }).lean();
-
-//         // Create a map for quick access to offers
-//         const offerMap = {};
-//         productOffers.forEach(offer => {
-//             offerMap[offer.productId] = offer;
-//         });
-
-//         // Enhance ordered products with pricing logic
-//         const enhancedOrderedProDet = orderedProDet.map(item => {
-//             const offer = offerMap[item.product._id];
-//             if (offer) {
-//                 return {
-//                     ...item,
-//                     product: {
-//                         ...item.product,
-//                         discountPrice: offer.discountPrice,
-//                         originalPrice: item.product.price,
-//                     }
-//                 };
-//             } else {
-//                 return {
-//                     ...item,
-//                     product: {
-//                         ...item.product,
-//                         discountPrice: item.product.price,
-//                         originalPrice: item.product.price,
-//                     }
-//                 };
-//             }
-//         });
-
-//         console.log("Address:", address);
-//         console.log("Order Details:", myOrderDetails);
-//         console.log("Ordered Product Details:", enhancedOrderedProDet);
-
-//         res.render("user/orderDetails", {
-//             totalprice: myOrderDetails.total,
-//             address,
-//             orderedProDet: enhancedOrderedProDet,
-//             myOrderDetails,
-//             userData
-//         });
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).send("Internal Server Error");
-//     }
-// };
-
 const orderDetails = async (req, res) => {
   try {
       const orderId = req.params.id;
@@ -562,6 +479,7 @@ const cancelOneProduct = async (req, res) => {
         { _id: req.session.user._id },
         { $inc: { wallet: newTotal } }
       );
+
       await User.updateOne(
         { _id: req.session.user._id },
         {
@@ -612,7 +530,7 @@ const returnOneProduct = async (req, res) => {
     console.log(id, prodId);
 
     if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
-      return res.status(HttpStatus.BadRequest).json({ error: 'Invalid order or product ID' });
+      return res.status(500).json({ error: 'Invalid order or product ID' });
     }
 
     const ID = new mongoose.Types.ObjectId(id);
@@ -626,7 +544,7 @@ const returnOneProduct = async (req, res) => {
     ).lean();
 
     if (!updatedOrder) {
-      return res.status(HttpStatus.NotFound).json({ error: 'Order or product not found' });
+      return res.status(500).json({ error: 'Order or product not found' });
     }
 
     const result = await Order.findOne(
@@ -716,136 +634,6 @@ const returnOneProduct = async (req, res) => {
     res.status(500).json({ error: 'An error occurred while processing the return' });
   }
 };
-
-
-//below we use toString()?
-// productId and productItem._id are probably objectId.It is unique.When comparing objectId values you can't directly compare them using the === operator because objectId instances are complex object.For that reason we convert it into string representation and compare it.
-// const getInvoice = async (req, res) => {
-//     try {
-//       const orderId = req.query.id;
-//       const order = await Order.findById(orderId);
-  
-//       if (!order) {
-//         return res.status(500).send({ message: "Order not found" });
-//       }
-//       //destructure the order it take userId,address and product
-//   const { userId, address: addressId, product } = order;
-//       const [user, address] = await Promise.all([
-//         User.findById(userId),
-//         Address.findById(addressId),
-//       ]);
-  
-//       if (!user || !address) {
-//         return res.status(500).send({ message: "User or address not found" });
-//       }
-  
-//       // Log the fetched order and products
-//       console.log("Fetched Order:", order);
-//       console.log("Fetched Products:", product);
-  
-//       // Get product offers for the products in the order
-//       const productOffers = await ProductOffer.find({
-//         productId: { $in: product.map(p => p._id) },  // Make sure we use the correct field (_id of the product).Matching the orders in the product array which has offer collection
-//         startDate: { $lte: new Date() },
-//         endDate: { $gte: new Date() },
-//         currentStatus: true,
-//       });
-  
-//       // Log the fetched product offers
-//       console.log("Fetched Active Product Offers:", productOffers);
-  
-//       // Map through products and apply offer if available
-//       const products = await Promise.all(
-//         product.map(async (productItem) => {
-//           // Log each product before applying the offer
-//           console.log("Processing Product:", productItem);
-  
-//           // Find the offer for the current product
-//           const offer = productOffers.find(
-//             (offer) => offer.productId.toString() === productItem._id.toString()
-//           );
-  
-//           let price = productItem.price;
-//           if (offer) {
-//             // Apply the discount if an offer exists
-//             console.log(`Found offer for ${productItem.name}:`, offer);
-  
-//             // If there's a discountPrice, apply it. Otherwise, apply the percentage discount.
-//             price = offer.discountPrice || price - (price * offer.productOfferPercentage) / 100;
-//             console.log(`Discounted Price for ${productItem.name}: ${price}`);
-//           }
-  
-//           return {
-//             quantity: productItem.quantity.toString(),
-//             description: productItem.name,
-//             tax: productItem.tax || 0,  // Make sure tax is set (default 0 if undefined)
-//             price: price, // Use the offer price if available
-//           };
-//         })
-//       );
-  
-//       // Log the products array after applying offers
-//       console.log("Products after applying offers:", products);
-  
-//       // Add the delivery charge
-//       products.push({
-//         quantity: "1",
-//         description: "Delivery Charge",
-//         tax: 0,
-//         price: 50,
-//       });
-  
-//       // Log the complete products array with delivery charge
-//       console.log("Final Products with Delivery Charge:", products);
-  
-//       const date = moment(order.date).format("MMMM D, YYYY");
-  
-//       const data = {
-//         mode: "development",
-//         currency: "INR",
-//         taxNotation: "vat",
-//         marginTop: 25,
-//         marginRight: 25,
-//         marginLeft: 25,
-//         marginBottom: 25,
-  
-//         sender: {
-//           company: "BASHA BOOK",
-//           address: "Park Avenue",
-//           zip: "600034",
-//           city: "Chennai",
-//           country: "India",
-//         },
-//         client: {
-//           company: user.name,
-//           address: address.adressLine1,
-//           zip: address.pin,
-//           city: address.city,
-//           country: "India",
-//         },
-//         information: {
-//           number: `INV-${orderId}`,
-//           date: date,
-//         },
-//         products: products,
-//       };
-  
-//       easyinvoice.createInvoice(data, function (result) {
-//         const fileName = `invoice_${orderId}.pdf`;
-//         const pdfBuffer = Buffer.from(result.pdf, "base64");//convert it into the buffer format pdfBuffer = <Buffer 25 50 44 46 2d 31 2e 34 0a 25 ... >;
-
-//         res.setHeader("Content-Type", "application/pdf");//browser will understand content is in pdf format
-//         res.setHeader("Content-Disposition", `attachment;filename=${fileName}`);
-//         //content-disposition -it tells the browser how to handle the file
-//         //attachment tells the browser to treat the content as a downloadable file
-//         //filename the browser suggest this filename when downloading
-//         res.send(pdfBuffer);//response body will be in the binary format but the content will be transmitted to the client with the headers set earlier
-//       });
-//     } catch (error) {
-//       console.log(error);
-//       res.status(500).send({ message: "Error generating invoice", error: error.message });
-//     }
-// };
 
 const getInvoice = async (req, res) => {
   try {
@@ -964,13 +752,13 @@ const getInvoice = async (req, res) => {
     };
 
     // Create the invoice and send the response
-    easyinvoice.createInvoice(data, function (result) {
-      const fileName = `invoice_${orderId}.pdf`;
-      const pdfBuffer = Buffer.from(result.pdf, "base64");
+    easyinvoice.createInvoice(data, function (result) { //createInvoice method from the easyinvoice library.Here we pass the data
+      const fileName = `invoice_${orderId}.pdf`;//create a string for the filename
+      const pdfBuffer = Buffer.from(result.pdf, "base64");//it is decoded into a binary buffer.Buffer.from is used to convert the base64 string into a buffer that can be sent over http. 
 
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment;filename=${fileName}`);
-      res.send(pdfBuffer);
+      res.setHeader("Content-Type", "application/pdf");//this line sets the http response.This informs the browser or client that the content being sent in the response is a pdf file.By this way browser knows how to handle the content.
+      res.setHeader("Content-Disposition", `attachment;filename=${fileName}`);//by this header prompting the user to download the pdf file when they click
+      res.send(pdfBuffer);//pdfbuffer has binary data of the pdf,which is sent to the client for download.when the client receives this response it will trigger the file download due to content-position header and the file named according to fileName
     });
   } catch (error) {
     console.log(error);
@@ -978,13 +766,10 @@ const getInvoice = async (req, res) => {
   }
 };
 
-
-
-
 const verify=(req,res)=>{
   console.log(req.body.payment,"end")
   const {orderId}=req.body
-  //destructuring the razorpay order id,payment id,signature proovided by the razorpay that verify the integrity of the payment
+  //destructuring the razorpay order id,payment id,signature provided by the razorpay that verify the integrity of the payment
   const{razorpay_order_id,razorpay_payment_id,razorpay_signature}=req.body.payment
 
   //create a hash based message authentication code.hmac created using crypto module.sha256 is a hashing algorithm

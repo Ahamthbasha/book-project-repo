@@ -255,11 +255,7 @@ const deleteCategory = async (req, res) => {
         isListed: !newListed
       },
         { new: true })
-  
       res.redirect('/admin/category')
-  
-  
-  
     } catch (error) {
       console.log(error)
   

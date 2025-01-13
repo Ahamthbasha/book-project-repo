@@ -14,9 +14,11 @@ let message2
 let redeemAmount
 let referalAmount
 let OwnerId
+let otp
 
 const loadHome = async (req, res) => {
   try {
+    //outline of the product offer showing.It first load every product.First it match with the is_blocked:false stage.Then we lookup it there we get that answer in an array.When we unwind it.It will become like a document.From that document we get projections atlast it shows every document in a structure like _id,name,price,description,stock,popularity,imageUrl,category,discountedprice,offerAvailable and offerPercentage.
     const loadProData = await Product.aggregate([
       {
         $match: { is_blocked: false },
@@ -138,7 +140,7 @@ const loadHome = async (req, res) => {
         },
       },
       {
-        $sort: { _id: -1 },  // Sort products by latest first
+        $sort: { _id: -1 },  // Sort products by latest first.last addedd to first addedd
       },
       {
         $limit: 8,  // Limit to 8 products
@@ -228,40 +230,6 @@ const loadHome = async (req, res) => {
     console.log(error);
   }
 };
-
-const userLogin = (req, res) => {
-
-    let regSuccessMsg = 'User registered sucessfully..!!'
-    let blockMsg = 'Sorry something went wrong..!!'
-    let mailErr = 'Incorrect email or password..!!'
-    let newpasMsg = 'Your password reseted successfuly..!!'
-    message2 = false
-
-
-    if (req.session.mailErr) {
-        res.render('user/login', { mailErr })
-        req.session.mailErr = false
-    }
-    else if (req.session.regSuccessMsg) {
-        res.render('user/login', { regSuccessMsg })
-        req.session.regSuccessMsg = false
-    }
-    else if (req.session.userBlocked) {
-        res.render('user/login', { blockMsg})
-        req.session.userBlocked = false
-    }
-    else if (req.session.LoggedIn) {
-        res.render('user/login')
-        req.session.LoggedIn = false
-    }
-    else if (req.session.newPas) {
-        res.render('user/login', { newpasMsg })
-        req.session.newPas = false
-    }
-    else {
-      res.render('user/login',{hideSearchBox:true})
-    }
-}
 
 const usersignup = (req, res) => {
     try {
@@ -371,7 +339,7 @@ const submitOtp = async (req, res) => {
                       }
                     )
                   }
-                  const generateReferalCode=uuidv4()
+                  const generateReferalCode=uuidv4()//generate a unique identifier in the version 4 format.
                   const referalCollection=new Referral({
                     userId:user._id,
                     referralCode:generateReferalCode
@@ -420,7 +388,6 @@ const resendOtp = async (req, res) => {
   }
 }
 
-
 const googleCallback = async (req, res) => {
     try {
       userData = await User.findOneAndUpdate(
@@ -429,15 +396,13 @@ const googleCallback = async (req, res) => {
         { upsert: true, new: true }
       );
       console.log(userData);
-  
+  //It checks the user is blocked or not. If the user is blocked it store in the session to show the block message
       if (userData.isBlocked) {
         req.session.blockMsg = true;
         res.redirect("/login");
       } else {
-        // req.session.LoggedIn = true;
-        console.log("session => ",req.session , req.session.admin)
+        console.log("session => ",req.session)
         req.session.user = userData;
-
         console.log("session AFTER USER=> ",req.session)
         req.session.admin = userData
         res.redirect("/");
@@ -448,6 +413,39 @@ const googleCallback = async (req, res) => {
     }
 };
 
+const userLogin = (req, res) => {
+
+  let regSuccessMsg = 'User registered sucessfully..!!'
+  let blockMsg = 'Sorry something went wrong..!!'
+  let mailErr = 'Incorrect email or password..!!'
+  let newpasMsg = 'Your password reseted successfuly..!!'
+  message2 = false
+
+
+  if (req.session.mailErr) {
+      res.render('user/login', { mailErr })
+      req.session.mailErr = false
+  }
+  else if (req.session.regSuccessMsg) {
+      res.render('user/login', { regSuccessMsg })
+      req.session.regSuccessMsg = false
+  }
+  else if (req.session.userBlocked) {
+      res.render('user/login', { blockMsg})
+      req.session.userBlocked = false
+  }
+  else if (req.session.LoggedIn) {
+      res.render('user/login')
+      req.session.LoggedIn = false
+  }
+  else if (req.session.newPas) {
+      res.render('user/login', { newpasMsg })
+      req.session.newPas = false
+  }
+  else {
+    res.render('user/login',{hideSearchBox:true})
+  }
+}
 
 //user login controller
 const doLogin = async (req, res) => {
@@ -461,7 +459,6 @@ const doLogin = async (req, res) => {
             console.log(userData.password)
             console.log(email)
             console.log(password)
-
         }
 
 
@@ -471,10 +468,8 @@ const doLogin = async (req, res) => {
                 const isBlocked = userData.isBlocked
 
                 if (!isBlocked) {
-
                     req.session.LoggedIn = true
                     req.session.user = userData
-
                     res.redirect('/')
                 } else {
                     userData = null

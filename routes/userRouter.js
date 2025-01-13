@@ -69,6 +69,8 @@ router.post('/forget_password',forgetPasswordController.submitMailPost)
 router.get('/otp',isLogout,forgetPasswordController.submitOtp)
 router.post('/otp',forgetPasswordController.submitOtpPost)
 
+//route for resend OTP
+router.post('/resend_otp', forgetPasswordController.resendOtp);
 
 //forgot password here we reset the password page
 router.get("/reset_password",isLogout,forgetPasswordController.resetPassword)

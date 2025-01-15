@@ -68,8 +68,6 @@ const addProductPage = async (req, res) => {
   }
 };
 
-
-
 // Add New Product
 const addNewProduct = async (req, res) => {
   try {

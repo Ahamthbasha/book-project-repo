@@ -31,23 +31,19 @@ const couponPage= async(req,res)=>{
 const addCouponPage= async(req,res)=>{
     const couponMsg = "Coupon added successfuly..!!";
     const couponExMsg = "Coupon alredy exist..!!";
-
     try {
         if (req.session.couponMsg) {
             res.render("admin/addCoupon",{  couponMsg ,title:"Admin",layout:'adminlayout'});
             req.session.couponMsg = false;
           } else if (req.session.couponExMsg) {
-            
             res.render("admin/addCoupon", { couponExMsg ,title:"Admin",layout:'adminlayout'});
             req.session.couponExMsg = false;
           } else {
             res.render("admin/addCoupon",{ title:"Admin",layout:'adminlayout'});
           }
     } catch (error) {
-
-        console.log(error.message);
+      console.log(error.message);
         res.status(500).send("Internal Server Error");
-        
     }
 }
 
@@ -148,13 +144,13 @@ const editCouponPost = async (req, res) => {
         console.error('Error updating coupon:', error.message);
         res.status(500).send("Internal Server Error");
     }
-  };
+};
 
-  const deleteCoupon = async (req, res) => {
+const deleteCoupon = async (req, res) => {
     const couponId = req.params.id;
     await Coupon.findByIdAndDelete(couponId)
     res.redirect('/admin/coupons')
-  };
+};
 
 module.exports={
     couponPage,

@@ -13,14 +13,16 @@ const categoryOfferController=require("../controllers/admin/categoryOfferControl
 const store=require("../middlewares/multer")
 const adminAuth=require('../middlewares/adminAuth')
 
+//admin login and logout
 router.get('/login',adminAuth.isLogout, adminController.adminLogin)
 router.post('/login', adminAuth.isLogout,adminController.adminDoLogin)
-
 router.get('/logout', adminController.adminLogout)
 
+//dashboard side router
 router.get('/home', adminAuth.isLogin, dashboardController.loadDashboard)
 router.get('/get_sales',adminAuth.isLogin,dashboardController.getSales)
 router.get('/get_chart_data',adminAuth.isLogin,dashboardController.getChartData)
+
 //user management
 router.get('/manage_users', adminAuth.isLogin, customerController.loadUsersData)
 router.get('/block_user/:id', adminAuth.isLogin, customerController.blockUser)

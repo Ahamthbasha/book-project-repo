@@ -3,7 +3,6 @@ const Product = require("../../models/productModel");
 const mongoose = require("mongoose");
 const productOffer = require("../../models/productOfferModel");
 
-
 const loadCart = async (req, res) => {
   try {
     let userData = req.session.user;
@@ -157,7 +156,7 @@ const addToCart = async (req, res) => {
     ]);
 
     if (!productToLookup || productToLookup.length === 0) {
-      return res.status(HttpStatus.NotFound).json({ success: false, message: "Product not found" });
+      return res.status(500).json({ success: false, message: "Product not found" });
     }
 
     let productToCart = productToLookup[0];
@@ -337,7 +336,6 @@ const updateCart = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-
 
 const checkOutOfStock = async (req, res) => {
   try {

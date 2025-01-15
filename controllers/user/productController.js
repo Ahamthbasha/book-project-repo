@@ -34,7 +34,7 @@ const getProduct = async (req, res) => {
         },
       },
       { 
-        $unwind: { path: "$productOffer", preserveNullAndEmptyArrays: true } 
+      $unwind: { path: "$productOffer", preserveNullAndEmptyArrays: true } 
       },
       {
         $project: {
@@ -47,11 +47,11 @@ const getProduct = async (req, res) => {
           imageUrl: 1,
           productOffer: 1,
           discountedPrice: {
-            $cond: {
-              if: {
+          $cond: {
+            if: {
                 $and: [
                   { $eq: ["$productOffer.currentStatus", true] },
-                  { $ne: ["$productOffer.discountPrice", null] },
+                { $ne: ["$productOffer.discountPrice", null] },
                 ],
               },
               then: "$productOffer.discountPrice",

@@ -6,7 +6,6 @@ const Address = require("../../models/addressModel");
 const Order = require("../../models/orderModel");
 const Coupon = require("../../models/couponModel");
 const Razorpay = require('razorpay');
-
 const mongoose = require("mongoose");
 const ObjectId = require("mongoose");
 
@@ -25,7 +24,7 @@ const loadCheckoutPage = async (req, res) => {
       // Get the cart data to match product IDs and quantities
     const cartItems = await Cart.find({ userId: ID }).lean();
   
-      const cartItemtoRender = await Cart.find({ userId: ID })
+    const cartItemtoRender = await Cart.find({ userId: ID })
     .populate({
       path: "product_Id", // Populate product details
       model: "Product",
@@ -263,8 +262,7 @@ const placeorder = async (req, res) => {
         productDet.forEach(async (product) => {
           const populatedProd= await Product.findById(product._id).populate('category').lean()
           await Category.updateMany({ _id: populatedProd.category._id }, { $inc: { bestSelling:1} });
-  
-      })
+        })
   
       // Mark the coupon as used after the order is placed
       if (req.body.couponData) {

@@ -161,7 +161,6 @@ const orderDetails = async (req, res) => {
   }
 };
 
-
 const cancelOrder = async (req, res) => {
     try {
         const id = req.params.id;
@@ -643,7 +642,7 @@ const getInvoice = async (req, res) => {
     if (!order) {
       return res.status(500).send({ message: "Order not found" });
     }
-
+//destructuring the order
     const { userId, address: addressId, product } = order;
     const [user, address] = await Promise.all([User.findById(userId), Address.findById(addressId)]);
 

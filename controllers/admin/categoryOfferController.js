@@ -27,6 +27,7 @@ const categoryOfferPage=async(req,res)=>{
                 }
             )
         })
+
 //format the date to visible in yyyy(year)-mm(month)-day(dd) format
         categoryOffers=categoryOffers.map((data)=>{
             data.startDate=moment(data.startDate).format("YYYY-MM-DD")
@@ -49,7 +50,6 @@ const addCategoryOfferPage=async(req,res)=>{
         console.log(error)
     }
 }
-
 
 const addCategoryOffer = async (req, res) => {
     try {

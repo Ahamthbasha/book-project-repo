@@ -27,7 +27,6 @@ const loadUsersData = async (req, res) => {
   const blockUser = async (req, res) => {
     try {
       let id = req.params.id;
-  
       const blockUser = await User.findById(id);
       let isBlocked = blockUser.isBlocked;
   

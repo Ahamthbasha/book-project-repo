@@ -117,6 +117,233 @@ const productIds = cartItems.map((item) => item.product_Id);
     }
 };
  
+// const placeorder = async (req, res) => {
+//     try {
+//       console.log("place order ", req.body);
+//       let userData = req.session.user;
+//       const ID = new mongoose.Types.ObjectId(userData._id);
+//       const addressId = req.body.selectedAddress;
+//       const payMethod = req.body.selectedPayment;
+//       const totalamount = req.body.amount;
+//       console.log("Request dot body  ", addressId, payMethod, totalamount);
+  
+//       console.log('Coupon data:', req.body.couponData); 
+//       console.log('Coupon Name:', req.body.couponName); 
+  
+//       const result = Math.random().toString(36).substring(2, 7);
+//       const id = Math.floor(100000 + Math.random() * 900000);
+//       const ordeId = result + id;
+  
+//       const productInCart = await Cart.aggregate([
+//         {
+//           $match: {
+//             userId: ID,
+//           },
+//         },
+//         {
+//           $lookup: {
+//             from: "products",
+//             foreignField: "_id",
+//             localField: "product_Id",
+//             as: "productData",
+//           },
+//         },
+//         {
+//           $unwind: {
+//             path: "$productData",
+//             preserveNullAndEmptyArrays: true,
+//           },
+//         },
+//         {
+//           $lookup: {
+//             from: "productoffers",
+//             localField: "productData._id",
+//             foreignField: "productId",
+//             as: "productOffer",
+//           },
+//         },
+//         {
+//           $unwind: {
+//             path: "$productOffer",
+//             preserveNullAndEmptyArrays: true,
+//           },
+//         },
+//         {
+//           $project: {
+//             product_Id: 1,
+//             userId: 1,
+//             quantity: 1,
+//             name: "$productData.name",
+//             productDescription: "$productData.description",
+//             image: "$productData.imageUrl",
+//             discountPrice:  {
+//               $cond: {
+//                 if: { $gt: [{ $ifNull: ["$productOffer.discountPrice", 0] }, 0] }, 
+//                 then: "$productOffer.discountPrice", 
+//                 else: "$productData.price", 
+//               },
+//             },
+//             stock: "$productData.stock",
+//           },
+//         }
+        
+//       ]);
+      
+   
+//     console.log("product in cart =======>",productInCart);
+  
+//       let productDet = productInCart.map((item) => {
+//         return {
+//           _id: item.product_Id,
+//           name: item.name,
+//           price: item.discountPrice,
+//           quantity: item.quantity,
+//           image: item.image[0],
+//           stock: item.stock,
+//         };
+//       });
+  
+  
+  
+//       console.log("aggregated cart prods-------->",productDet);
+  
+//       for (let product of productDet) {
+//         if (product.quantity > product.stock) {
+//           return res.json({
+//             message: `Insufficient stock for product: ${product.name}. Available stock: ${product.stock}`,
+//           });
+//         }
+//       }
+      
+  
+//       console.log("stock...........>",'product.stock')
+  
+//       // Apply coupon if present
+//       let finalTotal = totalamount;
+//       let discountAmt = 0;
+  
+//       if (req.body.couponData) {
+//         console.log(req.body.couponData)
+//         finalTotal = req.body.couponData.newTotal;
+//         discountAmt = req.body.couponData.discountAmt;
+//       }
+  
+//       const DELIVERY_CHARGE = 50;
+//       const grandTotal = finalTotal + DELIVERY_CHARGE;
+  
+//       let saveOrder = async () => {
+//         console.log("paymentMethod", payMethod)
+//         const order = new Order({  
+//           userId: ID,
+//           product: productDet,
+//           address: addressId,
+//           orderId: ordeId,
+//           total: grandTotal,
+//           paymentMethod: payMethod,
+//           discountAmt: discountAmt,
+//           amountAfterDscnt: grandTotal,  
+//           coupon: req.body.couponName ? req.body.couponName : "",
+//           couponUsed: req.body.couponData ? true : false,
+//         });
+  
+//         if (req.body.status) {
+//           order.status = "Payment Failed";
+//           console.log("Payment Failed  ", order.status)
+//       }
+  
+//         const ordered = await order.save();
+//         console.log(ordered, "ordersaved DATAAAA");
+  
+//         productDet.forEach(async (product) => {
+//           await Product.updateMany(
+//             { _id: product._id },
+//             { $inc: { stock: -product.quantity, bestSelling:1 } }
+//           );
+//         });
+//         productDet.forEach(async (product) => {
+//           const populatedProd= await Product.findById(product._id).populate('category').lean()
+//           await Category.updateMany({ _id: populatedProd.category._id }, { $inc: { bestSelling:1} });
+//         })
+  
+//       // Mark the coupon as used after the order is placed
+//       if (req.body.couponData) {
+//         await Coupon.updateOne(
+//           { code: req.body.couponName },
+//           { $addToSet: { usedBy: ID } }
+//         );
+//       }
+  
+  
+//         const deletedCart = await Cart.deleteMany({
+//           userId: ID,
+//         }).lean();
+  
+//         console.log(deletedCart, "deletedCart");
+//       };
+//   //save order ends
+//       if (addressId) {
+//         if (payMethod === "cash-on-delivery") {
+//           console.log("CASH ON DELIVERY");
+//           await saveOrder();
+//           res.json({ COD: true });
+//         } else if (payMethod === "razorpay") {
+//           const amount = grandTotal;
+//           let instance = new Razorpay({
+//             key_id: "rzp_test_QhDPSiMt8ea6IF",
+//             key_secret: "5wg9GfJ3ESDupFYCxdSpPbRP",
+//           });
+//           const order = await instance.orders.create({
+//             amount: amount * 100,
+//             currency: "INR",
+//             receipt: "Ahamathbasha",
+//           });
+//           await saveOrder();
+  
+//           res.json({
+//             razorPaySucess: true,
+//             order,
+//             amount,
+//           });
+//         } else if (payMethod === "wallet") {
+//           console.log('inside the wallettttttttttt')
+  
+//           const newWallet = req.body.updateWallet;
+  
+//           const userWallet = await User.findByIdAndUpdate(
+//             userData._id,
+//             { $set: { wallet: newWallet } },
+//             { new: true }
+//           );
+  
+//           console.log("userwalet" , userWallet)
+  
+//           const userHistory = await User.updateOne(
+//             {_id:userData._id},
+//             {
+//               $push:{
+//                 history:{
+//                   amount:grandTotal,
+//                   status:"Amount Debited",
+//                   date:Date.now()
+//                 }
+//               }
+//             }
+//           )
+  
+//           console.log("userHistory  ", userHistory)
+  
+  
+//           await saveOrder();
+  
+//           res.json({ walletSucess: true });
+//         }
+//       }
+//     } catch (error) {
+//       console.log(error.message);
+//       res.status(500).send("Internal Server Error");
+//     }
+// };
+  
 const placeorder = async (req, res) => {
     try {
       console.log("place order ", req.body);
@@ -207,16 +434,30 @@ const placeorder = async (req, res) => {
   
       console.log("aggregated cart prods-------->",productDet);
   
-      for (let product of productDet) {
-        if (product.quantity > product.stock) {
-          return res.json({
-            message: `Insufficient stock for product: ${product.name}. Available stock: ${product.stock}`,
-          });
-        }
+       // Accumulate all products with insufficient stock
+    let insufficientStockProducts = [];
+
+    for (let product of productDet) {
+      if (product.quantity > product.stock) {
+        insufficientStockProducts.push({
+          name: product.name,
+          requestedQuantity: product.quantity,
+          availableStock: product.stock,
+        });
       }
-  
-      console.log("stock...........>",'product.stock')
-  
+    }
+
+    // If there are stock issues, send an error response with product details
+    if (insufficientStockProducts.length > 0) {
+      return res.json({
+        message: "Insufficient stock for some products.",
+        insufficientStockProducts,
+      });
+    }
+
+    // Proceed with placing the order
+    console.log("Stock is sufficient. Proceeding with order.");
+    
       // Apply coupon if present
       let finalTotal = totalamount;
       let discountAmt = 0;
@@ -343,6 +584,7 @@ const placeorder = async (req, res) => {
     }
 };
   
+
 const orderSuccess = async (req, res) => {
   try {
     res.render("user/order_success", {

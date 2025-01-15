@@ -90,6 +90,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/admin', adminRouter);
 app.use('/', userRouter);
 
+//page not found middleware
+app.use(function(req,res,next){
+  res.status(404).render('404')
+})
+
+//error handler middleware
+app.use(function(err,req,res,next){
+  res.status(500)
+  res.render('error',{error:err})
+})
+
 app.listen(process.env.PORT,()=>{
     console.log("server is running")
 })

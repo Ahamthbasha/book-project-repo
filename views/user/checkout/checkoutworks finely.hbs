@@ -1,4 +1,4 @@
-<head>
+﻿<head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 <main class="main">
@@ -377,56 +377,30 @@
         });
     });
 
-const placeOrder = () => {
-    // Collect all product rows to loop through each product
-    const cartItems = document.querySelectorAll('tr');
-    let insufficientStockProducts = [];
+    const placeOrder = () => {
+        const productStock = parseInt(document.getElementById('productStock').value, 10); 
+        const productQuantity = parseInt(document.getElementById('productQuantity').value, 10); 
+        const productName=document.querySelector('.product-name').textContent.trim()
 
-    // Loop through each cart item
-    cartItems.forEach(item => {
-        // Check if the product row contains the necessary elements (productStock and productQuantity)
-        const productStockElement = item.querySelector('#productStock');
-        const productQuantityElement = item.querySelector('#productQuantity');
-        
-        if (productStockElement && productQuantityElement) {
-            const productStock = parseInt(productStockElement.value, 10);
-            const productQuantity = parseInt(productQuantityElement.value, 10);
-            const productName = item.querySelector('.product-name') ? item.querySelector('.product-name').textContent.trim() : '';
-
-            // Check if stock is zero
-            if (productStock == 0) {
-                insufficientStockProducts.push({
-                    productName,
-                    message: `${productName} is out of stock.<br>Please remove it from your cart.`
-                });
-            } else if (productQuantity > productStock) {
-                insufficientStockProducts.push({
-                    productName,
-                    message: `${productName} has only ${productStock} in stock.Reduce the quantity<br>`
-                });
-            }
-        }
-    });
-
-    // If there are any products with insufficient stock, show a SweetAlert message
-    if (insufficientStockProducts.length > 0) {
-        let errorMessage = insufficientStockProducts.map(item => {
-            return item.message; // Now using <br> for line breaks
-        }).join('');
-
+    // Check if stock is zero
+    if (productStock == 0) {
+        // Show SweetAlert if out of stock
         Swal.fire({
             icon: 'error',
-            title: 'Stock Issue',
-            html: errorMessage, // Use `html` to interpret HTML content (e.g., <br>)
+            title: 'Out of Stock',
+            text: 'Sorry, this product is currently out of stock.Go to cart page',
         });
-        return;
+
+        return 
+    }else if(productStock < productQuantity) {
+         Swal.fire({
+            icon: 'error',
+            title: 'Not much available',
+            text: `Sorry,the product name ${productName}.we only have ${productStock} of this product in stock. Please update the quantity.`,
+        });
+        return
     }
-
-    // If everything is valid, proceed with the order (you can call your backend API here)
-    console.log('All product quantities are valid. Proceeding with the order.');
-    // Example: Make an AJAX call to your backend to place the order.
-
-const selectedAddress = document.getElementById('selectedAddress').value;
+        const selectedAddress = document.getElementById('selectedAddress').value;
         if (!selectedAddress) {
             Swal.fire('Error', 'Please select a delivery address.', 'error');
             return;
@@ -463,7 +437,7 @@ const selectedAddress = document.getElementById('selectedAddress').value;
                 }
             }
         });
-};
+    }
 
 
     const useWallet = () => {

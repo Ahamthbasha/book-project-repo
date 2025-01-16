@@ -70,11 +70,11 @@ const orderSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  Reason: {
+    type: String,
+    required: false,  // Optional, based on whether you want it mandatory
+}
 
-  reason :{
-    type:String,
-    default:'',
-  }
 });
 
 module.exports = mongoose.model("Order", orderSchema);

@@ -485,186 +485,477 @@ const cancelOrder = async (req, res) => {
 //   }
 // };
 
+// const returnOrder = async (req, res) => {
+//     try {
+//         const id = req.params.id;
+//         const {reason}=req.body
+//         // Validate the order ID
+//         if (!mongoose.Types.ObjectId.isValid(id)) {
+//             return res.status(400).json({ error: 'Invalid order ID' });
+//         }
+//         const ID = new mongoose.Types.ObjectId(id);
+//         let totalRefund = 0;
+//         let DELIVERY_CHARGE = 50;
+  
+//         // Find the order to be returned
+//         let returnedOrder = await Order.findOne({ _id: ID }).lean();
+//         console.log(returnedOrder, "returnedOrder");
+  
+//         if (!returnedOrder) {
+//             return res.status(404).json({ error: 'Order not found' });
+//         }
+  
+//         // Mark the order status as returned
+//         const returnedOrderStatus = await Order.findByIdAndUpdate(ID, { $set: { status: 'Returned',Reason:reason} }, { new: true });
+  
+//         // Lookup the product offers and join with the product data
+//         const productDetails = await Product.aggregate([
+//             { $match: { _id: { $in: returnedOrder.product.map(p => p._id) } } },
+//             {
+//                 $lookup: {
+//                     from: 'productoffers',  // Assuming your product offers are stored in a 'productoffers' collection
+//                     localField: '_id',
+//                     foreignField: 'productId', // Assuming the product offer references the product via 'productId'
+//                     as: 'offerDetails'
+//                 }
+//             },
+//             { $unwind: { path: '$offerDetails', preserveNullAndEmptyArrays: true } } // Unwind in case no offer exists
+//         ]);
+  
+//         // Loop through the products and mark them as returned if not already cancelled
+//         for (const product of returnedOrderStatus.product) {
+//             if (!product.isCancelled) {
+//                 await Product.updateOne(
+//                     { _id: product._id },
+//                     { $inc: { stock: product.quantity } }
+//                 );
+  
+//                 await Order.updateOne(
+//                     { _id: ID, 'product._id': product._id },
+//                     { $set: { 'product.$.isReturned': true } }
+//                 );
+//             }
+//         }
+  
+//         // Calculate the refund amount for each product
+//         let couponAmountEach = 0;
+//         if (returnedOrder.coupon) {
+//             couponAmountEach = returnedOrder.discountAmt / returnedOrder.product.length;
+//         }
+  
+//         // Handle wallet or razorpay payment methods
+//         if (['wallet', 'razorpay'].includes(returnedOrder.paymentMethod)) {
+//             // First, calculate the refund amount for all products
+//             for (const product of returnedOrder.product) {
+//                 const productDetail = productDetails.find(p => p._id.toString() === product._id.toString());
+//                 let productTotal = 0;
+  
+//                 // Check if product has a product offer and adjust the price accordingly
+//                 if (productDetail && productDetail.offerDetails) {
+//                     const offer = productDetail.offerDetails;
+//                     // Assuming the product offer has discountPrice or discountPercentage
+//                     if (offer.discountPrice) {
+//                         // If the product offer contains a discounted price
+//                         productTotal = (offer.discountPrice * product.quantity) - couponAmountEach;
+//                     } else if (offer.discountPercentage) {
+//                         // If the product offer contains a discount percentage
+//                         const discount = (product.price * offer.discountPercentage) / 100;
+//                         productTotal = ((product.price - discount) * product.quantity) - couponAmountEach;
+//                     }
+//                 } else {
+//                     // If no product offer, calculate using the regular price
+//                     productTotal = (product.price * product.quantity) - couponAmountEach;
+//                 }
+  
+//                 totalRefund += productTotal;
+//                 console.log(`Product total before delivery charge: ₹${productTotal}`);
+//             }
+  
+//             // Now, the totalRefund should reflect the correct refund amount
+//             // Do not subtract the delivery charge here since it's not part of the refund
+//             console.log(`Total refund (without delivery charge): ₹${totalRefund}`);
+  
+//             // Update the wallet balance for the user
+//             await User.updateOne(
+//                 { _id: req.session.user._id },
+//                 { $inc: { wallet: totalRefund } }
+//             );
+  
+//             // Record the refund transaction in the user's history
+//             await User.updateOne(
+//                 { _id: req.session.user._id },
+//                 {
+//                     $push: {
+//                         history: {
+//                             amount: totalRefund,
+//                             status: 'Refund for Order Return',
+//                             date: Date.now()
+//                         }
+//                     }
+//                 }
+//             );
+//             console.log('Wallet updated and refund history added');
+//         }
+  
+//         // Special case for COD (Cash on Delivery) orders: Refund the amount to wallet
+//         if (returnedOrder.status === 'Delivered' && returnedOrder.paymentMethod === 'cash-on-delivery') {
+//             let codRefundAmount = 0;
+  
+//             // Calculate the refund amount for all products before subtracting delivery charge
+//             for (const product of returnedOrder.product) {
+//                 const productDetail = productDetails.find(p => p._id.toString() === product._id.toString());
+//                 let productTotal = 0;
+  
+//                 // Check if product has a product offer and adjust the price accordingly
+//                 if (productDetail && productDetail.offerDetails) {
+//                     const offer = productDetail.offerDetails;
+//                     if (offer.discountPrice) {
+//                         productTotal = (offer.discountPrice * product.quantity);
+//                     } else if (offer.discountPercentage) {
+//                         const discount = (product.price * offer.discountPercentage) / 100;
+//                         productTotal = ((product.price - discount) * product.quantity);
+//                     }
+//                 } else {
+//                     productTotal = (product.price * product.quantity);
+//                 }
+  
+//                 codRefundAmount += productTotal;
+//                 console.log(`COD Product total before delivery charge: ₹${productTotal}`);
+//             }
+  
+//             // Now, codRefundAmount should reflect the correct refund amount
+//             // Do not subtract the delivery charge here since it's not part of the refund
+//             console.log(`COD refund (without delivery charge): ₹${codRefundAmount}`);
+  
+//             // Update wallet balance for COD orders
+//             await User.updateOne(
+//                 { _id: req.session.user._id },
+//                 { $inc: { wallet: codRefundAmount } }
+//             );
+  
+//             // Record the COD refund in the user's history
+//             await User.updateOne(
+//                 { _id: req.session.user._id },
+//                 {
+//                     $push: {
+//                         history: {
+//                             amount: codRefundAmount,
+//                             status: 'COD Order Return Refund',
+//                             date: Date.now()
+//                         }
+//                     }
+//                 }
+//             );
+//             console.log('COD refund history added');
+//         }
+  
+//         // Send response indicating successful order return
+//         res.json({
+//             success: true,
+//             message: 'Successfully Returned Order'
+//         });
+  
+//     } catch (error) {
+//         console.log(error.message);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
+
+// const cancelOneProduct = async (req, res) => {
+//   try {
+//     const { id, prodId ,reason} = req.body;
+//     console.log(id, prodId,reason);
+
+//     if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
+//       return res.status(500).json({ error: 'Invalid order or product ID' });
+//     }
+
+//     const ID = new mongoose.Types.ObjectId(id);
+//     const PRODID = new mongoose.Types.ObjectId(prodId);
+
+//     // Find the updated order
+//     const updatedOrder = await Order.findOneAndUpdate(
+//       { _id: ID, 'product._id': PRODID },
+//       { $set: { 'product.$.isCancelled': true,Reason:reason }},
+//       { new: true }
+//     ).lean();
+
+//     if (!updatedOrder) {
+//       return res.status(500).json({ error: 'Order or product not found' });
+//     }
+
+//     const result = await Order.findOne(
+//       { _id: ID, 'product._id': PRODID },
+//       { 'product.$': 1 }
+//     ).lean();
+
+//     const productQuantity = result.product[0].quantity;
+    
+//     // Check if there's an offer for the product
+//     const productOffer = await ProductOffer.findOne({
+//       productId: PRODID,
+//       currentStatus: true,
+//       startDate: { $lte: Date.now() },
+//       endDate: { $gte: Date.now() }
+//     });
+
+//     // Use the offer price if there's an active offer, otherwise use the original price
+//     const productPrice = productOffer ? productOffer.discountPrice * productQuantity : result.product[0].price * productQuantity;
+
+//     await Product.findOneAndUpdate(
+//       {_id:PRODID},
+//       {$inc:{stock:productQuantity}}
+//     )
+
+//     // Get the total number of products in the order
+//     const totalProductsInOrder = updatedOrder.product.length;
+
+//     // Handle coupon refund logic if coupon is used
+//     if (updatedOrder.couponUsed) {
+//       const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
+      
+//       // Calculate the discount per product
+//       const discountPerProduct = coupon.maxDiscount / totalProductsInOrder;
+
+//       // Calculate the discount amount for the cancelled product
+//       const discountAmt = (discountPerProduct * productQuantity);
+
+//       // Calculate the new total after applying the discount
+//       const newTotal = productPrice - discountAmt;
+
+//       // Refund the user
+//       await User.updateOne(
+//         { _id: req.session.user._id },
+//         { $inc: { wallet: newTotal } }
+//       );
+
+//       await User.updateOne(
+//         { _id: req.session.user._id },
+//         {
+//           $push: {
+//             history: {
+//               amount: newTotal,
+//               status: `refund of: ${result.product[0].name}`,
+//               date: Date.now()
+//             }
+//           }
+//         }
+//       );
+//     } else {
+//       await User.updateOne(
+//         { _id: req.session.user._id },
+//         { $inc: { wallet: productPrice } }
+//       );
+//       await User.updateOne(
+//         { _id: req.session.user._id },
+//         {
+//           $push: {
+//             history: {
+//               amount: productPrice,
+//               status: `refund of: ${result.product[0].name}`,
+//               date: Date.now()
+//             }
+//           }
+//         }
+//       );
+//     }
+
+//     // Check if all products are cancelled, and if so, update the order status to "Cancelled"
+//     const allCancelled = updatedOrder.product.every(p => p.isCancelled);
+//     if (allCancelled) {
+//       // Update the order status to "Cancelled" even if the payment method is COD
+//       await Order.updateOne({ _id: ID }, { $set: { status: 'Cancelled' } });
+//     }
+
+//     res.json({ success: true, message: 'Successfully removed product' });
+//   } catch (error) {
+//     console.log(error.message);
+//   }
+// };
+
 const returnOrder = async (req, res) => {
-    try {
-        const id = req.params.id;
-        const {reason}=req.body
-        // Validate the order ID
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ error: 'Invalid order ID' });
-        }
-        const ID = new mongoose.Types.ObjectId(id);
-        let totalRefund = 0;
-        let DELIVERY_CHARGE = 50;
-  
-        // Find the order to be returned
-        let returnedOrder = await Order.findOne({ _id: ID }).lean();
-        console.log(returnedOrder, "returnedOrder");
-  
-        if (!returnedOrder) {
-            return res.status(404).json({ error: 'Order not found' });
-        }
-  
-        // Mark the order status as returned
-        const returnedOrderStatus = await Order.findByIdAndUpdate(ID, { $set: { status: 'Returned',Reason:reason} }, { new: true });
-  
-        // Lookup the product offers and join with the product data
-        const productDetails = await Product.aggregate([
-            { $match: { _id: { $in: returnedOrder.product.map(p => p._id) } } },
-            {
-                $lookup: {
-                    from: 'productoffers',  // Assuming your product offers are stored in a 'productoffers' collection
-                    localField: '_id',
-                    foreignField: 'productId', // Assuming the product offer references the product via 'productId'
-                    as: 'offerDetails'
-                }
-            },
-            { $unwind: { path: '$offerDetails', preserveNullAndEmptyArrays: true } } // Unwind in case no offer exists
-        ]);
-  
-        // Loop through the products and mark them as returned if not already cancelled
-        for (const product of returnedOrderStatus.product) {
-            if (!product.isCancelled) {
-                await Product.updateOne(
-                    { _id: product._id },
-                    { $inc: { stock: product.quantity } }
-                );
-  
-                await Order.updateOne(
-                    { _id: ID, 'product._id': product._id },
-                    { $set: { 'product.$.isReturned': true } }
-                );
-            }
-        }
-  
-        // Calculate the refund amount for each product
-        let couponAmountEach = 0;
-        if (returnedOrder.coupon) {
-            couponAmountEach = returnedOrder.discountAmt / returnedOrder.product.length;
-        }
-  
-        // Handle wallet or razorpay payment methods
-        if (['wallet', 'razorpay'].includes(returnedOrder.paymentMethod)) {
-            // First, calculate the refund amount for all products
-            for (const product of returnedOrder.product) {
-                const productDetail = productDetails.find(p => p._id.toString() === product._id.toString());
-                let productTotal = 0;
-  
-                // Check if product has a product offer and adjust the price accordingly
-                if (productDetail && productDetail.offerDetails) {
-                    const offer = productDetail.offerDetails;
-                    // Assuming the product offer has discountPrice or discountPercentage
-                    if (offer.discountPrice) {
-                        // If the product offer contains a discounted price
-                        productTotal = (offer.discountPrice * product.quantity) - couponAmountEach;
-                    } else if (offer.discountPercentage) {
-                        // If the product offer contains a discount percentage
-                        const discount = (product.price * offer.discountPercentage) / 100;
-                        productTotal = ((product.price - discount) * product.quantity) - couponAmountEach;
-                    }
-                } else {
-                    // If no product offer, calculate using the regular price
-                    productTotal = (product.price * product.quantity) - couponAmountEach;
-                }
-  
-                totalRefund += productTotal;
-                console.log(`Product total before delivery charge: ₹${productTotal}`);
-            }
-  
-            // Now, the totalRefund should reflect the correct refund amount
-            // Do not subtract the delivery charge here since it's not part of the refund
-            console.log(`Total refund (without delivery charge): ₹${totalRefund}`);
-  
-            // Update the wallet balance for the user
-            await User.updateOne(
-                { _id: req.session.user._id },
-                { $inc: { wallet: totalRefund } }
-            );
-  
-            // Record the refund transaction in the user's history
-            await User.updateOne(
-                { _id: req.session.user._id },
-                {
-                    $push: {
-                        history: {
-                            amount: totalRefund,
-                            status: 'Refund for Order Return',
-                            date: Date.now()
-                        }
-                    }
-                }
-            );
-            console.log('Wallet updated and refund history added');
-        }
-  
-        // Special case for COD (Cash on Delivery) orders: Refund the amount to wallet
-        if (returnedOrder.status === 'Delivered' && returnedOrder.paymentMethod === 'cash-on-delivery') {
-            let codRefundAmount = 0;
-  
-            // Calculate the refund amount for all products before subtracting delivery charge
-            for (const product of returnedOrder.product) {
-                const productDetail = productDetails.find(p => p._id.toString() === product._id.toString());
-                let productTotal = 0;
-  
-                // Check if product has a product offer and adjust the price accordingly
-                if (productDetail && productDetail.offerDetails) {
-                    const offer = productDetail.offerDetails;
-                    if (offer.discountPrice) {
-                        productTotal = (offer.discountPrice * product.quantity);
-                    } else if (offer.discountPercentage) {
-                        const discount = (product.price * offer.discountPercentage) / 100;
-                        productTotal = ((product.price - discount) * product.quantity);
-                    }
-                } else {
-                    productTotal = (product.price * product.quantity);
-                }
-  
-                codRefundAmount += productTotal;
-                console.log(`COD Product total before delivery charge: ₹${productTotal}`);
-            }
-  
-            // Now, codRefundAmount should reflect the correct refund amount
-            // Do not subtract the delivery charge here since it's not part of the refund
-            console.log(`COD refund (without delivery charge): ₹${codRefundAmount}`);
-  
-            // Update wallet balance for COD orders
-            await User.updateOne(
-                { _id: req.session.user._id },
-                { $inc: { wallet: codRefundAmount } }
-            );
-  
-            // Record the COD refund in the user's history
-            await User.updateOne(
-                { _id: req.session.user._id },
-                {
-                    $push: {
-                        history: {
-                            amount: codRefundAmount,
-                            status: 'COD Order Return Refund',
-                            date: Date.now()
-                        }
-                    }
-                }
-            );
-            console.log('COD refund history added');
-        }
-  
-        // Send response indicating successful order return
-        res.json({
-            success: true,
-            message: 'Successfully Returned Order'
-        });
-  
-    } catch (error) {
-        console.log(error.message);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-  };
+  try {
+      const id = req.params.id;
+      const { reason } = req.body;
+
+      // Validate the order ID
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+          return res.status(400).json({ error: 'Invalid order ID' });
+      }
+
+      const ID = new mongoose.Types.ObjectId(id);
+      let totalRefund = 0;
+      let DELIVERY_CHARGE = 50;
+
+      // Find the order to be returned
+      let returnedOrder = await Order.findOne({ _id: ID }).lean();
+      console.log(returnedOrder, "returnedOrder");
+
+      if (!returnedOrder) {
+          return res.status(404).json({ error: 'Order not found' });
+      }
+
+      // Mark the order status as returned
+      await Order.findByIdAndUpdate(ID, { $set: { status: 'Returned', Reason: reason } }, { new: true });
+
+      // Lookup product offers and join with product data
+      const productDetails = await Product.aggregate([
+          { $match: { _id: { $in: returnedOrder.product.map(p => p._id) } } },
+          {
+              $lookup: {
+                  from: 'productoffers',  // Assuming your product offers are stored in a 'productoffers' collection
+                  localField: '_id',
+                  foreignField: 'productId', // Assuming the product offer references the product via 'productId'
+                  as: 'offerDetails'
+              }
+          },
+          { $unwind: { path: '$offerDetails', preserveNullAndEmptyArrays: true } } // Unwind in case no offer exists
+      ]);
+
+      // Loop through the products and mark them as returned if not already cancelled or returned
+      for (const product of returnedOrder.product) {
+          if (!product.isCancelled && !product.isReturned) { // Check if not cancelled and not already returned
+              await Product.updateOne(
+                  { _id: product._id },
+                  { $inc: { stock: product.quantity } }
+              );
+
+              await Order.updateOne(
+                  { _id: ID, 'product._id': product._id },
+                  { $set: { 'product.$.isReturned': true } }
+              );
+          }
+      }
+
+      // Calculate the refund amount for each product that is eligible for return
+      let couponAmountEach = 0;
+      if (returnedOrder.coupon) {
+          couponAmountEach = returnedOrder.discountAmt / returnedOrder.product.length;
+      }
+
+      // Handle wallet or razorpay payment methods
+      if (['wallet', 'razorpay'].includes(returnedOrder.paymentMethod)) {
+          // Calculate the refund amount for all eligible products
+          for (const product of returnedOrder.product) {
+              if (!product.isCancelled && !product.isReturned) { // Only consider eligible products
+                  const productDetail = productDetails.find(p => p._id.toString() === product._id.toString());
+                  let productTotal = 0;
+
+                  // Check if product has a product offer and adjust the price accordingly
+                  if (productDetail && productDetail.offerDetails) {
+                      const offer = productDetail.offerDetails;
+                      // Assuming the product offer has discountPrice or discountPercentage
+                      if (offer.discountPrice) {
+                          // If the product offer contains a discounted price
+                          productTotal = (offer.discountPrice * product.quantity) - couponAmountEach;
+                      } else if (offer.discountPercentage) {
+                          // If the product offer contains a discount percentage
+                          const discount = (product.price * offer.discountPercentage) / 100;
+                          productTotal = ((product.price - discount) * product.quantity) - couponAmountEach;
+                      }
+                  } else {
+                      // If no product offer, calculate using the regular price
+                      productTotal = (product.price * product.quantity) - couponAmountEach;
+                  }
+
+                  totalRefund += Math.max(0, productTotal); // Ensure no negative refunds
+                  console.log(`Product total before delivery charge: ₹${productTotal}`);
+              }
+          }
+
+          console.log(`Total refund (without delivery charge): ₹${totalRefund}`);
+
+          // Update the wallet balance for the user
+          await User.updateOne(
+              { _id: req.session.user._id },
+              { $inc: { wallet: totalRefund } }
+          );
+
+          // Record the refund transaction in the user's history
+          await User.updateOne(
+              { _id: req.session.user._id },
+              {
+                  $push: {
+                      history: {
+                          amount: totalRefund,
+                          status: 'Refund for Order Return',
+                          date: Date.now()
+                      }
+                  }
+              }
+          );
+          console.log('Wallet updated and refund history added');
+      }
+
+      // Special case for COD (Cash on Delivery) orders: Refund the amount to wallet
+      if (returnedOrder.status === 'Delivered' && returnedOrder.paymentMethod === 'cash-on-delivery') {
+          let codRefundAmount = 0;
+
+          // Calculate the refund amount for all eligible products before subtracting delivery charge
+          for (const product of returnedOrder.product) {
+              if (!product.isCancelled && !product.isReturned) { // Only consider eligible products
+                  const productDetail = productDetails.find(p => p._id.toString() === product._id.toString());
+                  let productTotal = 0;
+
+                  // Check if product has a product offer and adjust the price accordingly
+                  if (productDetail && productDetail.offerDetails) {
+                      const offer = productDetail.offerDetails;
+                      if (offer.discountPrice) {
+                          productTotal = (offer.discountPrice * product.quantity);
+                      } else if (offer.discountPercentage) {
+                          const discount = (product.price * offer.discountPercentage) / 100;
+                          productTotal = ((product.price - discount) * product.quantity);
+                      }
+                  } else {
+                      productTotal = (product.price * product.quantity);
+                  }
+
+                  codRefundAmount += Math.max(0, productTotal); // Ensure no negative refunds
+                  console.log(`COD Product total before delivery charge: ₹${productTotal}`);
+              }
+          }
+
+          console.log(`COD refund (without delivery charge): ₹${codRefundAmount}`);
+
+          // Update wallet balance for COD orders
+          await User.updateOne(
+              { _id: req.session.user._id },
+              { $inc: { wallet: codRefundAmount } }
+          );
+
+          // Record the COD refund in the user's history
+          await User.updateOne(
+              { _id: req.session.user._id },
+              {
+                  $push: {
+                      history: {
+                          amount: codRefundAmount,
+                          status: 'COD Order Return Refund',
+                          date: Date.now()
+                      }
+                  }
+              }
+          );
+          console.log('COD refund history added');
+      }
+
+      // Send response indicating successful order return
+      res.json({
+          success: true,
+          message: 'Successfully Returned Order'
+      });
+
+  } catch (error) {
+      console.log(error.message);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 
 const cancelOneProduct = async (req, res) => {
   try {
-    const { id, prodId ,reason} = req.body;
-    console.log(id, prodId,reason);
+    const { id, prodId, reason } = req.body; // Get reason from request body
+    console.log(id, prodId, reason);
 
     if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
       return res.status(500).json({ error: 'Invalid order or product ID' });
@@ -673,10 +964,10 @@ const cancelOneProduct = async (req, res) => {
     const ID = new mongoose.Types.ObjectId(id);
     const PRODID = new mongoose.Types.ObjectId(prodId);
 
-    // Find the updated order
+    // Find the updated order and mark the product as cancelled
     const updatedOrder = await Order.findOneAndUpdate(
       { _id: ID, 'product._id': PRODID },
-      { $set: { 'product.$.isCancelled': true,Reason:reason }},
+      { $set: { 'product.$.isCancelled': true, Reason: reason } },
       { new: true }
     ).lean();
 
@@ -690,7 +981,7 @@ const cancelOneProduct = async (req, res) => {
     ).lean();
 
     const productQuantity = result.product[0].quantity;
-    
+
     // Check if there's an offer for the product
     const productOffer = await ProductOffer.findOne({
       productId: PRODID,
@@ -702,31 +993,39 @@ const cancelOneProduct = async (req, res) => {
     // Use the offer price if there's an active offer, otherwise use the original price
     const productPrice = productOffer ? productOffer.discountPrice * productQuantity : result.product[0].price * productQuantity;
 
+    // Update stock for the cancelled product
     await Product.findOneAndUpdate(
-      {_id:PRODID},
-      {$inc:{stock:productQuantity}}
-    )
+      { _id: PRODID },
+      { $inc: { stock: productQuantity } }
+    );
 
-    // Get the total number of products in the order
-    const totalProductsInOrder = updatedOrder.product.length;
+    // Calculate new total for the order after cancellation
+    let newTotal = updatedOrder.total - productPrice; // Subtract the cancelled product price from the total
+
+    // Update the order with the new total
+    await Order.updateOne(
+      { _id: ID },
+      { $set: { total: newTotal } }
+    );
 
     // Handle coupon refund logic if coupon is used
     if (updatedOrder.couponUsed) {
       const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
-      
+
       // Calculate the discount per product
+      const totalProductsInOrder = updatedOrder.product.length;
       const discountPerProduct = coupon.maxDiscount / totalProductsInOrder;
 
       // Calculate the discount amount for the cancelled product
       const discountAmt = (discountPerProduct * productQuantity);
 
-      // Calculate the new total after applying the discount
-      const newTotal = productPrice - discountAmt;
+      // Refund calculation after applying discount
+      const refundAmount = productPrice - discountAmt;
 
       // Refund the user
       await User.updateOne(
         { _id: req.session.user._id },
-        { $inc: { wallet: newTotal } }
+        { $inc: { wallet: refundAmount } }
       );
 
       await User.updateOne(
@@ -734,18 +1033,21 @@ const cancelOneProduct = async (req, res) => {
         {
           $push: {
             history: {
-              amount: newTotal,
-              status: `refund of: ${result.product[0].name}`,
+              amount: refundAmount,
+              status: `refund of (after discount): ${result.product[0].name}`,
               date: Date.now()
             }
           }
         }
       );
+      
     } else {
+      // If no coupon was used, refund the original price of the cancelled product
       await User.updateOne(
         { _id: req.session.user._id },
         { $inc: { wallet: productPrice } }
       );
+
       await User.updateOne(
         { _id: req.session.user._id },
         {
@@ -763,20 +1065,131 @@ const cancelOneProduct = async (req, res) => {
     // Check if all products are cancelled, and if so, update the order status to "Cancelled"
     const allCancelled = updatedOrder.product.every(p => p.isCancelled);
     if (allCancelled) {
-      // Update the order status to "Cancelled" even if the payment method is COD
       await Order.updateOne({ _id: ID }, { $set: { status: 'Cancelled' } });
     }
 
-    res.json({ success: true, message: 'Successfully removed product' });
+    res.json({ success: true, message: 'Successfully removed product and updated total' });
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ error: 'An error occurred while cancelling the product' });
   }
 };
 
+// const returnOneProduct = async (req, res) => {
+//   try {
+//     const { id, prodId,reason } = req.body;
+//     console.log(id, prodId,reason);
+
+//     if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
+//       return res.status(500).json({ error: 'Invalid order or product ID' });
+//     }
+
+//     const ID = new mongoose.Types.ObjectId(id);
+//     const PRODID = new mongoose.Types.ObjectId(prodId);
+
+//     // Find the updated order and mark the product as returned
+//     const updatedOrder = await Order.findOneAndUpdate(
+//       { _id: ID, 'product._id': PRODID },
+//       { $set: { 'product.$.isReturned': true,Reason:reason} },
+//       { new: true }
+//     ).lean();
+
+//     if (!updatedOrder) {
+//       return res.status(500).json({ error: 'Order or product not found' });
+//     }
+
+//     const result = await Order.findOne(
+//       { _id: ID, 'product._id': PRODID },
+//       { 'product.$': 1 }
+//     ).lean();
+
+//     const productQuantity = result.product[0].quantity;
+
+//     // Check if there's an offer for the product
+//     const productOffer = await ProductOffer.findOne({
+//       productId: PRODID,
+//       currentStatus: true,
+//       startDate: { $lte: Date.now() },
+//       endDate: { $gte: Date.now() }
+//     });
+
+//     // Use the offer price if there's an active offer, otherwise use the original price
+//     const productPrice = productOffer ? productOffer.discountPrice * productQuantity : result.product[0].price * productQuantity;
+
+//     // Update stock
+//     await Product.findOneAndUpdate(
+//       { _id: PRODID },
+//       { $inc: { stock: productQuantity } }
+//     );
+
+//     // Handle coupon refund logic if coupon was used
+//     if (updatedOrder.couponUsed) {
+//       const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
+
+//       // Calculate the discount per product
+//       const totalProductsInOrder = updatedOrder.product.length;
+//       const discountPerProduct = coupon.maxDiscount / totalProductsInOrder;
+
+//       // Apply the discount for the returned product
+//       const discountAmt = (discountPerProduct * productQuantity);
+
+//       // Calculate the new total after applying the discount
+//       const newTotal = productPrice - discountAmt;
+
+//       // Refund the user
+//       await User.updateOne(
+//         { _id: req.session.user._id },
+//         { $inc: { wallet: newTotal } }
+//       );
+//       await User.updateOne(
+//         { _id: req.session.user._id },
+//         {
+//           $push: {
+//             history: {
+//               amount: newTotal,
+//               status: `[return] refund of: ${result.product[0].name}`,
+//               date: Date.now()
+//             }
+//           }
+//         }
+//       );
+//     } else {
+//       // No coupon used, refund the original price
+//       await User.updateOne(
+//         { _id: req.session.user._id },
+//         { $inc: { wallet: productPrice } }
+//       );
+//       await User.updateOne(
+//         { _id: req.session.user._id },
+//         {
+//           $push: {
+//             history: {
+//               amount: productPrice,
+//               status: `[return] refund of: ${result.product[0].name}`,
+//               date: Date.now()
+//             }
+//           }
+//         }
+//       );
+//     }
+
+//     // Check if all products are returned, and if so, update the order status to "Returned"
+//     const allReturned = updatedOrder.product.every(p => p.isReturned);
+//     if (allReturned) {
+//       await Order.updateOne({ _id: ID }, { $set: { status: 'Returned' } });
+//     }
+
+//     res.json({ success: true, message: 'Successfully returned product' });
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(500).json({ error: 'An error occurred while processing the return' });
+//   }
+// };
+
 const returnOneProduct = async (req, res) => {
   try {
-    const { id, prodId,reason } = req.body;
-    console.log(id, prodId,reason);
+    const { id, prodId, reason } = req.body; // Get reason from request body
+    console.log(id, prodId, reason);
 
     if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
       return res.status(500).json({ error: 'Invalid order or product ID' });
@@ -788,7 +1201,7 @@ const returnOneProduct = async (req, res) => {
     // Find the updated order and mark the product as returned
     const updatedOrder = await Order.findOneAndUpdate(
       { _id: ID, 'product._id': PRODID },
-      { $set: { 'product.$.isReturned': true,Reason:reason} },
+      { $set: { 'product.$.isReturned': true, Reason: reason } },
       { new: true }
     ).lean();
 
@@ -820,6 +1233,15 @@ const returnOneProduct = async (req, res) => {
       { $inc: { stock: productQuantity } }
     );
 
+    // Calculate new total for the order after returning the product
+    let newTotal = updatedOrder.total - productPrice; // Subtract the returned product price from the total
+
+    // Update the order with the new total
+    await Order.updateOne(
+      { _id: ID },
+      { $set: { total: newTotal } }
+    );
+
     // Handle coupon refund logic if coupon was used
     if (updatedOrder.couponUsed) {
       const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
@@ -831,32 +1253,35 @@ const returnOneProduct = async (req, res) => {
       // Apply the discount for the returned product
       const discountAmt = (discountPerProduct * productQuantity);
 
-      // Calculate the new total after applying the discount
-      const newTotal = productPrice - discountAmt;
+      // Calculate refund amount after applying discount
+      const refundAmount = productPrice - discountAmt;
 
       // Refund the user
       await User.updateOne(
         { _id: req.session.user._id },
-        { $inc: { wallet: newTotal } }
+        { $inc: { wallet: refundAmount } }
       );
+      
       await User.updateOne(
         { _id: req.session.user._id },
         {
           $push: {
             history: {
-              amount: newTotal,
-              status: `[return] refund of: ${result.product[0].name}`,
+              amount: refundAmount,
+              status: `[return] refund of (after discount): ${result.product[0].name}`,
               date: Date.now()
             }
           }
         }
       );
+      
     } else {
       // No coupon used, refund the original price
       await User.updateOne(
         { _id: req.session.user._id },
         { $inc: { wallet: productPrice } }
       );
+
       await User.updateOne(
         { _id: req.session.user._id },
         {
@@ -877,7 +1302,7 @@ const returnOneProduct = async (req, res) => {
       await Order.updateOne({ _id: ID }, { $set: { status: 'Returned' } });
     }
 
-    res.json({ success: true, message: 'Successfully returned product' });
+    res.json({ success: true, message: 'Successfully returned product and updated total' });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: 'An error occurred while processing the return' });

@@ -164,5 +164,8 @@ Handlebars.registerHelper('equalsObjectId',function(a,b){
   return a.equals(b)
 })
 
-  
+Handlebars.registerHelper('everyOrderedProductCancelledOrReturned', function(orderedProDet) {
+  return orderedProDet.every(product => product.isCancelled || product.isReturned);
+});
+
 module.exports = Handlebars;

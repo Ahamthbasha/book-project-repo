@@ -689,7 +689,8 @@ const removeCoupon = async (req, res) => {
       return res.json({ status: "invalid" });
     } else if (!coupon.usedBy.includes(userId)) {
       return res.json({ status: "not_used" });
-    } else {
+    } 
+   else {
       // Remove user ID from usedBy array
       await Coupon.updateOne(
         { _id: coupon._id },

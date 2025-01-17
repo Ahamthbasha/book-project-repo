@@ -49,7 +49,7 @@ const my_Orders=async(req,res)=>{
                 $limit:limit,
             },
         ])
-        const count=await Order.find({}).countDocuments()
+        const count=await Order.countDocuments({userId:new mongoose.Types.ObjectId(id)})
         const totalPages=Math.ceil(count/limit)
         const pages=Array.from({length:totalPages},(_,i)=>i+1)
         console.log(myOrders,"myOrders")

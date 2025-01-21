@@ -131,7 +131,7 @@ sales.forEach((sale) => {
             totalSales,
             thisMonthOrder: odersByMonth.length > 0 ? odersByMonth[odersByMonth.length - 1] : 0,//here it will get the recent month data
             thisMonthSales: revnueByMonth.length > 0 ? revnueByMonth[revnueByMonth.length - 1] : 0,
-            layout: 'adminLayout',
+            layout: 'adminlayout',
         });
     } catch (error) {
         console.log(error);

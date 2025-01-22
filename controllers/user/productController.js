@@ -104,154 +104,311 @@ const getProduct = async (req, res) => {
   }
 };
 
+// const searchSortFilter = async (req, res) => {
+//     const { searchQuery, sortOption, categoryFilter, page = 1, limit = 9 } = req.body;
+  
+//     // Match stage based on search query and category filter
+//     const matchStage = { $match: {} };
+//     if (searchQuery) {
+//       matchStage.$match.name = { $regex: searchQuery, $options: "i" }; // Case-insensitive search
+//     }
+//     if (categoryFilter) {
+//       matchStage.$match.category = new mongoose.Types.ObjectId(categoryFilter); // Filter by category
+//     }
+  
+//     // Construct the sort stage
+//     // const sortStage = { $sort: {} };
+//     // switch (sortOption) {
+//     //   case "priceAsc":
+//     //     sortStage.$sort.price = 1;
+//     //     break;
+//     //   case "priceDesc":
+//     //     sortStage.$sort.price = -1;
+//     //     break;
+//     //   case "nameAsc":
+//     //     sortStage.$sort.name = 1;
+//     //     break;
+//     //   case "nameDesc":
+//     //     sortStage.$sort.name = -1;
+//     //     break;
+//     //   case "newArrivals":
+//     //     sortStage.$sort.createdAt = -1;
+//     //     break;
+//     //   case "popularity":
+//     //     sortStage.$sort.popularity = -1;
+//     //     break;
+//     //   default:
+//     //     sortStage.$sort.createdAt = 1; // Default sort by creation date
+//     // }
+
+    
+  
+//     // Pagination: skip and limit
+//     const skipStage = { $skip: (page - 1) * limit }; // Skip records based on the current page
+//     const limitStage = { $limit: limit }; // Limit the number of results per page
+  
+//     // Fetch products with aggregation pipeline
+//     const products = await Product.aggregate([
+//       matchStage,
+//       {
+//         $lookup: {
+//           from: "categories",
+//           localField: "category",
+//           foreignField: "_id",
+//           as: "category",
+//         },
+//       },
+//       {
+//         $unwind: {
+//           path: "$category",
+//           preserveNullAndEmptyArrays: true,
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "productoffers",
+//           localField: "_id",
+//           foreignField: "productId",
+//           as: "productOffer",
+//         },
+//       },
+//       {
+//         $unwind: {
+//           path: "$productOffer",
+//           preserveNullAndEmptyArrays: true,
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 1,
+//           name: 1,
+//           price: 1,
+//           description: 1,
+//           stock: 1,
+//           popularity: 1,
+//           bestSelling: 1,
+//           imageUrl: 1,
+//           category: {
+//             _id: "$category._id",
+//             category: "$category.category",
+//             imageUrl: "$category.imageUrl",
+//             isListed: "$category.isListed",
+//             bestSelling: "$category.bestSelling",
+//           },
+//           productOffer: 1,
+//           discountPrice: {
+//             $cond: {
+//               if: { $eq: ["$productOffer.currentStatus", true] },
+//               then: "$productOffer.discountPrice",
+//               else: "$price",
+//             },
+//           },
+//           offerAvailable: {
+//             $cond: {
+//               if: { $eq: ["$productOffer.currentStatus", true] },
+//               then: true,
+//               else: false,
+//             },
+//           },
+//           offerPercentage: {
+//             $cond: {
+//               if: { $eq: ["$productOffer.currentStatus", true] }, // Check if offer is active
+//               then:
+//                 { 
+//                   $multiply:
+//                     [
+//                       { 
+//                         $divide:
+//                           [
+//                             { $subtract: ["$price", "$productOffer.discountPrice"] }, 
+//                             "$price"
+//                           ] 
+//                       }, 
+//                       100 
+//                     ] 
+//                 }, // Calculate offer percentage
+//               else:
+//                 null, // Set to null if no offer
+//             },
+//           },
+//         },
+//       },
+//       sortStage,
+//       skipStage,
+//       limitStage,
+//     ]);
+  
+//     // Calculate total products count
+//     const totalProducts = await Product.countDocuments(matchStage.$match);
+  
+//     // Calculate total number of pages
+//     const totalPages = Math.ceil(totalProducts / limit);
+  
+//     // Return paginated results along with page details
+//     res.json({
+//       products,
+//       totalProducts,
+//       totalPages, // Total pages
+//       currentPage: page, // Current page
+//       limit,
+//     });
+//   };
+
 const searchSortFilter = async (req, res) => {
-    const { searchQuery, sortOption, categoryFilter, page = 1, limit = 9 } = req.body;
-  
-    // Match stage based on search query and category filter
-    const matchStage = { $match: {} };
-    if (searchQuery) {
-      matchStage.$match.name = { $regex: searchQuery, $options: "i" }; // Case-insensitive search
-    }
-    if (categoryFilter) {
-      matchStage.$match.category = new mongoose.Types.ObjectId(categoryFilter); // Filter by category
-    }
-  
-    // Construct the sort stage
-    const sortStage = { $sort: {} };
-    switch (sortOption) {
-      case "priceAsc":
-        sortStage.$sort.price = 1;
-        break;
-      case "priceDesc":
-        sortStage.$sort.price = -1;
-        break;
-      case "nameAsc":
-        sortStage.$sort.name = 1;
-        break;
-      case "nameDesc":
-        sortStage.$sort.name = -1;
-        break;
-      case "newArrivals":
-        sortStage.$sort.createdAt = -1;
-        break;
-      case "popularity":
-        sortStage.$sort.popularity = -1;
-        break;
-      default:
-        sortStage.$sort.createdAt = 1; // Default sort by creation date
-    }
-  
-    // Pagination: skip and limit
-    const skipStage = { $skip: (page - 1) * limit }; // Skip records based on the current page
-    const limitStage = { $limit: limit }; // Limit the number of results per page
-  
-    // Fetch products with aggregation pipeline
-    const products = await Product.aggregate([
-      matchStage,
-      {
-        $lookup: {
-          from: "categories",
-          localField: "category",
-          foreignField: "_id",
-          as: "category",
-        },
+  const { searchQuery, sortOption, categoryFilter, page = 1, limit = 9 } = req.body;
+
+  // Match stage based on search query and category filter
+  const matchStage = { $match: {} };
+  if (searchQuery) {
+    matchStage.$match.name = { $regex: searchQuery, $options: "i" }; // Case-insensitive search
+  }
+  if (categoryFilter) {
+    matchStage.$match.category = new mongoose.Types.ObjectId(categoryFilter); // Filter by category
+  }
+
+  // Construct the sort stage
+  const sortStage = { $sort: {} };
+  switch (sortOption) {
+    case "priceAsc":
+      sortStage.$sort.price = 1;
+      break;
+    case "priceDesc":
+      sortStage.$sort.price = -1;
+      break;
+    case "nameAsc":
+      sortStage.$sort = { nameLower: 1 };
+      break;
+    case "nameDesc":
+      sortStage.$sort = { nameLower: -1 };
+      break;
+    case "newArrivals":
+      sortStage.$sort.createdAt = -1;
+      break;
+    case "popularity":
+      sortStage.$sort.popularity = -1;
+      break;
+    default:
+      sortStage.$sort.createdAt = 1; // Default sort by creation date
+  }
+
+  // Pagination: skip and limit
+  const skipStage = { $skip: (page - 1) * limit }; // Skip records based on the current page
+  const limitStage = { $limit: limit }; // Limit the number of results per page
+
+  // Fetch products with aggregation pipeline
+  const products = await Product.aggregate([
+    matchStage,
+    {
+      $lookup: {
+        from: "categories",
+        localField: "category",
+        foreignField: "_id",
+        as: "category",
       },
-      {
-        $unwind: {
-          path: "$category",
-          preserveNullAndEmptyArrays: true,
-        },
+    },
+    {
+      $unwind: {
+        path: "$category",
+        preserveNullAndEmptyArrays: true,
       },
-      {
-        $lookup: {
-          from: "productoffers",
-          localField: "_id",
-          foreignField: "productId",
-          as: "productOffer",
-        },
+    },
+    {
+      $lookup: {
+        from: "productoffers",
+        localField: "_id",
+        foreignField: "productId",
+        as: "productOffer",
       },
-      {
-        $unwind: {
-          path: "$productOffer",
-          preserveNullAndEmptyArrays: true,
-        },
+    },
+    {
+      $unwind: {
+        path: "$productOffer",
+        preserveNullAndEmptyArrays: true,
       },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          price: 1,
-          description: 1,
-          stock: 1,
-          popularity: 1,
-          bestSelling: 1,
-          imageUrl: 1,
-          category: {
-            _id: "$category._id",
-            category: "$category.category",
-            imageUrl: "$category.imageUrl",
-            isListed: "$category.isListed",
-            bestSelling: "$category.bestSelling",
-          },
-          productOffer: 1,
-          discountPrice: {
-            $cond: {
-              if: { $eq: ["$productOffer.currentStatus", true] },
-              then: "$productOffer.discountPrice",
-              else: "$price",
-            },
-          },
-          offerAvailable: {
-            $cond: {
-              if: { $eq: ["$productOffer.currentStatus", true] },
-              then: true,
-              else: false,
-            },
-          },
-          offerPercentage: {
-            $cond: {
-              if: { $eq: ["$productOffer.currentStatus", true] }, // Check if offer is active
-              then:
-                { 
-                  $multiply:
-                    [
-                      { 
-                        $divide:
-                          [
-                            { $subtract: ["$price", "$productOffer.discountPrice"] }, 
-                            "$price"
-                          ] 
-                      }, 
-                      100 
-                    ] 
-                }, // Calculate offer percentage
-              else:
-                null, // Set to null if no offer
-            },
+    },
+    {
+      $addFields: {
+        nameLower: { $toLower: "$name" }, // Add a lowercase version of the name field
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        price: 1,
+        description: 1,
+        stock: 1,
+        popularity: 1,
+        bestSelling: 1,
+        imageUrl: 1,
+        category: {
+          _id: "$category._id",
+          category: "$category.category",
+          imageUrl: "$category.imageUrl",
+          isListed: "$category.isListed",
+          bestSelling: "$category.bestSelling",
+        },
+        productOffer: 1,
+        discountPrice: {
+          $cond: {
+            if: { $eq: ["$productOffer.currentStatus", true] },
+            then: "$productOffer.discountPrice",
+            else: "$price",
           },
         },
+        offerAvailable: {
+          $cond: {
+            if: { $eq: ["$productOffer.currentStatus", true] },
+            then: true,
+            else: false,
+          },
+        },
+        offerPercentage: {
+          $cond: {
+            if: { $eq: ["$productOffer.currentStatus", true] }, // Check if offer is active
+            then:
+              {
+                $multiply:
+                  [
+                    {
+                      $divide:
+                        [
+                          { $subtract: ["$price", "$productOffer.discountPrice"] },
+                          "$price"
+                        ]
+                    },
+                    100
+                  ]
+              }, // Calculate offer percentage
+            else:
+              null, // Set to null if no offer
+          },
+        },
+        nameLower: 1, // Include the lowercase name field
       },
-      sortStage,
-      skipStage,
-      limitStage,
-    ]);
-  
-    // Calculate total products count
-    const totalProducts = await Product.countDocuments(matchStage.$match);
-  
-    // Calculate total number of pages
-    const totalPages = Math.ceil(totalProducts / limit);
-  
-    // Return paginated results along with page details
-    res.json({
-      products,
-      totalProducts,
-      totalPages, // Total pages
-      currentPage: page, // Current page
-      limit,
-    });
-  };
-  
+    },
+    sortStage,
+    skipStage,
+    limitStage,
+  ]);
+
+  // Calculate total products count
+  const totalProducts = await Product.countDocuments(matchStage.$match);
+
+  // Calculate total number of pages
+  const totalPages = Math.ceil(totalProducts / limit);
+
+  // Return paginated results along with page details
+  res.json({
+    products,
+    totalProducts,
+    totalPages, // Total pages
+    currentPage: page, // Current page
+    limit,
+  });
+};
+
+
 const productView = async (req, res) => {
   try {
     const userData = req.session.user; // Get the logged-in user data from session

@@ -109,35 +109,40 @@
 
         // Event delegation for add to cart button
         $(document).on('click', '.button-add-to-cart', function () {
-            let prodId = $(this).data('product-id');
-            let quantity = 1;
+    let prodId = $(this).data('product-id');
+    let $thisButton = $(this); // Store the button clicked
+    let quantity = 1;
 
-            $.ajax({
-                url: '/addtocart/' + prodId,
-                method: 'POST',
-                data: { prodId: prodId, quantity: quantity },
-                success: function (result) {
-                    if (result.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Added to cart',
-                            text: result.message,
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-                        $('#addcart').html('<button id="addcart-btn" onclick="window.location.href=\'/cart\'" class="button button-add-to-cart">Go to cart</button>');
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: result.message,
-                        });
-                    }
-                },
-                error: function (error) {
-                    console.log('Error adding to cart', error);
-                }
-            });
-        });
+    $.ajax({
+        url: '/addtocart/' + prodId,
+        method: 'POST',
+        data: { prodId: prodId, quantity: quantity },
+        success: function (result) {
+            if (result.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Added to cart',
+                    text: result.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+
+                // Update the button text for the clicked product
+                $thisButton.text('Go to cart');
+                $thisButton.attr('onclick', "window.location.href='/cart'"); // Update the button action
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: result.message,
+                });
+            }
+        },
+        error: function (error) {
+            console.log('Error adding to cart', error);
+        }
+    });
+});
+
     });
 </script>

@@ -136,21 +136,6 @@
 
 <script>
     
-function validate_email() {
-    var email = document.getElementById('email').value;
-    var emailPattern = /^(?![0-9]+@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    var emailerror = document.getElementById('emailError');
-    emailerror.innerHTML = ""; // Clear previous error message
-
-    if (!email.match(emailPattern)) {
-        emailerror.innerHTML ="Please enter a valid email address (e.g., example@gmail.com). Email cannot be purely numeric or repetitive characters.";
-        return false; // Return false if validation fails
-    }
-
-    return true; // Return true if validation passes
-}
-
 function Validation() {
     let errors = [];
     var username = document.getElementById('name').value;

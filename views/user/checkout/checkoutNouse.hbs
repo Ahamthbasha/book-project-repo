@@ -279,103 +279,89 @@
 
 <script>
 
-    let couponData
-    let couponEl
-    let newTotal
-    let subTotal
-    let updateWallet
-    let ct=0
+let couponData;
+let couponEl;
+let ct = 0;
+let updateWallet;
+let originalSubTotal = Number(document.getElementsByName('subTotal')[0].value);
 
+const toggleCoupon = async () => {
+    ct += 1;
+    couponEl = document.getElementById('copon').value.trim();
+    const currentStatus = document.getElementById('couponBtn').innerText.trim();
+    const endpoint = currentStatus === 'Apply' ? '/apply_coupon' : '/remove_coupon';
 
-    // toggle coupon
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ couponVal: couponEl, subTotal: originalSubTotal })
+    });
 
-    let couponStatus
+    couponData = await response.json();
 
-    let originalSubTotal = Number(document.getElementsByName('subTotal')[0].value) ;
+    console.log(couponData);
 
-    const toggleCoupon = async () => {
-        
-        ct+=1
-        couponEl = document.getElementById('copon').value.trim();
-        const currentStatus = document.getElementById('couponBtn').innerText.trim();
-        const endpoint = currentStatus === 'Apply' ? '/apply_coupon' : '/remove_coupon';
+    const setCouponStatus = (msg, element) => {
+        element.innerHTML = `<p>${msg}</p>`;
+        setTimeout(() => {
+            element.style.opacity = 1;
+            element.innerHTML = '';
+        }, 2000);
+    };
 
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ couponVal: couponEl, subTotal: originalSubTotal })
-        });
+    const couponMsg = document.getElementById('couponMsg');
+    const sCoponMsg = document.getElementById('sCoponMsg');
 
-         couponData = await response.json();
-
-         console.log(couponData)
-
-        const setCouponStatus = (msg, element) => {
-            element.innerHTML = `<p>${msg}</p>`;
-            setTimeout(() => {
-                element.style.opacity = 1;
-                element.innerHTML = '';
-            }, 2000);
-        };
-
-        const couponMsg = document.getElementById('couponMsg');
-        const sCoponMsg = document.getElementById('sCoponMsg');
-
-        if (couponData.status === 'invalid') {
-            ct=0
-            setCouponStatus('Invalid coupon', couponMsg);
-        } else if (couponData.status === 'expired') {
-            ct=0
-            setCouponStatus('Coupon has expired!', couponMsg);
-        } else if (couponData.status === 'already_used') {
-            ct=0
-            setCouponStatus('Coupon already used!', couponMsg);
-        } 
-        else if (couponData.status === 'not_used') {
+    if (couponData.status === 'invalid') {
         ct = 0;
-        // Prompt the user to confirm if they really want to remove the coupon
-        const confirmRemove = window.confirm('Are you sure you want to remove the coupon?');
-        
-        if (confirmRemove) {
-            // If the user confirms, remove the coupon and refresh the page
-            setCouponStatus('Coupon removed successfully', couponMsg);
-            document.getElementById('couponBtn').innerHTML = '<i class="fi-rs-label mr-10"></i>Apply';
-            document.getElementById('copon').value = '';
-
-            // Recalculate grand total
-            document.getElementById('new_sub_total').innerHTML = `<strong>${parseInt(couponData.newTotal) + 50}</strong>`; // Add shipping cost
-            document.getElementsByName('subTotal')[0].value = couponData.newTotal + 50;
-
-            // Reload the page after a brief delay
-            
-                window.location.reload();  // Refresh the page  // Wait for 2 seconds
-        } else {
-            // If the user cancels, just show the message
-            setCouponStatus('Coupon not used yet! If you want to remove, refresh the page.', couponMsg);
-        }
-    } 
-        else if (couponData.status === 'min_purchase_not_met') {
+        setCouponStatus('Invalid coupon', couponMsg);
+    } else if (couponData.status === 'expired') {
+        ct = 0;
+        setCouponStatus('Coupon has expired!', couponMsg);
+    } else if (couponData.status === 'already_used') {
+        ct = 0;
+        setCouponStatus('Coupon already used!', couponMsg);
+    } else if (couponData.status === 'not_used') {
+        ct = 0;
+        setCouponStatus('Coupon not used yet! If you want to remove, just refresh', couponMsg);
+    } else if (couponData.status === 'min_purchase_not_met') {
         ct = 0;
         setCouponStatus('Minimum purchase not met!', couponMsg);
-        }else if (couponData.status === 'removed') {
-            setCouponStatus('Coupon removed successfully', couponMsg);
-            document.getElementById('couponBtn').innerHTML = '<i class="fi-rs-label mr-10"></i>Apply';
-            document.getElementById('copon').value = '';
-        } else if (couponData.status === 'applied') {
-            setCouponStatus('Coupon applied successfully', sCoponMsg);
-            document.getElementById('couponBtn').innerHTML = '<i class="fi-rs-label mr-10"></i>Remove';
-        }
-   
+    } else if (couponData.status === 'removed') {
+        setCouponStatus('Coupon removed successfully', couponMsg);
+        
+        // Reset coupon code and discount on UI
+        document.getElementById('couponBtn').innerHTML = '<i class="fi-rs-label mr-10"></i>Apply';
+        document.getElementById('copon').value = '';
+        document.getElementById('copoun_code').innerHTML = `<small>No Coupon</small>`;
+        document.getElementById('discount_amt').innerHTML = `<span class="text-success">No Coupon</span>`;
+        
+        // Recalculate grand total (original total + shipping)
+        document.getElementById('new_sub_total').innerHTML = `<strong>${parseInt(couponData.newTotal) + 50}</strong>`;  // Add shipping cost
+        document.getElementsByName('subTotal')[0].value = couponData.newTotal + 50;
+    } else if (couponData.status === 'applied') {
+        setCouponStatus('Coupon applied successfully', sCoponMsg);
+        document.getElementById('couponBtn').innerHTML = '<i class="fi-rs-label mr-10"></i>Remove';
+    }
 
-        if (couponData.status === 'applied' || couponData.status === 'removed') {
-            document.getElementById('new_sub_total').innerHTML = `<strong>${parseInt(couponData.newTotal) + 50}</strong>`;
-            document.getElementsByName('subTotal')[0].value = couponData.newTotal + 50;
+    // Update the display for the applied or removed coupon
+    if (couponData.status === 'applied' || couponData.status === 'removed') {
+        // Update the grand total based on whether the coupon was applied or removed
+        document.getElementById('new_sub_total').innerHTML = `<strong>${parseInt(couponData.newTotal) + 50}</strong>`; // Include shipping cost
+        document.getElementsByName('subTotal')[0].value = couponData.newTotal + 50;  // Update the hidden subTotal field
+
+        // Show coupon code and discount amount
+        if (couponData.status === 'applied') {
             document.getElementById('copoun_code').innerHTML = `<small>${couponEl}</small>`;
             document.getElementById('discount_amt').innerHTML = `<span class="text-success">${couponData.discountAmt}</span>`;
+        } else {
+            document.getElementById('copoun_code').innerHTML = `<small>No Coupon</small>`;
+            document.getElementById('discount_amt').innerHTML = `<span class="text-success">No Coupon</span>`;
         }
-    };
+    }
+};
 
 
 
@@ -396,23 +382,18 @@
         });
     });
 
-const placeOrder = () => {
-    // Collect all product rows to loop through each product
+    const placeOrder = () => {
     const cartItems = document.querySelectorAll('tr');
     let insufficientStockProducts = [];
 
-    // Loop through each cart item
     cartItems.forEach(item => {
-        // Check if the product row contains the necessary elements (productStock and productQuantity)
         const productStockElement = item.querySelector('#productStock');
         const productQuantityElement = item.querySelector('#productQuantity');
-        
         if (productStockElement && productQuantityElement) {
             const productStock = parseInt(productStockElement.value, 10);
             const productQuantity = parseInt(productQuantityElement.value, 10);
             const productName = item.querySelector('.product-name') ? item.querySelector('.product-name').textContent.trim() : '';
 
-            // Check if stock is zero
             if (productStock == 0) {
                 insufficientStockProducts.push({
                     productName,
@@ -421,161 +402,138 @@ const placeOrder = () => {
             } else if (productQuantity > productStock) {
                 insufficientStockProducts.push({
                     productName,
-                    message: `${productName} has only ${productStock} in stock.Reduce the quantity or remove it from your cart<br>`
+                    message: `${productName} has only ${productStock} in stock. Reduce the quantity or remove it from your cart<br>`
                 });
             }
         }
     });
 
-    // If there are any products with insufficient stock, show a SweetAlert message
     if (insufficientStockProducts.length > 0) {
-        let errorMessage = insufficientStockProducts.map(item => {
-            return item.message; // Now using <br> for line breaks
-        }).join('');
-
+        let errorMessage = insufficientStockProducts.map(item => item.message).join('');
         Swal.fire({
             icon: 'error',
             title: 'Stock Issue',
-            html: errorMessage, // Use `html` to interpret HTML content (e.g., <br>)
+            html: errorMessage,
         });
         return;
     }
 
-    // If everything is valid, proceed with the order (you can call your backend API here)
-    console.log('All product quantities are valid. Proceeding with the order.');
-    // Example: Make an AJAX call to your backend to place the order.
+    const selectedAddress = document.getElementById('selectedAddress').value;
+    if (!selectedAddress) {
+        Swal.fire('Error', 'Please select a delivery address.', 'error');
+        return;
+    }
 
-const selectedAddress = document.getElementById('selectedAddress').value;
-        if (!selectedAddress) {
-            Swal.fire('Error', 'Please select a delivery address.', 'error');
-            return;
-        }
-        Swal.fire({
-            title: 'Confirm Order',
-            text: "Are you sure you want to place the order?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, place it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                subTotal = Number(document.getElementsByName('subTotal')[0].value);
-                if (paymentMethod === 'cash-on-delivery') {
-                    if (subTotal >= 1000) {
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'Cash on delivery is not available for orders above ₹1000',
-                            icon: 'error',
-                            showCancelButton: false,
-
-                        })
-                    } else {
-                        Cod()
-                    }
-                } else if (paymentMethod === 'razorpay') {
-                    online();
-                } else if (paymentMethod === 'wallet') {
-                    useWallet();
+    Swal.fire({
+        title: 'Confirm Order',
+        text: "Are you sure you want to place the order?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, place it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            subTotal = Number(document.getElementsByName('subTotal')[0].value);
+            if (paymentMethod === 'cash-on-delivery') {
+                if (subTotal >= 1000) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Cash on delivery is not available for orders above ₹1000',
+                        icon: 'error',
+                        showCancelButton: false,
+                    });
                 } else {
-                    console.log('Invalid payment method.');
+                    Cod(); // Proceed with COD payment method
                 }
+            } else if (paymentMethod === 'razorpay') {
+                online(); // Handle Razorpay payment
+            } else if (paymentMethod === 'wallet') {
+                useWallet(); // Handle wallet payment
+            } else {
+                console.log('Invalid payment method.');
             }
-        });
+        }
+    });
 };
 
 
     const useWallet = () => {
-        const wallet = document.getElementsByName('wallet')[0].value
-        let subTotal = Number(document.getElementsByName('subTotal')[0].value)
-        console.log(wallet, 'walletttttttttttt', subTotal)
-        const deliveryCharge = 50;
+    const wallet = document.getElementsByName('wallet')[0].value;
+    let subTotal = Number(document.getElementsByName('subTotal')[0].value);
+    console.log(wallet, 'wallet balance');
+    console.log(subTotal, 'discounted subTotal');
 
-        if (couponData && couponData.status === 'applied') {
+    if (couponData && couponData.status === 'applied') {
         subTotal = couponData.newTotal; // Updated subTotal after coupon
-        }
-        const totalAmount = subTotal + deliveryCharge;
-
-        console.log(wallet, 'wallet balance');
-        console.log(subTotal, 'discounted subTotal');
-        console.log(totalAmount, 'totalAmount (subTotal + delivery charge)');
-
-        if (wallet >= totalAmount) {
-            updateWallet = wallet - totalAmount
-
-            console.log(updateWallet, 'my name is update wallet...........')
-            Cod()
-        } else {
-            alertify.set('notifier', 'position', 'bottom-center');
-            //alertify.success('you dont have sufficient balance in ur wallet choose another payment method')
-            Swal.fire({
-                icon: 'error',
-                title: 'Insufficient Balance',
-                text: 'You don’t have sufficient balance in your wallet. Please choose another payment method.',
-                confirmButtonText: 'OK'
-            });
-        }
     }
+    const deliveryCharge = 50;
+    const totalAmount = subTotal + deliveryCharge;
 
+    if (wallet >= totalAmount) {
+        updateWallet = wallet - totalAmount;
+        console.log(updateWallet, 'Updated wallet balance');
+        Cod(); // Proceed with cash on delivery after updating wallet
+    } else {
+        alertify.set('notifier', 'position', 'bottom-center');
+        Swal.fire({
+            icon: 'error',
+            title: 'Insufficient Balance',
+            text: 'You don’t have sufficient balance in your wallet. Please choose another payment method.',
+            confirmButtonText: 'OK'
+        });
+    }
+}
 
     let paymentStatus = true;
+     
+     const Cod = async () => {
+    try {
+        const selectedAddress = document.querySelector('#selectedAddress').value;
+        const subTotal = Number(document.getElementsByName('subTotal')[0]?.value) || 0; // Adding safe checks here to prevent undefined errors
+        let requestBody = {
+            selectedAddress: selectedAddress,
+            selectedPayment: paymentMethod,
+            amount: subTotal,
+            couponData: couponData || null,  // Ensure couponData is passed correctly (or null if not available)
+            couponName: couponEl || '',  // Ensure couponName is passed
+            updateWallet: updateWallet || null,  // Ensure updateWallet is passed correctly
+        };
 
+        console.log('Request Body:', requestBody);
 
-    const Cod = async () => {
-        try{
-            const selectAddress = document.querySelector('#selectedAddress').value
-            const subTotal = Number(document.getElementsByName('subTotal')[0].value) 
-
-            let requestBody = {
-
-                selectedAddress: selectAddress,
-                selectedPayment: paymentMethod,
-                amount: subTotal,
-                couponData: couponData,
-                couponName: couponEl,
-                updateWallet: updateWallet
-            }
-            console.log('req.body--------------------->', requestBody)
-            
-            if (!paymentStatus) {
-                console.log('payment status failed   =>        ')
-            requestBody.status = "Payment Failed";
-            }
-                
-            const datas = await fetch('/placeorder', {
+        const response = await fetch('/placeorder', {
             method: 'POST',
-            headers: {
-                'Content-Type': "application/json",
-            },
-            body: JSON.stringify(requestBody)            
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody),
+        });
 
-            const placeOrderData = await datas.json()        
-            console.log('response json_______________', placeOrderData)
-            if (placeOrderData) {
-            console.log('Received placeOrderData:', placeOrderData);
-            if (paymentStatus) {            
-            window.location.href = '/orderPlaced'
-            }
-            else {
-                // Show an alert and redirect to the payment_failed route
+        const placeOrderData = await response.json();
+        console.log('Received placeOrderData:', placeOrderData);
+
+        if (placeOrderData) {
+            if (paymentStatus) {
+                window.location.href = '/orderPlaced';
+            } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Payment Failed',
                     text: 'Your payment could not be processed. Please try again later or use a different payment method.',
                     confirmButtonText: 'OK'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/payment_failed';
-                    }
+                }).then(() => {
+                    window.location.href = '/payment_failed';
                 });
             }
-            }
-        } catch (error) {
-        console.error('Error placing order:', error);
-        // Optionally handle the error, e.g., show a notification to the user
         }
-    };
+    } catch (error) {
+        console.error('Error placing order:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong while placing the order.',
+        });
+    }
+};
 
 
     const online = () => {

@@ -61,7 +61,7 @@ const addProductPage = async (req, res) => {
     const productExists = req.session.productExists;
     req.session.productExists = null; 
 
-    res.render("admin/addproduct", { layout: "adminLayout", category, productExists });
+    res.render("admin/addproduct", { layout: "adminlayout", category, productExists });
   } catch (error) {
     console.log(error.message);
     res.status(500).send("Internal Server Error");

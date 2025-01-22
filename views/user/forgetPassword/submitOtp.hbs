@@ -127,6 +127,7 @@ function resendOTP() {
             timerElement.textContent = countdown;
             resendButton.disabled = true;
             countdownInterval = setInterval(updateTimer, 1000);
+            location.reload()
         } else {
             alert(data.error || 'Error resending OTP. Please try again later.');
         }

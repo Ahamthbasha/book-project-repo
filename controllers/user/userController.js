@@ -416,7 +416,7 @@ const googleCallback = async (req, res) => {
 const userLogin = (req, res) => {
 
   let regSuccessMsg = 'User registered sucessfully..!!'
-  let blockMsg = 'Sorry something went wrong..!!'
+  let blockMsg = 'Access Denied..!!'
   let mailErr = 'Incorrect email or password..!!'
   let newpasMsg = 'Your password reseted successfuly..!!'
   message2 = false

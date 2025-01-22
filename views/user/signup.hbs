@@ -138,15 +138,13 @@
     
 function validate_email() {
     var email = document.getElementById('email').value;
-    var emailPattern = /^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z])(?=.*\d.*\d.*\d.*\d.*\d)[A-Za-z\d._%+-]{10,}@[A-Za-z\d.-]+\.[A-Za-z]{2,}$/;
-
-
+    var emailPattern = /^(?![0-9]+@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     var emailerror = document.getElementById('emailError');
     emailerror.innerHTML = ""; // Clear previous error message
 
     if (!email.match(emailPattern)) {
-        emailerror.innerHTML ="Please enter a valid email address that contains atleast five characters and optional five numbers.";
+        emailerror.innerHTML ="Please enter a valid email address (e.g., example@gmail.com). Email cannot be purely numeric or repetitive characters.";
         return false; // Return false if validation fails
     }
 
@@ -171,7 +169,7 @@ function Validation() {
     // Regular expressions for validation
     //var userPattern = /^[a-zA-Z0-9]{5,}$/; // Username must be at least 5 characters long
     var userPattern = /^(?!([a-zA-Z0-9])\1{4,})[a-zA-Z0-9]{5,}$/; 
-    var emailPattern = /^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z])[A-Za-z\d._%+-]{10,}@[A-Za-z\d.-]+\.[A-Za-z]{2,}$/; 
+    var emailPattern = /^(?![0-9]+@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; 
     var passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; 
     var phonePattern = /^(?!.*(\d)\1{9})\d{10}$/;
 
@@ -181,7 +179,7 @@ function Validation() {
     }
 
     if (!email.match(emailPattern)) {
-        errors.push("Please enter a valid email address that contains atleast five characters and optional five numbers.");
+        errors.push("Please enter a valid email address (e.g., example@gmail.com). Email cannot be purely numeric or repetitive characters.");
     }
 
     if (!password.match(passwordPattern)) {
@@ -199,7 +197,7 @@ function Validation() {
     // Display all error messages
     usernameerror.innerHTML = errors.includes("Username must be at least 5 characters long and can contain letters and numbers only.") ? "Username must be at least 5 characters long and can contain letters and numbers only." : "";
     
-    emailerror.innerHTML = errors.includes("Please enter a valid email address that contains atleast five characters and optional five numbers.") ? "Please enter a valid email address that contains atleast five characters and optional five numbers." : "";
+    emailerror.innerHTML = errors.includes("Please enter a valid email address (e.g., example@gmail.com). Email cannot be purely numeric or repetitive characters.") ? "Please enter a valid email address (e.g., example@gmail.com). Email cannot be purely numeric or repetitive characters." : "";
     
     passworderror.innerHTML = errors.includes("Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.") ? "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character." : "";
     

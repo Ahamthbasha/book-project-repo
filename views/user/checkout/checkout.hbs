@@ -402,7 +402,7 @@ const placeOrder = () => {
             } else if (productQuantity > productStock) {
                 insufficientStockProducts.push({
                     productName,
-                    message: `${productName} has only ${productStock} in stock.Reduce the quantity<br>`
+                    message: `${productName} has only ${productStock} in stock.Reduce the quantity or remove it from your cart<br>`
                 });
             }
         }

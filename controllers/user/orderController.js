@@ -793,6 +793,129 @@ const cancelOneProduct = async (req, res) => {
   }
 };
 
+// const returnOneProduct = async (req, res) => {
+//   try {
+//     const { id, prodId, reason } = req.body; // Get reason from request body
+//     console.log(id, prodId, reason);
+
+//     if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
+//       return res.status(500).json({ error: 'Invalid order or product ID' });
+//     }
+
+//     const ID = new mongoose.Types.ObjectId(id);
+//     const PRODID = new mongoose.Types.ObjectId(prodId);
+
+//     // Find the updated order and mark the product as returned
+//     const updatedOrder = await Order.findOneAndUpdate(
+//       { _id: ID, 'product._id': PRODID },
+//       { $set: { 'product.$.isReturned': true, Reason: reason } },
+//       { new: true }
+//     ).lean();
+
+//     if (!updatedOrder) {
+//       return res.status(500).json({ error: 'Order or product not found' });
+//     }
+
+//     const result = await Order.findOne(
+//       { _id: ID, 'product._id': PRODID },
+//       { 'product.$': 1 }
+//     ).lean();
+
+//     const productQuantity = result.product[0].quantity;
+
+//     // Check if there's an offer for the product
+//     const productOffer = await ProductOffer.findOne({
+//       productId: PRODID,
+//       currentStatus: true,
+//       startDate: { $lte: Date.now() },
+//       endDate: { $gte: Date.now() }
+//     });
+
+//     // Use the offer price if there's an active offer, otherwise use the original price
+//     const productPrice = productOffer ? productOffer.discountPrice * productQuantity : result.product[0].price * productQuantity;
+
+//     // Update stock
+//     await Product.findOneAndUpdate(
+//       { _id: PRODID },
+//       { $inc: { stock: productQuantity } }
+//     );
+
+//     // Calculate new total for the order after returning the product
+//     let newTotal = updatedOrder.total - productPrice; // Subtract the returned product price from the total
+
+//     // Update the order with the new total
+//     // await Order.updateOne(
+//     //   { _id: ID },
+//     //   { $set: { total: newTotal } }
+//     // );
+
+//     // Handle coupon refund logic if coupon was used
+//     if (updatedOrder.couponUsed) {
+//       const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
+
+//       // Calculate the discount per product
+//       const totalProductsInOrder = updatedOrder.product.length;
+//       const discountPerProduct = coupon.maxDiscount / totalProductsInOrder;
+
+//       // Apply the discount for the returned product
+//       const discountAmt = (discountPerProduct * productQuantity);
+
+//       // Calculate refund amount after applying discount
+//       const refundAmount = productPrice - discountAmt;
+
+//       // Refund the user
+//       await User.updateOne(
+//         { _id: req.session.user._id },
+//         { $inc: { wallet: refundAmount } }
+//       );
+      
+//       await User.updateOne(
+//         { _id: req.session.user._id },
+//         {
+//           $push: {
+//             history: {
+//               amount: refundAmount,
+//               status: `[return] refund of (after discount): ${result.product[0].name}`,
+//               date: Date.now()
+//             }
+//           }
+//         }
+//       );
+      
+//     } else {
+//       // No coupon used, refund the original price
+//       await User.updateOne(
+//         { _id: req.session.user._id },
+//         { $inc: { wallet: productPrice } }
+//       );
+
+//       await User.updateOne(
+//         { _id: req.session.user._id },
+//         {
+//           $push: {
+//             history: {
+//               amount: productPrice,
+//               status: `[return] refund of: ${result.product[0].name}`,
+//               date: Date.now()
+//             }
+//           }
+//         }
+//       );
+//     }
+
+//     // Check if all products are returned, and if so, update the order status to "Returned"
+//     const allReturned = updatedOrder.product.every(p => p.isReturned);
+//     if (allReturned) {
+//       await Order.updateOne({ _id: ID }, { $set: { status: 'Returned' } });
+//     }
+
+//     res.json({ success: true, message: 'Successfully returned product and updated total' });
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(500).json({ error: 'An error occurred while processing the return' });
+//   }
+// };
+
 const returnOneProduct = async (req, res) => {
   try {
     const { id, prodId, reason } = req.body; // Get reason from request body
@@ -805,16 +928,28 @@ const returnOneProduct = async (req, res) => {
     const ID = new mongoose.Types.ObjectId(id);
     const PRODID = new mongoose.Types.ObjectId(prodId);
 
-    // Find the updated order and mark the product as returned
-    const updatedOrder = await Order.findOneAndUpdate(
-      { _id: ID, 'product._id': PRODID },
-      { $set: { 'product.$.isReturned': true, Reason: reason } },
-      { new: true }
-    ).lean();
+    // Find the updated order and check if the product is canceled before returning
+    const updatedOrder = await Order.findOne({ _id: ID, 'product._id': PRODID }).lean();
 
     if (!updatedOrder) {
       return res.status(500).json({ error: 'Order or product not found' });
     }
+
+    const product = updatedOrder.product.find(p => p._id.toString() === PRODID.toString());
+
+    // If the product is canceled, refund should be zero
+    if (product.isCancelled) {
+      return res.json({
+        success: false,
+        message: 'This product is already cancelled. No refund will be processed.'
+      });
+    }
+
+    // Mark the product as returned
+    await Order.updateOne(
+      { _id: ID, 'product._id': PRODID },
+      { $set: { 'product.$.isReturned': true, Reason: reason } }
+    );
 
     const result = await Order.findOne(
       { _id: ID, 'product._id': PRODID },
@@ -842,12 +977,6 @@ const returnOneProduct = async (req, res) => {
 
     // Calculate new total for the order after returning the product
     let newTotal = updatedOrder.total - productPrice; // Subtract the returned product price from the total
-
-    // Update the order with the new total
-    // await Order.updateOne(
-    //   { _id: ID },
-    //   { $set: { total: newTotal } }
-    // );
 
     // Handle coupon refund logic if coupon was used
     if (updatedOrder.couponUsed) {
@@ -915,6 +1044,7 @@ const returnOneProduct = async (req, res) => {
     res.status(500).json({ error: 'An error occurred while processing the return' });
   }
 };
+
 
 const getInvoice = async (req, res) => {
   try {

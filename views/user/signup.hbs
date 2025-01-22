@@ -169,7 +169,8 @@ function Validation() {
     var phonenoerror = document.getElementById('phonenoError');
 
     // Regular expressions for validation
-    var userPattern = /^[a-zA-Z0-9]{5,}$/; // Username must be at least 5 characters long
+    //var userPattern = /^[a-zA-Z0-9]{5,}$/; // Username must be at least 5 characters long
+    var userPattern = /^(?!([a-zA-Z0-9])\1{4,})[a-zA-Z0-9]{5,}$/; 
     var emailPattern = /^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z])[A-Za-z\d._%+-]{10,}@[A-Za-z\d.-]+\.[A-Za-z]{2,}$/; 
     var passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; 
     var phonePattern = /^(?!.*(\d)\1{9})\d{10}$/;

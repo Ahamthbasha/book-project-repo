@@ -244,6 +244,109 @@ const orderDetails = async (req, res) => {
 //   }
 // };
 
+// const cancelOrder = async (req, res) => {
+//   try {
+//       const id = req.params.id;
+//       const { reason } = req.body;
+//       console.log('Order ID:', id);
+
+//       if (!mongoose.Types.ObjectId.isValid(id)) {
+//           console.log('Invalid order ID');
+//           return res.status(400).json({ success: false, error: 'Invalid order ID' });
+//       }
+
+//       const ID = new mongoose.Types.ObjectId(id);
+
+//       let canceledOrder = await Order.findOne({ _id: ID });
+//       console.log('Canceled Order:', canceledOrder);
+
+//       if (!canceledOrder) {
+//           console.log('Order not found');
+//           return res.status(404).json({ success: false, error: 'Order not found' });
+//       }
+
+//       // Update order status to "Cancelled"
+//       await Order.updateOne({ _id: ID }, { $set: { status: 'Cancelled', Reason: reason } });
+//       console.log('Order status updated to Cancelled');
+
+//       // Update stock for each product and mark as cancelled
+//       for (const product of canceledOrder.product) {
+//           if (!product.isCancelled) {
+//               await Product.updateOne(
+//                   { _id: product._id },
+//                   { $inc: { stock: product.quantity }, $set: { isCancelled: true } }
+//               );
+
+//               await Order.updateOne(
+//                   { _id: ID, 'product._id': product._id },
+//                   { $set: { 'product.$.isCancelled': true } }
+//               );
+//               console.log('Product stock and cancellation status updated');
+//           }
+//       }
+
+//       // Calculate total refund excluding canceled products
+//       let totalRefund = 0;
+//       let totalProductAmount = 0;
+//       const DELIVERY_CHARGE = 50;
+
+//       // Calculate total product amount (before coupon)
+//       canceledOrder.product.forEach((product) => {
+//           totalProductAmount += product.price * product.quantity;
+//       });
+
+//       // Subtract coupon amount (if any)
+//       let totalAmountAfterCoupon = totalProductAmount;
+//       if (canceledOrder.coupon) {
+//           totalAmountAfterCoupon -= canceledOrder.discountAmt;
+//       }
+//       console.log(totalAmountAfterCoupon)
+//       // Subtract delivery charge from the total amount (after coupon)
+//       totalRefund = totalAmountAfterCoupon;
+
+//       // Refund for non-cancelled products
+//       totalRefund = canceledOrder.product.reduce((total, product) => {
+//           if (!product.isCancelled) {
+//               total += product.price * product.quantity;
+//           }
+//           return total;
+//       }, 0);
+
+//       console.log('Total Refund:', totalRefund);
+
+//       // Handle wallet update if payment method is wallet or razorpay
+//       if (['wallet', 'razorpay'].includes(canceledOrder.paymentMethod)) {
+//           await User.updateOne(
+//               { _id: req.session.user._id },
+//               { $inc: { wallet: totalRefund } }
+//           );
+
+//           await User.updateOne(
+//               { _id: req.session.user._id },
+//               {
+//                   $push: {
+//                       history: {
+//                           amount: totalRefund,
+//                           status: 'Refund for Order Cancellation',
+//                           date: Date.now()
+//                       }
+//                   }
+//               }
+//           );
+//           console.log('Wallet updated and history entry added');
+//       }
+
+//       console.log('Successfully cancelled Order');
+//       res.json({
+//           success: true,
+//           message: 'Successfully cancelled Order'
+//       });
+//   } catch (error) {
+//       console.log('Error:', error.message);
+//       res.status(500).json({ success: false, message: 'Internal Server Error' });
+//   }
+// };
+
 const cancelOrder = async (req, res) => {
   try {
       const id = req.params.id;
@@ -257,7 +360,7 @@ const cancelOrder = async (req, res) => {
 
       const ID = new mongoose.Types.ObjectId(id);
 
-      let canceledOrder = await Order.findOne({ _id: ID });
+      let canceledOrder = await Order.findOne({ _id: ID }).lean();
       console.log('Canceled Order:', canceledOrder);
 
       if (!canceledOrder) {
@@ -268,6 +371,20 @@ const cancelOrder = async (req, res) => {
       // Update order status to "Cancelled"
       await Order.updateOne({ _id: ID }, { $set: { status: 'Cancelled', Reason: reason } });
       console.log('Order status updated to Cancelled');
+
+      // Lookup product offers and join with product data
+      const productDetails = await Product.aggregate([
+          { $match: { _id: { $in: canceledOrder.product.map(p => p._id) } } },
+          {
+              $lookup: {
+                  from: 'productoffers',
+                  localField: '_id',
+                  foreignField: 'productId',
+                  as: 'offerDetails'
+              }
+          },
+          { $unwind: { path: '$offerDetails', preserveNullAndEmptyArrays: true } } // Unwind offers if any
+      ]);
 
       // Update stock for each product and mark as cancelled
       for (const product of canceledOrder.product) {
@@ -285,7 +402,7 @@ const cancelOrder = async (req, res) => {
           }
       }
 
-      // Calculate total refund excluding canceled products
+      // Calculate the total refund amount, considering product offers and coupon
       let totalRefund = 0;
       let totalProductAmount = 0;
       const DELIVERY_CHARGE = 50;
@@ -301,18 +418,45 @@ const cancelOrder = async (req, res) => {
           totalAmountAfterCoupon -= canceledOrder.discountAmt;
       }
 
-      // Subtract delivery charge from the total amount (after coupon)
-      totalRefund = totalAmountAfterCoupon - DELIVERY_CHARGE;
+      console.log('Total amount after coupon (before delivery): ₹', totalAmountAfterCoupon);
 
-      // Refund for non-cancelled products
-      totalRefund = canceledOrder.product.reduce((total, product) => {
+      // Loop through products and calculate refund considering offers
+      for (const product of canceledOrder.product) {
           if (!product.isCancelled) {
-              total += product.price * product.quantity;
-          }
-          return total;
-      }, 0);
+              const productDetail = productDetails.find(p => p._id.toString() === product._id.toString());
+              let productTotal = 0;
 
-      console.log('Total Refund:', totalRefund);
+              // Check if product has a product offer
+              if (productDetail && productDetail.offerDetails) {
+                  const offer = productDetail.offerDetails;
+                  if (offer.discountPrice) {
+                      // If offer has a discounted price
+                      productTotal = offer.discountPrice * product.quantity;
+                  } else if (offer.discountPercentage) {
+                      // If offer has a discount percentage
+                      const discount = (product.price * offer.discountPercentage) / 100;
+                      productTotal = (product.price - discount) * product.quantity;
+                  }
+              } else {
+                  // No offer, use regular price
+                  productTotal = product.price * product.quantity;
+              }
+
+              // Subtract coupon amount if applicable
+              if (canceledOrder.coupon) {
+                  productTotal -= canceledOrder.discountAmt / canceledOrder.product.length;
+              }
+
+              totalRefund += Math.max(0, productTotal); // Ensure no negative refund
+          }
+      }
+
+      console.log('Total Refund (before delivery charge): ₹', totalRefund);
+
+      // Add delivery charge to the total refund (if applicable)
+      //totalRefund += DELIVERY_CHARGE;
+
+      console.log('Total Refund (including delivery charge): ₹', totalRefund);
 
       // Handle wallet update if payment method is wallet or razorpay
       if (['wallet', 'razorpay'].includes(canceledOrder.paymentMethod)) {

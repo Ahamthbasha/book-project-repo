@@ -216,16 +216,16 @@
 
 
 <script>
-   function validateForm() {
+    function validateForm() {
     let errors = [];
 
-    // Validate Category Name
+    // Validate Category Name (allow letters, numbers, spaces, hyphens, underscores, and other common characters)
     var name = document.getElementById('name').value;
     var nameerror = document.getElementById('nameError');
-    var namePattern = /^[a-zA-Z0-9\s]{5,}$/; // Allow letters, numbers, and spaces
+    var namePattern = /^[a-zA-Z0-9\s\-_&.,!@#$%^()]{5,}$/; // Allow letters, numbers, spaces, hyphens, underscores, and special characters
 
     if (!name.match(namePattern)) {
-        errors.push("Name Not Valid");
+        errors.push("Name must be at least 5 characters and can include letters, numbers, spaces, hyphens, underscores, and common special characters.");
     }
 
     // Validate Category Image File Type
@@ -249,7 +249,7 @@
 
     // Display errors if any
     if (errors.length > 0) {
-        nameerror.innerHTML = errors.includes("Name Not Valid") ? "Name Not Valid" : "";
+        nameerror.innerHTML = errors.includes("Name must be at least 5 characters and can include letters, numbers, spaces, hyphens, underscores, and common special characters.") ? "Name must be at least 5 characters and can include letters, numbers, spaces, hyphens, underscores, and common special characters." : "";
         return false; // Prevent form submission if errors are present
     }
 

@@ -32,56 +32,6 @@ const getCategory = async (req, res) => {
       console.log(error);
     }
   };
-  
-  /// To get add category page ///
-  
-  // const addCategory = (req, res) => {
-  //   try {
-  //     let catExistMsg = "Category alredy Exist..!!";
-  
-  //     if (req.session.categorySave) {
-  //       res.render("admin/add_category", { catSaveMsg, layout: 'adminlayout' });
-  //       req.session.categorySave = false;
-  //     } else if (req.session.catExist) {
-  //       res.render("admin/add_category", { catExistMsg, layout: 'adminlayout' });
-  //       req.session.catExist = false;
-  //     } else {
-  //       res.render("admin/add_category", { layout: 'adminlayout' });
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-  
-  /// To add new category post///
-  
-  // const addNewCategory = async (req, res) => {
-  //   const catName = req.body.name;
-  //   const image = req.file;
-  //   const lCatName = catName;
-  
-  //   try {
-  //     const catExist = await Category.findOne({ category: { $regex: new RegExp("^" + lCatName + "$", "i") } });
-  //     if (!catExist) {
-  //       const category = new Category({
-  //         category: lCatName,
-  //         imageUrl: image.filename,
-  //       });
-  
-  //       await category.save();
-  //       req.session.categorySave = true;
-  //       res.redirect("/admin/add_category");
-  //     } else {
-  //       req.session.catExist = true;
-  //       res.redirect("/admin/add_category");
-  //     }
-  //   } catch (error) { }
-    
-  // };
-
- 
-  
-  
   /// To edit category ///
   
   const addCategory = (req, res) => {

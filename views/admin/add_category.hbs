@@ -216,42 +216,46 @@
 
 
 <script>
-    function validateForm() {
-        let errors = [];
+   function validateForm() {
+    let errors = [];
 
-        // Validate Category Name
-        var name = document.getElementById('name').value;
-        var nameerror = document.getElementById('nameError');
-        var namePattern = /^[a-zA-Z0-9\s]{5,}$/; // Allow letters, numbers, and spaces
+    // Validate Category Name
+    var name = document.getElementById('name').value;
+    var nameerror = document.getElementById('nameError');
+    var namePattern = /^[a-zA-Z0-9\s]{5,}$/; // Allow letters, numbers, and spaces
 
-        if (!name.match(namePattern)) {
-            errors.push("Name Not Valid");
-        }
-
-        // Validate Category Image File Type
-        var image = document.getElementById('image');
-        var imageerror = document.getElementById('imageError');
-        var validImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/avif'];
-
-        if (image.files.length === 0) {
-            errors.push("Please choose an image");
-        } else {
-            var file = image.files[0];
-            if (!validImageTypes.includes(file.type)) {
-                errors.push("Invalid image type. Only PNG, JPEG, JPG, and AVIF are allowed.");
-            }
-        }
-
-        // Display errors if any
-        if (errors.length > 0) {
-            nameerror.innerHTML = errors.includes("Name Not Valid") ? "Name Not Valid" : "";
-            imageerror.innerHTML = errors.includes("Please choose an image") ? "Please choose an image" : "";
-            imageerror.innerHTML = errors.includes("Invalid image type. Only PNG, JPEG, JPG, and AVIF are allowed.") ? "Invalid image type. Only PNG, JPEG, JPG, and AVIF are allowed." : "";
-            return false; // Prevent form submission
-        }
-
-        return true; // Allow form submission if no errors
+    if (!name.match(namePattern)) {
+        errors.push("Name Not Valid");
     }
+
+    // Validate Category Image File Type
+    var image = document.getElementById('image');
+    var imageerror = document.getElementById('imageError');
+    var validImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/avif'];
+
+    // Reset the image error message before validating
+    imageerror.innerHTML = ""; 
+
+    if (image.files.length === 0) {
+        errors.push("Please choose an image");
+        imageerror.innerHTML = "Please choose an image"; // Show error if no image selected
+    } else {
+        var file = image.files[0];
+        if (!validImageTypes.includes(file.type)) {
+            errors.push("Invalid image type. Only PNG, JPEG, JPG, and AVIF are allowed.");
+            imageerror.innerHTML = "Invalid image type. Only PNG, JPEG, JPG, and AVIF are allowed."; // Show specific error for invalid file type
+        }
+    }
+
+    // Display errors if any
+    if (errors.length > 0) {
+        nameerror.innerHTML = errors.includes("Name Not Valid") ? "Name Not Valid" : "";
+        return false; // Prevent form submission if errors are present
+    }
+
+    return true; // Allow form submission if no errors
+}
+
 </script>
 
 

@@ -186,15 +186,15 @@ function Validation() {
     var fileInput = document.getElementById('productImage');
     var fileError = document.getElementById('fileError');
 
-    // Updated regular expression to allow letters, numbers, spaces, and special characters
-    var categoryPattern = /^[a-zA-Z0-9\s\-_&.,!@#$%^()]{5,}$/;
+    // Updated regex to ensure the name has at least one letter and is at least 5 characters long
+    var categoryPattern = /^(?=.*[a-zA-Z])[a-zA-Z0-9\s\-_&.,!@#$%^()]{5,}$/;
 
     // Validate the category name
     if (!name.match(categoryPattern)) {
-        errors.push("Name must be at least 5 characters long and can include letters, numbers, spaces, and common special characters.");
+        errors.push("Name must be at least 5 characters long and must include at least one letter. Special characters, numbers, and spaces are allowed.");
     }
 
-    // Validate the uploaded file type
+    // Validate uploaded file type
     var file = fileInput.files[0];
     if (file) {
         var fileType = file.type;
@@ -203,10 +203,10 @@ function Validation() {
         }
     }
 
-    // Handle name errors
+    // Handle errors
     if (errors.length > 0) {
-        nameError.innerHTML = errors.includes("Name must be at least 5 characters long and can include letters, numbers, spaces, and common special characters.") ? 
-                              "Name must be at least 5 characters long and can include letters, numbers, spaces, and common special characters." : "";
+        nameError.innerHTML = errors.includes("Name must be at least 5 characters long and must include at least one letter. Special characters, numbers, and spaces are allowed.") ? 
+                              "Name must be at least 5 characters long and must include at least one letter. Special characters, numbers, and spaces are allowed." : "";
         fileError.innerHTML = errors.includes("Only image files are allowed.") ? "Only image files are allowed." : "";
         return false; // Prevent form submission
     }

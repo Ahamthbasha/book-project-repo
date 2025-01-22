@@ -1,3 +1,4 @@
+
 <aside class="navbar-aside" id="offcanvas_aside">
     <div class="aside-top">
         <a href="/admin/home" class="brand-wrap">
@@ -80,7 +81,45 @@
         <br>
     </nav>
 </aside>
-       
+
+<style>
+
+.card-header {
+    display: flex;
+    justify-content: space-between; /* Distributes space between items */
+    align-items: center; /* Vertically centers items */
+    padding: 1rem; /* Adds padding around the header */
+    background-color: #f8f9fa; /* Light background color */
+}
+
+.card-header .row {
+    flex-grow: 1; /* Allows the row to grow and fill available space */
+}
+
+.card-header .col {
+    flex: 1; /* Each column takes equal space */
+    text-align: center; /* Center align text in each column */
+}
+
+/* Specific styles for spacing */
+.card-header .col-lg-3 {
+    margin-right: 180px; /* Space after Image column */
+}
+
+.card-header .col-lg-2 {
+    margin-right: 150px; /* Space after Category Name column */
+}
+
+.card-header .col-lg-1 {
+    margin-right: 20px; /* Space after Status column */
+}
+
+.card-header .col-check {
+    flex-grow: 0; /* Checkbox column does not grow */
+}
+
+</style>
+
 <main class="main-wrap">
 
         <section class="content-main">
@@ -94,18 +133,35 @@
                 </div>
             </div>
             <div class="card mb-4">
-                <header class="card-header">
-                    <div class="row align-items-center">
-                        <div class="col col-check flex-grow-0">
-                            <div class="form-check ms-2">
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-2 col-6">
-                        </div>
-                        
-                    </div>
-                </header> <!-- card-header end// -->
+
+    <header class="card-header">
+    <div class="row align-items-center">
+        <div class="col col-check flex-grow-0">
+            <div class="form-check ms-2">
+                <!-- Checkbox for selecting all -->
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-sm-3 col-3">
+            <strong>Image</strong>
+        </div>
+        
+        <div class="col-lg-2 col-sm-2 col-2">
+            <strong>Category Name</strong>
+        </div>
+
+        <div class="col-lg-1 col-sm-1 col-1">
+            <strong>Status</strong>
+        </div>
+
+        <div class="col-lg-1 col-sm-1 col-1 text-end">
+            <strong>Actions</strong>
+        </div>
+    </div>
+</header> <!-- card-header end// -->
+  
+
+
                 <div class="card-body">
                    
                <!---category tab-->
@@ -194,6 +250,8 @@
             </div>
         </footer>
     </main>
+
+
 
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
 

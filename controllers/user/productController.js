@@ -503,6 +503,9 @@ const productView = async (req, res) => {
   }
 };
 
+
+
+
 module.exports={
     getProduct,
     searchSortFilter,

@@ -75,30 +75,6 @@ Handlebars.registerHelper('ifeq', function (a, b, options) {
     return a === b;
   });
   
-  // Handlebars.registerHelper('singlestatuchecker', function (product, options) {
-  //   if (product.isReturned) {
-  //     return new Handlebars.SafeString('<span class="badge rounded-pill alert-info text-info">Returned</span>');
-  //   } else if (product.isCancelled) {
-  //     return new Handlebars.SafeString('<span class="badge rounded-pill alert-danger text-danger">Cancelled</span>');
-  //   } else {
-  //     return options.fn(this);
-  //   }
-  // });
-
-//   Handlebars.registerHelper('singlestatuchecker', function (product, options) {
-//     // Check if the product has been returned
-//     if (product.isReturned) {
-//         return new Handlebars.SafeString('<span class="badge rounded-pill alert-info text-info">Returned</span>');
-//     } 
-//     // Check if the product has been canceled
-//     else if (product.isCancelled) {
-//         return new Handlebars.SafeString('<span class="badge rounded-pill alert-danger text-danger">Cancelled</span>');
-//     } 
-//     // If neither condition is true, allow rendering of buttons
-//     else {
-//         return options.fn(this);
-//     }
-// });
 
 Handlebars.registerHelper('singlestatuchecker', function (product, options) {
   console.group('helper called with product',product)

@@ -1,5 +1,5 @@
 node_modules
 .env
 
-# Ignore the directory anywhere in the repo
-**/public/images/products/
+# # Ignore the directory anywhere in the repo
+# **/public/images/products/

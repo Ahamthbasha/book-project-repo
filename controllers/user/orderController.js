@@ -4,9 +4,9 @@ const Address=require("../../models/addressModel")
 const Order=require("../../models/orderModel")
 const Coupon=require("../../models/couponModel")
 const ProductOffer=require("../../models/productOfferModel")
-const moment=require('moment')
 const mongoose=require('mongoose')
-const easyinvoice=require('easyinvoice')
+const PDFDocument=require("pdfkit")
+const moment = require('moment');
 
 
 
@@ -68,6 +68,7 @@ const my_Orders=async(req,res)=>{
 const orderDetails = async (req, res) => {
   try {
       const orderId = req.params.id;
+      console.log("Order ID:", orderId);
       const user = req.session.user;
 
       if (!user) {
@@ -143,10 +144,6 @@ const orderDetails = async (req, res) => {
           }
       });
 
-      console.log("Address:", address);
-      console.log("Order Details:", myOrderDetails);
-      console.log("Ordered Product Details:", enhancedOrderedProDet);
-
       // Render the order details page for the correct user
       res.render("user/orderDetails", {
           totalprice: myOrderDetails.total,
@@ -160,192 +157,6 @@ const orderDetails = async (req, res) => {
       res.status(500).send("Internal Server Error");
   }
 };
-
-// const cancelOrder = async (req, res) => {
-//   try {
-//       const id = req.params.id;
-//       const { reason } = req.body;
-//       console.log('Order ID:', id);
-
-//       if (!mongoose.Types.ObjectId.isValid(id)) {
-//           console.log('Invalid order ID');
-//           return res.status(400).json({ success: false, error: 'Invalid order ID' });
-//       }
-
-//       const ID = new mongoose.Types.ObjectId(id);
-
-//       let canceledOrder = await Order.findOne({ _id: ID });
-//       console.log('Canceled Order:', canceledOrder);
-
-//       if (!canceledOrder) {
-//           console.log('Order not found');
-//           return res.status(404).json({ success: false, error: 'Order not found' });
-//       }
-
-//       await Order.updateOne({ _id: ID }, { $set: { status: 'Cancelled', Reason: reason } });
-//       console.log('Order status updated to Cancelled');
-
-//       // Update stock for each product and mark as cancelled
-//       for (const product of canceledOrder.product) {
-//           // Increase the stock if the ordered product is not cancelled
-//           if (!product.isCancelled) {
-//               await Product.updateOne(
-//                   { _id: product._id },
-//                   { $inc: { stock: product.quantity }, $set: { isCancelled: true } }
-//               );
-
-//               await Order.updateOne(
-//                   { _id: ID, 'product._id': product._id },
-//                   { $set: { 'product.$.isCancelled': true } }
-//               );
-//               console.log('Product stock and cancellation status updated');
-//           }
-//       }
-
-//       // Calculate total refund excluding canceled products
-//       let totalRefund = canceledOrder.product.reduce((total, product) => {
-//           if (!product.isCancelled) {
-//               total += product.price * product.quantity; // Add price of non-canceled product
-//           }
-//           return total;
-//       }, 0);
-//       console.log('Total Refund:', totalRefund);
-
-//       // Handle wallet update if payment method is wallet or razorpay
-//       if (['wallet', 'razorpay'].includes(canceledOrder.paymentMethod)) {
-//           await User.updateOne(
-//               { _id: req.session.user._id },
-//               { $inc: { wallet: totalRefund } }
-//           );
-
-//           await User.updateOne(
-//               { _id: req.session.user._id },
-//               {
-//                   $push: {
-//                       history: {
-//                           amount: totalRefund,
-//                           status: 'refund for Order Cancellation',
-//                           date: Date.now()
-//                       }
-//                   }
-//               }
-//           );
-//           console.log('Wallet updated and history entry added');
-//       }
-
-//       console.log('Successfully cancelled Order');
-//       res.json({
-//           success: true,
-//           message: 'Successfully cancelled Order'
-//       });
-//   } catch (error) {
-//       console.log('Error:', error.message);
-//       res.status(500).json({ success: false, message: 'Internal Server Error' });
-//   }
-// };
-
-// const cancelOrder = async (req, res) => {
-//   try {
-//       const id = req.params.id;
-//       const { reason } = req.body;
-//       console.log('Order ID:', id);
-
-//       if (!mongoose.Types.ObjectId.isValid(id)) {
-//           console.log('Invalid order ID');
-//           return res.status(400).json({ success: false, error: 'Invalid order ID' });
-//       }
-
-//       const ID = new mongoose.Types.ObjectId(id);
-
-//       let canceledOrder = await Order.findOne({ _id: ID });
-//       console.log('Canceled Order:', canceledOrder);
-
-//       if (!canceledOrder) {
-//           console.log('Order not found');
-//           return res.status(404).json({ success: false, error: 'Order not found' });
-//       }
-
-//       // Update order status to "Cancelled"
-//       await Order.updateOne({ _id: ID }, { $set: { status: 'Cancelled', Reason: reason } });
-//       console.log('Order status updated to Cancelled');
-
-//       // Update stock for each product and mark as cancelled
-//       for (const product of canceledOrder.product) {
-//           if (!product.isCancelled) {
-//               await Product.updateOne(
-//                   { _id: product._id },
-//                   { $inc: { stock: product.quantity }, $set: { isCancelled: true } }
-//               );
-
-//               await Order.updateOne(
-//                   { _id: ID, 'product._id': product._id },
-//                   { $set: { 'product.$.isCancelled': true } }
-//               );
-//               console.log('Product stock and cancellation status updated');
-//           }
-//       }
-
-//       // Calculate total refund excluding canceled products
-//       let totalRefund = 0;
-//       let totalProductAmount = 0;
-//       const DELIVERY_CHARGE = 50;
-
-//       // Calculate total product amount (before coupon)
-//       canceledOrder.product.forEach((product) => {
-//           totalProductAmount += product.price * product.quantity;
-//       });
-
-//       // Subtract coupon amount (if any)
-//       let totalAmountAfterCoupon = totalProductAmount;
-//       if (canceledOrder.coupon) {
-//           totalAmountAfterCoupon -= canceledOrder.discountAmt;
-//       }
-//       console.log(totalAmountAfterCoupon)
-//       // Subtract delivery charge from the total amount (after coupon)
-//       totalRefund = totalAmountAfterCoupon;
-
-//       // Refund for non-cancelled products
-//       totalRefund = canceledOrder.product.reduce((total, product) => {
-//           if (!product.isCancelled) {
-//               total += product.price * product.quantity;
-//           }
-//           return total;
-//       }, 0);
-
-//       console.log('Total Refund:', totalRefund);
-
-//       // Handle wallet update if payment method is wallet or razorpay
-//       if (['wallet', 'razorpay'].includes(canceledOrder.paymentMethod)) {
-//           await User.updateOne(
-//               { _id: req.session.user._id },
-//               { $inc: { wallet: totalRefund } }
-//           );
-
-//           await User.updateOne(
-//               { _id: req.session.user._id },
-//               {
-//                   $push: {
-//                       history: {
-//                           amount: totalRefund,
-//                           status: 'Refund for Order Cancellation',
-//                           date: Date.now()
-//                       }
-//                   }
-//               }
-//           );
-//           console.log('Wallet updated and history entry added');
-//       }
-
-//       console.log('Successfully cancelled Order');
-//       res.json({
-//           success: true,
-//           message: 'Successfully cancelled Order'
-//       });
-//   } catch (error) {
-//       console.log('Error:', error.message);
-//       res.status(500).json({ success: false, message: 'Internal Server Error' });
-//   }
-// };
 
 const cancelOrder = async (req, res) => {
   try {
@@ -361,7 +172,6 @@ const cancelOrder = async (req, res) => {
       const ID = new mongoose.Types.ObjectId(id);
 
       let canceledOrder = await Order.findOne({ _id: ID }).lean();
-      console.log('Canceled Order:', canceledOrder);
 
       if (!canceledOrder) {
           console.log('Order not found');
@@ -370,7 +180,6 @@ const cancelOrder = async (req, res) => {
 
       // Update order status to "Cancelled"
       await Order.updateOne({ _id: ID }, { $set: { status: 'Cancelled', Reason: reason } });
-      console.log('Order status updated to Cancelled');
 
       // Lookup product offers and join with product data
       const productDetails = await Product.aggregate([
@@ -793,129 +602,6 @@ const cancelOneProduct = async (req, res) => {
   }
 };
 
-// const returnOneProduct = async (req, res) => {
-//   try {
-//     const { id, prodId, reason } = req.body; // Get reason from request body
-//     console.log(id, prodId, reason);
-
-//     if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(prodId)) {
-//       return res.status(500).json({ error: 'Invalid order or product ID' });
-//     }
-
-//     const ID = new mongoose.Types.ObjectId(id);
-//     const PRODID = new mongoose.Types.ObjectId(prodId);
-
-//     // Find the updated order and mark the product as returned
-//     const updatedOrder = await Order.findOneAndUpdate(
-//       { _id: ID, 'product._id': PRODID },
-//       { $set: { 'product.$.isReturned': true, Reason: reason } },
-//       { new: true }
-//     ).lean();
-
-//     if (!updatedOrder) {
-//       return res.status(500).json({ error: 'Order or product not found' });
-//     }
-
-//     const result = await Order.findOne(
-//       { _id: ID, 'product._id': PRODID },
-//       { 'product.$': 1 }
-//     ).lean();
-
-//     const productQuantity = result.product[0].quantity;
-
-//     // Check if there's an offer for the product
-//     const productOffer = await ProductOffer.findOne({
-//       productId: PRODID,
-//       currentStatus: true,
-//       startDate: { $lte: Date.now() },
-//       endDate: { $gte: Date.now() }
-//     });
-
-//     // Use the offer price if there's an active offer, otherwise use the original price
-//     const productPrice = productOffer ? productOffer.discountPrice * productQuantity : result.product[0].price * productQuantity;
-
-//     // Update stock
-//     await Product.findOneAndUpdate(
-//       { _id: PRODID },
-//       { $inc: { stock: productQuantity } }
-//     );
-
-//     // Calculate new total for the order after returning the product
-//     let newTotal = updatedOrder.total - productPrice; // Subtract the returned product price from the total
-
-//     // Update the order with the new total
-//     // await Order.updateOne(
-//     //   { _id: ID },
-//     //   { $set: { total: newTotal } }
-//     // );
-
-//     // Handle coupon refund logic if coupon was used
-//     if (updatedOrder.couponUsed) {
-//       const coupon = await Coupon.findOne({ code: updatedOrder.coupon });
-
-//       // Calculate the discount per product
-//       const totalProductsInOrder = updatedOrder.product.length;
-//       const discountPerProduct = coupon.maxDiscount / totalProductsInOrder;
-
-//       // Apply the discount for the returned product
-//       const discountAmt = (discountPerProduct * productQuantity);
-
-//       // Calculate refund amount after applying discount
-//       const refundAmount = productPrice - discountAmt;
-
-//       // Refund the user
-//       await User.updateOne(
-//         { _id: req.session.user._id },
-//         { $inc: { wallet: refundAmount } }
-//       );
-      
-//       await User.updateOne(
-//         { _id: req.session.user._id },
-//         {
-//           $push: {
-//             history: {
-//               amount: refundAmount,
-//               status: `[return] refund of (after discount): ${result.product[0].name}`,
-//               date: Date.now()
-//             }
-//           }
-//         }
-//       );
-      
-//     } else {
-//       // No coupon used, refund the original price
-//       await User.updateOne(
-//         { _id: req.session.user._id },
-//         { $inc: { wallet: productPrice } }
-//       );
-
-//       await User.updateOne(
-//         { _id: req.session.user._id },
-//         {
-//           $push: {
-//             history: {
-//               amount: productPrice,
-//               status: `[return] refund of: ${result.product[0].name}`,
-//               date: Date.now()
-//             }
-//           }
-//         }
-//       );
-//     }
-
-//     // Check if all products are returned, and if so, update the order status to "Returned"
-//     const allReturned = updatedOrder.product.every(p => p.isReturned);
-//     if (allReturned) {
-//       await Order.updateOne({ _id: ID }, { $set: { status: 'Returned' } });
-//     }
-
-//     res.json({ success: true, message: 'Successfully returned product and updated total' });
-//   } catch (error) {
-//     console.log(error.message);
-//     res.status(500).json({ error: 'An error occurred while processing the return' });
-//   }
-// };
-
 const returnOneProduct = async (req, res) => {
   try {
     const { id, prodId, reason } = req.body; // Get reason from request body
@@ -1045,138 +731,188 @@ const returnOneProduct = async (req, res) => {
   }
 };
 
-
 const getInvoice = async (req, res) => {
   try {
     const orderId = req.query.id;
     const order = await Order.findById(orderId);
 
     if (!order) {
-      return res.status(500).send({ message: "Order not found" });
+      return res.status(404).json({ message: "Order not found" });
     }
-//destructuring the order
-    const { userId, address: addressId, product } = order;
-    const [user, address] = await Promise.all([User.findById(userId), Address.findById(addressId)]);
+
+    const { userId, address: addressId, product: orderProducts } = order;
+    const [user, address] = await Promise.all([
+      User.findById(userId),
+      Address.findById(addressId)
+    ]);
 
     if (!user || !address) {
-      return res.status(500).send({ message: "User or address not found" });
+      return res.status(404).json({ message: "User or address not found" });
     }
 
-    console.log("Fetched Order:", order);
-    console.log("Fetched Products:", product);
-
+    // Apply offers
     const productOffers = await ProductOffer.find({
-      productId: { $in: product.map(p => p._id) },
+      productId: { $in: orderProducts.map(p => p._id) },
       startDate: { $lte: new Date() },
       endDate: { $gte: new Date() },
       currentStatus: true,
     });
 
-    console.log("Fetched Active Product Offers:", productOffers);
-
-    let totalBeforeCoupon = 0;
-    const products = await Promise.all(
-      product.map(async (productItem) => {
-        console.log("Processing Product:", productItem);
-
-        const offer = productOffers.find(
-          (offer) => offer.productId.toString() === productItem._id.toString()
-        );
-
-        let price = productItem.price;
-        if (offer) {
-          console.log(`Found offer for ${productItem.name}:`, offer);
-          price = offer.discountPrice || price - (price * offer.productOfferPercentage) / 100;
-          console.log(`Discounted Price for ${productItem.name}: ${price}`);
+    let subtotal = 0;
+    const items = orderProducts.map(item => {
+      let price = parseFloat(item.price) || 0;
+      const offer = productOffers.find(o => o.productId.toString() === item._id.toString());
+      if (offer) {
+        if (offer.discountPrice) {
+          price = parseFloat(offer.discountPrice) || price;
+        } else if (offer.productOfferPercentage) {
+          const percentage = parseFloat(offer.productOfferPercentage) || 0;
+          price = price - (price * percentage / 100);
         }
+      }
+      const quantity = parseInt(item.quantity) || 1;
+      const total = price * quantity;
+      subtotal += total;
 
-        totalBeforeCoupon += price * productItem.quantity;
-
-        return {
-          quantity: productItem.quantity.toString(),
-          description: productItem.name,
-          tax: productItem.tax || 0,
-          price: price,
-        };
-      })
-    );
-
-    console.log("Products after applying offers:", products);
-
-    // Add delivery charge to products
-    const deliveryCharge = order.deliveryCharge || 50; // Ensure you use the order's delivery charge
-    products.push({
-      quantity: "1",
-      description: "Delivery Charge",
-      tax: 0,
-      price: deliveryCharge,
+      return {
+        name: item.name || "Unknown Product",
+        quantity: quantity,
+        price: price.toFixed(2),
+        total: total.toFixed(2),
+      };
     });
-    totalBeforeCoupon += deliveryCharge;
 
-    console.log("Final Products with Delivery Charge:", products);
+    const deliveryCharge = parseFloat(order.deliveryCharge) || 50;
+    subtotal += deliveryCharge;
+    const discountAmt = parseFloat(order.discountAmt) || 0;
+    const grandTotal = subtotal - discountAmt;
 
-    const date = moment(order.date).format("MMMM D, YYYY");
-
-    const totalAfterDiscount = totalBeforeCoupon - order.discountAmt; // Apply discountAmt to totalBeforeCoupon
-    const couponDiscount = order.couponUsed ? order.discountAmt : 0; // Apply coupon discount if used
-    const finalTotal = totalAfterDiscount - couponDiscount; // Final total after both discounts
-
-    const data = {
-      mode: "development",
-      currency: "INR",
-      taxNotation: "vat",
-      marginTop: 25,
-      marginRight: 25,
-      marginLeft: 25,
-      marginBottom: 25,
-
-      sender: {
-        company: "BASHA BOOK",
-        address: "Park Avenue",
-        zip: "600034",
-        city: "Chennai",
-        country: "India",
-      },
-      client: {
-        company: user.name,
-        address: address.adressLine1,
-        zip: address.pin,
-        city: address.city,
-        country: "India",
-      },
-      information: {
-        number: `INV-${orderId}`,
-        date: date,
-      },
-      products: products,
-
-      // Adding discount and coupon as products
-      products: [
-        ...products,
-        ...(order.discountAmt > 0 ? [{
-          quantity: "1",
-          description: `Discount`,
-          tax: 0,
-          price: -order.discountAmt, // Negative value for discount
-        }] : []),
-      ]
-    };
-
-    // Create the invoice and send the response
-    easyinvoice.createInvoice(data, function (result) { //createInvoice method from the easyinvoice library.Here we pass the data
-      const fileName = `invoice_${orderId}.pdf`;//create a string for the filename
-      const pdfBuffer = Buffer.from(result.pdf, "base64");//it is decoded into a binary buffer.Buffer.from is used to convert the base64 string into a buffer that can be sent over http. 
-
-      res.setHeader("Content-Type", "application/pdf");//this line sets the http response.This informs the browser or client that the content being sent in the response is a pdf file.By this way browser knows how to handle the content.
-      res.setHeader("Content-Disposition", `attachment;filename=${fileName}`);//by this header prompting the user to download the pdf file when they click
-      res.send(pdfBuffer);//pdfbuffer has binary data of the pdf,which is sent to the client for download.when the client receives this response it will trigger the file download due to content-position header and the file named according to fileName
+    // Create PDF
+    const doc = new PDFDocument({
+      size: 'A4',
+      margin: 50,
     });
+
+    // Set response headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="invoice_${orderId}.pdf"`);
+
+    // Pipe PDF directly to response
+    doc.pipe(res);
+
+    // Title
+    doc.fontSize(26).font('Helvetica-Bold').text('INVOICE', { align: 'center' });
+    doc.moveDown(0.5);
+    doc.fontSize(12).font('Helvetica')
+      .text(`Invoice No: INV-${orderId.slice(-8)}`, { align: 'center' })
+      .text(`Date: ${moment(order.date).format('MMMM D, YYYY')}`, { align: 'center' });
+    doc.moveDown(2);
+
+    // Company and Customer Info
+    const startY = doc.y;
+
+    // From (Company)
+    doc.fontSize(14).font('Helvetica-Bold').text('From:', 50, startY);
+    doc.fontSize(11).font('Helvetica')
+      .text('BASHA BOOK', 50, startY + 20)
+      .text('Park Avenue', 50, startY + 35)
+      .text('Chennai - 600034', 50, startY + 50)
+      .text('Tamil Nadu, India', 50, startY + 65);
+
+    // Bill To (Customer)
+    doc.fontSize(14).font('Helvetica-Bold').text('Bill To:', 300, startY);
+    doc.fontSize(11).font('Helvetica')
+      .text(user.name || 'Customer', 300, startY + 20)
+      .text(address.adressLine1 || address.addressLine1 || 'N/A', 300, startY + 35)
+      .text(`${address.city || ''}, ${address.state || ''} - ${address.pin || ''}`, 300, startY + 50)
+      .text(`Mobile: ${address.mobile || 'N/A'}`, 300, startY + 65);
+
+    doc.moveDown(6);
+
+    // Table setup
+    const tableTop = doc.y + 20;
+    const tableLeft = 50;
+    const colWidths = [220, 80, 100, 100]; // Description, Qty, Price, Total
+
+    // Header
+    doc.font('Helvetica-Bold').fontSize(12);
+    doc.text('Item Description', tableLeft, tableTop);
+    doc.text('Qty', tableLeft + colWidths[0], tableTop, { width: colWidths[1], align: 'right' });
+    doc.text('Unit Price', tableLeft + colWidths[0] + colWidths[1], tableTop, { width: colWidths[2], align: 'right' });
+    doc.text('Total', tableLeft + colWidths[0] + colWidths[1] + colWidths[2], tableTop, { width: colWidths[3], align: 'right' });
+
+    // Header line
+    doc.moveTo(tableLeft, tableTop + 18)
+       .lineTo(tableLeft + 500, tableTop + 18)
+       .stroke();
+
+    // Body
+    doc.font('Helvetica').fontSize(11);
+    let y = tableTop + 35;
+
+    items.forEach(item => {
+      doc.text(item.name, tableLeft, y, { width: colWidths[0] });
+
+      doc.text(item.quantity.toString(), tableLeft + colWidths[0], y, {
+        width: colWidths[1],
+        align: 'right'
+      });
+
+      doc.text(item.price, tableLeft + colWidths[0] + colWidths[1], y, {
+        width: colWidths[2],
+        align: 'right'
+      });
+
+      doc.text(item.total, tableLeft + colWidths[0] + colWidths[1] + colWidths[2], y, {
+        width: colWidths[3],
+        align: 'right'
+      });
+
+      y += 30;
+    });
+
+    // Delivery Charge
+    doc.text('Delivery Charge', tableLeft, y, { width: colWidths[0] });
+    doc.text(deliveryCharge.toFixed(2), tableLeft + colWidths[0] + colWidths[1] + colWidths[2], y, {
+      width: colWidths[3],
+      align: 'right'
+    });
+    y += 30;
+
+    // Discount
+    if (discountAmt > 0) {
+      doc.text('Discount', tableLeft, y, { width: colWidths[0] });
+      doc.text(`-${discountAmt.toFixed(2)}`, tableLeft + colWidths[0] + colWidths[1] + colWidths[2], y, {
+        width: colWidths[3],
+        align: 'right'
+      });
+      y += 30;
+    }
+
+    // Grand Total
+    y += 20;
+    doc.font('Helvetica-Bold').fontSize(16);
+    doc.text('Grand Total', tableLeft, y);
+    doc.text(grandTotal.toFixed(2), tableLeft + colWidths[0] + colWidths[1] + colWidths[2], y, {
+      width: colWidths[3],
+      align: 'right'
+    });
+
+    // Footer
+    doc.moveDown(8);
+    doc.fontSize(10).font('Helvetica').text('Thank you for shopping with BASHA BOOK!', { align: 'center' });
+    doc.text('For support: support@bashabook.com', { align: 'center' });
+
+    // Finalize PDF
+    doc.end();
+
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ message: "Error generating invoice", error: error.message });
+    console.error("PDFKit Invoice error:", error);
+    if (!res.headersSent) {
+      res.status(500).json({ message: "Error generating invoice", error: error.message });
+    }
   }
 };
-
 const verify=(req,res)=>{
   console.log(req.body.payment,"end")
   const {orderId}=req.body

@@ -2,38 +2,66 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css" />
     <style>
         #image-preview-container {
-        display: none;
-        margin-top: 20px;
-        width: 50%; /* Take up half of the container width */
-        max-width: 300px; /* Optional, limit the maximum width */
-        aspect-ratio: 1; /* Ensures the container maintains a square shape */
-        position: relative;
-    }
+            display: none;
+            margin-top: 20px;
+            width: 50%;
+            max-width: 300px;
+            aspect-ratio: 1;
+            position: relative;
+        }
 
-    #imagePreview {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 8px;
-    }
+        #imagePreview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
 
-    #cropped-image-container {
-        display: none;
-        margin-top: 20px;
-        width: 50%; /* Take up half of the container width */
-        max-width: 300px; /* Optional, limit the maximum width */
-        aspect-ratio: 1; /* Ensures the container maintains a square shape */
-    }
+        #cropped-image-container {
+            display: none;
+            margin-top: 20px;
+            width: 50%;
+            max-width: 300px;
+            aspect-ratio: 1;
+        }
 
-    #croppedImage {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 8px;
-    }
+        #croppedImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .image-container {
+            position: relative;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .image-container img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+
+        .close-button {
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0;
+            padding: 0 5px;
+        }
+
+        .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            cursor: pointer;
+        }
     </style>
 </head>
-
 
 <aside class="navbar-aside" id="offcanvas_aside">
     <div class="aside-top">
@@ -56,46 +84,36 @@
                 <a class="menu-link" href="/admin/product"> <i class="icon material-icons md-shopping_bag"></i>
                     <span class="text">Products</span>
                 </a>
-
             </li>
             <li class="menu-item ">
                 <a class="menu-link" href="/admin/orders"> <i class="icon material-icons md-shopping_cart"></i>
                     <span class="text">Orders</span>
                 </a>
-
             </li>
             <li class="menu-item ">
                 <a class="menu-link" href="/admin/category"> <i class="icon material-icons md-category"></i>
                     <span class="text">Category</span>
                 </a>
-
             </li>
-            
-
-             <li class="menu-item ">
-                    <a class="menu-link" href="/admin/coupons"><i class="icon fa-solid fa-ticket"></i>
-                        <span class="text">Coupons</span>
-                    </a>
-      </li>
+            <li class="menu-item ">
+                <a class="menu-link" href="/admin/coupons"><i class="icon fa-solid fa-ticket"></i>
+                    <span class="text">Coupons</span>
+                </a>
+            </li>
             <li class="menu-item">
                 <a class="menu-link" href="/admin/manage_users"> <i class="icon material-icons md-person"></i>
                     <span class="text">Users</span>
                 </a>
-
             </li>
-                         <li class="menu-item">
-                    <a class="menu-link" href="/admin/productOffers"> <i class="icon material-icons md-local_offer"></i>
-                        <span class="text"> productOffers </span>
-                    </a>
-                </li>
-                     <li class="menu-item">
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/productOffers"> <i class="icon material-icons md-local_offer"></i>
+                    <span class="text"> productOffers </span>
+                </a>
+            </li>
+            <li class="menu-item">
                 <a class="menu-link" href="/admin/categoryOffers"> <i class="icon material-icons md-comment"></i>
                     <span class="text"> categoryOffers </span>
                 </a>
-            </li>
-            <li class="menu-item ">
-            </li>
-            <li class="menu-item ">
             </li>
         </ul>
         <hr>
@@ -118,7 +136,6 @@
 </aside>
 
 <main class="main-wrap">
-
     <section class="content-main">
         <div class="row">
             <div class="col-9">
@@ -133,164 +150,131 @@
                     </div>
                     <div class="card-body">
                         {{#if errorMessage}}
-    <div class="alert alert-danger" role="alert" id="errorMessage">
-        {{errorMessage}}
-    </div>
-{{/if}}
+                        <div class="alert alert-danger" role="alert" id="errorMessage">
+                            {{errorMessage}}
+                        </div>
+                        {{/if}}
+                        
                         <form method="post" class="form-add-product" action="/admin/update_product/{{proData._id}}"
                             enctype="multipart/form-data" onsubmit="return Validation()">
+                            
                             <div class="mb-4">
                                 <label for="product_name" class="form-label">Product Name</label>
                                 <input type="text" value="{{proData.name}}" placeholder="Type here" name="name"
-                                    class="form-control" id="productName"   >
-                                    <h6 class="alertAddProduct mt-1" style="color: red" id="productNameAlert"></h6>
+                                    class="form-control" id="productName">
+                                <h6 class="alertAddProduct mt-1" style="color: red" id="productNameAlert"></h6>
                             </div>
+                            
                             <div class="mb-4">
                                 <label class="form-label">Full description</label>
-                                <input class="form-control" id="longdescription" 
-                                    name="description" rows="3"
-                                    value="{{proData.description}}" ></input>
-                                    <h6 class="alertAddProduct mt-1" style="color: red" id="longAlert"></h6>
-
-                                    
+                                <textarea class="form-control" id="longdescription" 
+                                    name="description" rows="5">{{proData.description}}</textarea>
+                                <h6 class="alertAddProduct mt-1" style="color: red" id="longAlert"></h6>
                             </div>
+                            
                             <div class="row">
                                 <div class="col-lg-3">
                                     <div class="mb-4">
                                         <label class="form-label">Price</label>
                                         <div class="row gx-2">
-                                            <input placeholder="$" type="text" value="{{proData.price}}" id="price"
+                                            <input placeholder="₹" type="number" value="{{proData.price}}" id="price"
                                                 name="price" class="form-control">
                                         </div>
-                                         <h6 class="alertAddProduct mt-1" style="color: red" id="priceAlert"></h6>
-
+                                        <h6 class="alertAddProduct mt-1" style="color: red" id="priceAlert"></h6>
                                     </div>
                                 </div>
                                 <div class="col-lg-3">
                                     <div class="mb-4">
                                         <label class="form-label">Stock</label>
                                         <input name="stock" value="{{proData.stock}}" class="form-control"
-                                            placeholder="Quantity" type="text" id="Qty">
+                                            placeholder="Quantity" type="number" id="Qty">
                                     </div>
                                     <h6 class="alertAddProduct mt-1" style="color: red" id="qtyAlert"></h6>
-                                </div>        
-                                <div class="col-lg-3">
-    <label class="form-label">Category:</label>
-    <select name="category" id="category" class="form-select">
-        {{#each catogories}}
-            <option value="{{this._id}}" {{#if (equalsObjectId this._id ../proData.category)}}selected{{/if}}>{{this.category}}</option>
-        {{/each}}
-    </select>
-</div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <label class="form-label">Category:</label>
+                                    <select name="category" id="category" class="form-select">
+                                        {{#each catogories}}
+                                        <option value="{{this._id}}" {{#if this.isSelected}}selected{{/if}}>
+                                            {{this.category}}
+                                        </option>
+                                        {{/each}}
+                                    </select>
+                                </div>
                             </div>
-                            {{!-- <div class="form-group">
-        <label for="productImage">Product Image:</label>
-        <div class="d-flex border p-10 m-tb-10">
-          <input name="product-id" type="hidden" value="{{proData._id}}">
-          {{#each proData.imageUrl}}
-          <div class="image-container" onclick="deleteProImg()">
-            <div  class="badge rounded-pill alert-danger "><p  class="close-button" data-image-index="{{@index}}"
-              style="text-decoration: none;">×</p></div>
-            <img src="/images/products/{{this}}" alt="images" style="width: 80px; height: auto;" class="m-2 pro-image"
-              data-image-index="{{@index}}">
-          </div>
 
-          {{/each}}
-        </div>
-        <input type="file" class="form-control-file" id="productImage" multiple name="image">
-        <h6 id="imgAlert" class=" mt-2" style="color: red;"></h6>
-      </div>  --}}
-{{!-- <div class="form-group">
-    <label for="productImage">Product Image:</label>
-    <div class="d-flex border p-10 m-tb-10">
-        <input name="product-id" type="hidden" value="{{proData._id}}">
-        
-        {{#each proData.imageUrl}}
-            <div class="image-container" onclick="deleteProImg()">
-                <div class="badge rounded-pill alert-danger">
-                    <p class="close-button" data-image-index="{{@index}}" style="text-decoration: none;">×</p>
-                </div>
-                <img src="/images/products/{{this}}" alt="images" style="width: 80px; height: auto;" class="m-2 pro-image" data-image-index="{{@index}}">
-            </div>
-        {{/each}}
-    </div>
-    
-    <input type="file" class="form-control-file" id="productImage" multiple name="image" accept="image/*">
-    
-    <!-- Display error message if there is one -->
-    {{#if errorMessage}}
-      <div class="error" style="color: red;">
-          <p>{{errorMessage}}</p>
-      </div>
-    {{/if}}
-</div> --}}
+                            <!-- Existing Images from Cloudinary -->
+                            <div class="form-group mb-4">
+                                <label for="productImage">Product Images:</label>
+                                <div class="d-flex flex-wrap border p-3 mb-3" id="existingImagesContainer">
+                                    <input name="product-id" type="hidden" value="{{proData._id}}">
 
-<div class="form-group">
-    <label for="productImage">Product Image:</label>
-    <div class="d-flex border p-10 m-tb-10">
-        <input name="product-id" type="hidden" value="{{proData._id}}">
+                                    {{#each proData.imageUrl}}
+                                    <div class="image-container" data-image-url="{{this}}">
+                                        <div class="badge rounded-pill alert-danger">
+                                            <p class="close-button" data-image-url="{{this}}" 
+                                               data-product-id="{{../proData._id}}" 
+                                               style="text-decoration: none;">×</p>
+                                        </div>
+                                        <img src="{{this}}" alt="Product Image" 
+                                             onerror="this.src='/images/no-image.jpg';">
+                                    </div>
+                                    {{/each}}
+                                </div>
 
-        <!-- Existing images display area (if any) -->
-        {{#each proData.imageUrl}}
-            <div class="image-container" onclick="deleteProImg()">
-                <div class="badge rounded-pill alert-danger">
-                    <p class="close-button" data-image-index="{{@index}}" style="text-decoration: none;">×</p>
-                </div>
-                <img src="/images/products/{{this}}" alt="images" style="width: 80px; height: auto;" class="m-2 pro-image" data-image-index="{{@index}}">
-            </div>
-        {{/each}}
-    </div>
-    
-    <!-- Image file input (for uploading new image) -->
-    <input type="file" class="form-control-file" id="productImage" name="image" accept="image/*">
-    
-    <!-- Image preview container (hidden initially) -->
-        <!-- Image preview container -->
-    <div id="image-preview-container" style="display:none; margin-top: 20px;">
-        <img id="imagePreview" src="" alt="Image Preview" style="width: 100%; max-height: 300px; object-fit: cover;">
-    </div>
+                                <!-- Add New Images -->
+                                <label class="form-label">Add New Images (Optional):</label>
+                                <input type="file" class="form-control-file mb-3" id="productImage" 
+                                       name="image" accept="image/png, image/jpeg, image/jpg, image/avif, image/webp" 
+                                       multiple>
 
-    <!-- Cropper options (display only after image is selected) -->
-    <div id="cropper-container" style="display:none; margin-top: 20px;">
-        <button type="button" id="cropSaveButton" class="btn btn-primary">Save Cropped Image</button>
-    </div>
+                                <!-- Image Preview Container -->
+                                <div id="image-preview-container">
+                                    <h6>Image Preview:</h6>
+                                    <img id="imagePreview" src="" alt="Image Preview">
+                                </div>
 
-    <!-- Display the cropped image below -->
-    <div id="cropped-image-container" style="display:none; margin-top: 20px;">
-        <h5>Cropped Image:</h5>
-        <img id="croppedImage" src="" alt="Cropped Image" style="width: 100%; max-height: 300px; object-fit: cover;">
-    </div>
-    
-    <h6 id="imgAlert" class=" mt-2" style="color: red;"></h6>
-</div>
+                                <!-- Cropper Controls -->
+                                <div id="cropper-container" style="display:none; margin-top: 10px;">
+                                    <button type="button" id="cropSaveButton" class="btn btn-sm btn-success">
+                                        Save Cropped Image
+                                    </button>
+                                    <button type="button" id="cancelCropButton" class="btn btn-sm btn-secondary">
+                                        Cancel
+                                    </button>
+                                </div>
 
+                                <!-- Cropped Image Display -->
+                                <div id="cropped-image-container">
+                                    <h6>Cropped Image Preview:</h6>
+                                    <img id="croppedImage" src="" alt="Cropped Image">
+                                </div>
+
+                                <h6 id="imgAlert" class="mt-2" style="color: red;"></h6>
+                                <small class="form-text text-muted">
+                                    Upload up to 5 images. Supported formats: PNG, JPEG, JPG, AVIF, WebP. Max size: 5MB per image.
+                                </small>
+                            </div>
 
                             <div class="d-flex g-2">
                                 <div class="m-2">
                                     <button type="submit" class="btn btn-primary">Save Changes</button>
-
                                 </div>
                                 <div class="m-2">
-                                    <a href="/admin/product" type="button" class="btn btn-primary" id="backbutton">Back</a>
-
+                                    <a href="/admin/product" type="button" class="btn btn-secondary" id="backbutton">Back</a>
                                 </div>
-
-
                             </div>
                         </form>
                     </div>
-                </div> <!-- card end// -->
-
-
-
+                </div>
             </div>
-    </section> <!-- content-main end// -->
+        </div>
+    </section>
+    
     <footer class="main-footer font-xs">
         <div class="row pb-30 pt-15">
             <div class="col-sm-6">
-                <script>
-                    document.write(new Date().getFullYear())
-                </script> ©, Evara - HTML Ecommerce Template .
+                <script>document.write(new Date().getFullYear())</script> ©, Evara - HTML Ecommerce Template.
             </div>
             <div class="col-sm-6">
                 <div class="text-sm-end">
@@ -300,356 +284,249 @@
         </div>
     </footer>
 </main>
+
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <script>
 let cropper; // Store the Cropper.js instance
 
 // Handle the file input change (image selection)
 document.getElementById('productImage').addEventListener('change', function(event) {
-    const file = event.target.files[0]; // Get the selected file
+    const files = event.target.files;
+    const imgAlert = document.getElementById('imgAlert');
+    imgAlert.innerHTML = '';
 
-    // Check if a file is selected
-    if (file) {
-        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/avif'];
+    if (files.length === 0) return;
+
+    // Validate file types and sizes
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/avif', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         
-        // Validate image type
         if (!allowedTypes.includes(file.type)) {
-            alert("Invalid image type. Please upload only images (PNG, JPEG, JPG, AVIF).");
+            imgAlert.innerHTML = "Invalid image type. Please upload only images (PNG, JPEG, JPG, AVIF, WebP).";
+            event.target.value = '';
             return;
         }
-
-        // Create a URL for the selected file
-        const imageUrl = URL.createObjectURL(file);
-
-        // Set the preview image to the selected file
-        const imagePreview = document.getElementById('imagePreview');
-        imagePreview.src = imageUrl;
-
-        // Show the preview container and initialize the cropper
-        document.getElementById('image-preview-container').style.display = 'block';
-        document.getElementById('cropper-container').style.display = 'none'; // Hide cropper save button initially
-
-        // Destroy any previous cropper instance to avoid conflicts
-        if (cropper) {
-            cropper.destroy();
+        
+        if (file.size > maxSize) {
+            imgAlert.innerHTML = "File size exceeds 5MB limit.";
+            event.target.value = '';
+            return;
         }
-
-        // Initialize the cropper
-        cropper = new Cropper(imagePreview, {
-            aspectRatio: 1,  // Fixed aspect ratio (square crop)
-            viewMode: 1,     // Ensures the crop box stays inside the image
-            autoCropArea: 0.8, // Set the auto-crop area to 80% of the image
-            responsive: true,
-            zoomable: true,
-            movable: true,
-            cropBoxResizable: true,
-            ready() {
-                // Show the cropper save button after cropper is ready
-                document.getElementById('cropper-container').style.display = 'block';
-            }
-        });
     }
+
+    // Show preview for the first selected image
+    const file = files[0];
+    const imageUrl = URL.createObjectURL(file);
+    const imagePreview = document.getElementById('imagePreview');
+    imagePreview.src = imageUrl;
+
+    // Show preview container
+    document.getElementById('image-preview-container').style.display = 'block';
+    document.getElementById('cropper-container').style.display = 'none';
+    document.getElementById('cropped-image-container').style.display = 'none';
+
+    // Destroy previous cropper instance
+    if (cropper) {
+        cropper.destroy();
+    }
+
+    // Initialize cropper
+    cropper = new Cropper(imagePreview, {
+        aspectRatio: 1,
+        viewMode: 1,
+        autoCropArea: 0.8,
+        responsive: true,
+        zoomable: true,
+        movable: true,
+        cropBoxResizable: true,
+        ready() {
+            document.getElementById('cropper-container').style.display = 'block';
+        }
+    });
 });
 
 // Handle saving the cropped image
 document.getElementById('cropSaveButton').addEventListener('click', function() {
-    // Get the cropped image as a canvas
-    const canvas = cropper.getCroppedCanvas();
+    if (!cropper) return;
 
-    // Convert the canvas to a base64 image
+    const canvas = cropper.getCroppedCanvas();
     const croppedImage = canvas.toDataURL('image/jpeg');
 
-    // Display the cropped image in the container (which will take half the width)
+    // Display cropped image
     document.getElementById('cropped-image-container').style.display = 'block';
     document.getElementById('croppedImage').src = croppedImage;
 
-    // Update the input field with the cropped image (optional, for form submission)
+    // Convert to blob and update file input
     canvas.toBlob(function(blob) {
-        const file = new File([blob], 'cropped-image.jpg', {
-            type: 'image/jpeg'
-        });
-
-        // Create a new DataTransfer object and update the input's files
+        const file = new File([blob], 'cropped-image.jpg', { type: 'image/jpeg' });
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
         document.getElementById('productImage').files = dataTransfer.files;
     });
+
+    // Hide cropper
+    document.getElementById('cropper-container').style.display = 'none';
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
 });
-</script>
 
-
-<script>
-function validateImage() {
-    const fileInput = document.getElementById('productImage');
-    const imgAlert = document.getElementById('imgAlert');
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/avif'];
-
-    // Clear previous alert messages
-    imgAlert.innerHTML = '';
-
-    // Check if any files were selected
-    if (fileInput.files.length === 0) {
-        imgAlert.innerHTML = "Please choose an image.";
-        return false; // No files selected
-    }
-
-    // Validate each file type
-    for (let i = 0; i < fileInput.files.length; i++) {
-        const file = fileInput.files[i];
-        if (!allowedTypes.includes(file.type)) {
-            imgAlert.innerHTML = "Invalid image type. Please upload only images (PNG, JPEG, JPG, AVIF).";
-            return false; // Invalid file type
-        }
-    }
-
-    return true; // All validations passed
-}
-
-// Integrate into your main validation function
-function Validation() {
-    var errors = []; // Array to store validation errors
-
-    var productName = document.getElementById("productName").value;
-    var longdescription = document.getElementById("longdescription").value;
-    let price = document.getElementById("price").value;
-
-    let productNameRegex = /^\s*.\S.\s*$/;
-    let number = /^[1-9]\d*$/;
-    let descriptionRegex = /^(?!\s*$)[\s\S]{1,100}$/;
-
-    let productNameAlert = document.getElementById("productNameAlert");
-    let priceAlert = document.getElementById("priceAlert");
-    let longAlert = document.getElementById("longAlert");
-
-    // Perform existing validations
-    if (!productName.match(productNameRegex)) {
-        errors.push("Name Not Valid");
-        productNameAlert.innerHTML = "Name must not be empty.";
-    }
-
-    if (!price.match(number)) {
-        errors.push("Please Check Price Again");
-        priceAlert.innerHTML = "Price must be a positive number.";
-    }
-
-    if (!longdescription.match(descriptionRegex)) {
-        errors.push("Please Check about Again");
-        longAlert.innerHTML = "Description must be between 1 and 100 characters.";
-    }
-
-    // Call the image validation function
-    if (!validateImage()) {
-        errors.push("Invalid image or no image uploaded.");
-    }
-
-    // Display all error messages
-    if (errors.length > 0) {
-        return false; // Prevent form submission
-    }
-
-    return true; // Allow form submission if no errors
-}
-
-const deleteImage = async (productId, imageName, imageElement) => {
-  try {
-    // Send the DELETE request to the server
-    const response = await fetch(`/admin/product_img_delete?id=${productId}&image=${imageName}`, {
-      method: 'DELETE',
-    });
-
-    const result = await response.json();
-
-    if (response.ok) {
-      alert("Image deleted successfully!");
-      
-      // Remove the image from the DOM (fade out or directly remove)
-      imageElement.parentElement.style.transition = 'opacity 0.5s';
-      imageElement.parentElement.style.opacity = '0';  // Fade out
-      setTimeout(() => {
-        imageElement.parentElement.remove();  // Remove from DOM after fade
-      }, 500);
-      
-      // Optionally, update the image list if you have it displayed elsewhere
-      updateImageUI(result.updatedImages); // Update the images UI if required
-    } else {
-      alert(result.error || "Failed to delete image");
-    }
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
-
-// Event listener for delete buttons
-const deleteProImg = () => {
-  const deleteButtons = document.querySelectorAll('.close-button');
-  const productId = document.getElementsByName('product-id')[0].value;
-
-  deleteButtons.forEach((button) => {
-    button.addEventListener('click', async (event) => {
-      // Get the image name from the src or any relevant attribute
-      const imageName = event.target.closest('.image-container').querySelector('img').src.split('/').pop();
-      const imageElement = event.target.closest('.image-container').querySelector('img');
-      
-      // Call the delete function and pass the image element to remove it immediately
-      await deleteImage(productId, imageName, imageElement);
-    });
-  });
-};
-
-
-
-    function Validation() 
-    {
-
-       
-        let productName = document.getElementById("productName").value;
-
-        let longdescription = document.getElementById("longdescription").value;
-        let Qty = document.getElementById("Qty").value;
-        let price = document.getElementById("price").value;
-
-
-
-        let productNameRegex = /^\s*.*\S.*\s*$/;
-        let number = /^[1-9]\d*$/;
-        let descriptionRegex = /^(?!\s*$)[\s\S]{1,100}$/
-
-
-
-
-        let productNameAlert = document.getElementById("productNameAlert");
-        let qtyAlert = document.getElementById("qtyAlert");
-        let priceAlert = document.getElementById("priceAlert");
-
-
-        let longAlert = document.getElementById("longAlert");
-        let imgAlert = document.getElementById('imgAlert')
-
-        if (!productName.match(productNameRegex)) {
-            productNameAlert.innerHTML = "Name Not Valid";
-            return false;
-        } //else if (!Qty.match(number)) {
-            //qtyAlert.innerHTML = "Please Check Qty Again";
-            //return false;
-            //} 
-        else if (!price.match(number)) {
-            priceAlert.innerHTML = "Please Check Price Again";
-            return false;
-        }
-
-        else if (!longdescription.match(descriptionRegex)) {
-            longAlert.innerHTML = "Please Check about Again";
-            return false;
-        }
-
-        else {
-            return true;
-        }
-
-    }
-
-    function validate_productName() {
-        var productNameInput = document.getElementById("productName");
-        var product = productNameInput.value.trim();
-        var pattern = /^[a-zA-Z0-9\s]{3,}$/;
-
-        if (!pattern.test(product)) {
-            alert("Invalid product name. Please try again.");
-            productNameInput.value = ''; // Clear the input field
-            productNameInput.focus();    // Set focus back to the input field
-            return false;
-        } else {
-            return true;
-        }
-
-
-    }
-
-
+// Cancel crop
+document.getElementById('cancelCropButton').addEventListener('click', function() {
+    document.getElementById('image-preview-container').style.display = 'none';
+    document.getElementById('cropper-container').style.display = 'none';
+    document.getElementById('cropped-image-container').style.display = 'none';
+    document.getElementById('productImage').value = '';
     
-    function validate_productName() {
-        var productNameInput = document.getElementById("productName");
-        var product = productNameInput.value.trim();
-        var pattern = /^[a-zA-Z0-9\s]{3,}$/;
-
-        if (!pattern.test(product)) {
-            alert("Invalid product name. Please try again.");
-            productNameInput.value = ''; // Clear the input field
-            productNameInput.focus();    // Set focus back to the input field
-            return false;
-        } else {
-            return true;
-        }
-
-
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
     }
+});
 
+// Delete image from Cloudinary
+$(document).on('click', '.close-button', function(e) {
+    e.preventDefault();
+    const imageUrl = $(this).data('image-url');
+    const productId = $(this).data('product-id');
+    const imageContainer = $(this).closest('.image-container');
 
-    function validate_description() {
-
-        var longdescriptionInput = document.getElementById("longdescription");
-        var longdescription = longdescriptionInput.value.trim();
-
-
-        if (longdescription === "") {
-            alert("Invalid description . Please try again.");
-            longdescriptionInput.value = ''; // Clear the input field
-            longdescriptionInput.focus();    // Set focus back to the input field
-            return false;
-        } else {
-            return true;
-        }
-
-    }
-
-    
-
-   
-</script>
-
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-    ////////////back
-    $(document).ready(function () {
-        $('#backbutton').click(function (e) {
-            e.preventDefault();
-
-
+    Swal.fire({
+        title: "Delete this image?",
+        text: "This action cannot be undone!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading
             Swal.fire({
-                title: "Leave the page?",
-                text: "The Data will not be saved",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#088178",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "/admin/product";
-
+                title: 'Deleting...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
             });
 
-
-        });
-    });
-</script>
-
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-    // Check if there's an error message
-    $(document).ready(function() {
-        // If the error message exists
-        if ($('#errorMessage').length > 0) {
-            // Fade out the error message after 5 seconds
-            setTimeout(function() {
-                $('#errorMessage').fadeOut();
-            }, 2000); // 5000 milliseconds = 5 seconds
+            $.ajax({
+                type: 'DELETE',
+                url: `/admin/product_img_delete?id=${productId}&image=${encodeURIComponent(imageUrl)}`,
+                success: function(response) {
+                    Swal.fire({
+                        title: 'Deleted!',
+                        text: 'Image has been deleted successfully.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                    // Remove image from UI
+                    imageContainer.fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error deleting image:", error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Failed to delete image. Please try again.',
+                        icon: 'error'
+                    });
+                }
+            });
         }
     });
+});
+
+// Form validation
+function Validation() {
+    let errors = [];
+    let productName = document.getElementById("productName").value.trim();
+    let longdescription = document.getElementById("longdescription").value.trim();
+    let qty = document.getElementById("Qty").value;
+    let price = document.getElementById("price").value;
+
+    let productNameRegex = /^[a-zA-Z0-9\s'-]{3,}$/;
+    let number = /^[1-9]\d*$/;
+    let descriptionRegex = /^.{10,500}$/;
+
+    let productNameAlert = document.getElementById("productNameAlert");
+    let qtyAlert = document.getElementById("qtyAlert");
+    let priceAlert = document.getElementById("priceAlert");
+    let longAlert = document.getElementById("longAlert");
+
+    // Clear previous alerts
+    productNameAlert.innerHTML = "";
+    qtyAlert.innerHTML = "";
+    priceAlert.innerHTML = "";
+    longAlert.innerHTML = "";
+
+    // Validate product name
+    if (!productName.match(productNameRegex)) {
+        productNameAlert.innerHTML = "Product name must be at least 3 characters and contain only letters, numbers, spaces, hyphens, and apostrophes.";
+        errors.push("Invalid product name");
+    }
+
+    // Validate quantity
+    if (!qty.match(number)) {
+        qtyAlert.innerHTML = "Quantity must be a positive number.";
+        errors.push("Invalid quantity");
+    }
+
+    // Validate price
+    if (!price.match(number)) {
+        priceAlert.innerHTML = "Price must be a positive number.";
+        errors.push("Invalid price");
+    }
+
+    // Validate description
+    if (!longdescription.match(descriptionRegex)) {
+        longAlert.innerHTML = "Description must be between 10 and 500 characters.";
+        errors.push("Invalid description");
+    }
+
+    if (errors.length > 0) {
+        return false;
+    }
+
+    return true;
+}
+
+// Back button confirmation
+$(document).ready(function() {
+    $('#backbutton').click(function(e) {
+        e.preventDefault();
+        Swal.fire({
+            title: "Leave the page?",
+            text: "Any unsaved changes will be lost",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#088178",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, leave"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "/admin/product";
+            }
+        });
+    });
+
+    // Auto-hide error message
+    if ($('#errorMessage').length > 0) {
+        setTimeout(function() {
+            $('#errorMessage').fadeOut();
+        }, 3000);
+    }
+});
 </script>

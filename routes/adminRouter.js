@@ -10,7 +10,8 @@ const dashboardController=require("../controllers/admin/dashboardController")
 const offerController=require("../controllers/admin/productOfferController")
 const categoryOfferController=require("../controllers/admin/categoryOfferController")
 
-const store=require("../middlewares/multer")
+// const store=require("../middlewares/multer")
+const {upload} = require('../middlewares/multer')
 const adminAuth=require('../middlewares/adminAuth')
 
 //admin login and logout
@@ -30,9 +31,9 @@ router.get('/block_user/:id', adminAuth.isLogin, customerController.blockUser)
 //category management
 router.get("/category",adminAuth.isLogin,categoryController.getCategory)
 router.get("/add_category",adminAuth.isLogin,categoryController.addCategory)
-router.post("/add_category",adminAuth.isLogin,store.single('image'),categoryController.addNewCategory)
+router.post("/add_category",adminAuth.isLogin,upload.single('image'),categoryController.addNewCategory)
 router.get("/edit_category/:id",adminAuth.isLogin,categoryController.editCategory)
-router.post("/update_category/:id",adminAuth.isLogin,store.single('image'),categoryController.updateCategory)
+router.post("/update_category/:id",adminAuth.isLogin,upload.single('image'),categoryController.updateCategory)
 router.post("/delete_category",adminAuth.isLogin,categoryController.deleteCategory)
 router.post("/unlistCategory",adminAuth.isLogin,categoryController.unListCategory)
 
@@ -40,9 +41,9 @@ router.post("/unlistCategory",adminAuth.isLogin,categoryController.unListCategor
 
 router.get("/product",adminAuth.isLogin,productController.getProduct)
 router.get("/new_Product",adminAuth.isLogin,productController.addProductPage)
-router.post("/add_new_product",store.array('image',5),productController.addNewProduct)
-router.get("/edit_product/:id",store.array('image',5),adminAuth.isLogin,productController.editProduct)
-router.post("/update_product/:id",store.array('image',5),adminAuth.isLogin,productController.updateProduct)
+router.post("/add_new_product",upload.array('image',5),productController.addNewProduct)
+router.get("/edit_product/:id",upload.array('image',5),adminAuth.isLogin,productController.editProduct)
+router.post("/update_product/:id",upload.array('image',5),adminAuth.isLogin,productController.updateProduct)
 router.delete("/product_img_delete",adminAuth.isLogin,productController.deleteProImage)
 router.post("/block_product",adminAuth.isLogin,productController.blockProduct)
 router.get("/delete_product/:id",adminAuth.isLogin,productController.deleteProduct)

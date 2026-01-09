@@ -108,9 +108,11 @@
                                 <td width="20%" class="text-center">
                                     <a href="#" class="itemside">
                                         <div class="left">
-                                           <img src="/images/products/{{#if this.imageUrl.[0]}}{{this.imageUrl.[0]}}{{else}}no-image.jpg{{/if}}" 
-     class="img-sm img-thumbnail" 
-     alt="{{this.name}}">
+                                           {{!-- Updated to use Cloudinary URL directly --}}
+                                           <img src="{{#if this.imageUrl.[0]}}{{this.imageUrl.[0]}}{{else}}/images/no-image.jpg{{/if}}" 
+                                                class="img-sm img-thumbnail" 
+                                                alt="{{this.name}}"
+                                                onerror="this.src='/images/no-image.jpg';">
                                         </div>
                                         <div class="info pl-3">
                                             <h6 class="mb-0 title">{{this.name}}</h6>
@@ -130,7 +132,6 @@
                                 <td class="text-center" width="40%">
                                     {{#if this.is_blocked}}
                                     <a style="width: 72px;" id="unblockprod" data-product-id="{{this._id}}" class="btn btn-sm font-sm btn-light flex-end"
-                                        
                                         >
                                         Unblock
                                     </a>
@@ -143,9 +144,6 @@
                                     <a style="width: 72px;" href="/admin/edit_product/{{this._id}}" class="btn btn-sm font-sm rounded btn-brand">
                                         <i class="material-icons md-edit"></i> Edit
                                     </a>
-                                    {{!-- <a style="width: 80px;" href="/admin/delete_product/{{this._id}}" class="btn btn-sm font-sm btn-light rounded" >
-                                        <i class="material-icons md-delete_forever" ></i> Delete
-                                    </a> --}}
                                 </td>
 
                             </tr>
@@ -160,7 +158,9 @@
             <nav aria-label="Page navigation example">
                 <ul class="pagination justify-content-start">
                     {{#each pages}}
-                             <li class="page-item active"><a class="page-link" href="?page={{this}}">{{this}}</a></li>
+                             <li class="page-item {{#if (eq this ../currentPage)}}active{{/if}}">
+                                <a class="page-link" href="?page={{this}}">{{this}}</a>
+                            </li>
                     {{/each}}
                 </ul>
             </nav>
@@ -196,9 +196,7 @@
         $(document).on('click','#deleteprod',function(e){
             e.preventDefault();
             var id = $(this).data('product-id');
-            //var wishId = $(this).data('whishlist-id'); // Corrected variable name to wishId
 
-            // Store reference to $(this) in a variable for use inside AJAX success and error callbacks
             var $this = $(this);
 
             Swal.fire({
@@ -212,40 +210,26 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        type: 'POST',
-                        url: '/admin/delete_product',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ id: id }),
-                        success: function (productData) {
-                            console.log("Product removed from Cart successfully");
-                            // If you want to remove the row from the table upon successful removal
-                            $this.closest('tr').remove(); // Use $this instead of $(this)
-                            // swal("Removed from wishlist", "The product has been removed from your wishlist.", "success");
-                            {
-                                Swal.fire({
-                                    title: 'Removed!',
-                                    text: 'Product Succesfully Removed from Cart!!!',
-                                    icon: 'success',
-                                    confirmButtonText: 'Cool'
-                                })
-                            }
-
-
+                        type: 'GET',
+                        url: '/admin/delete_product/' + id,
+                        success: function (response) {
+                            console.log("Product deleted successfully");
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'Product Successfully Deleted!',
+                                icon: 'success',
+                                confirmButtonText: 'Cool'
+                            }).then(() => {
+                                window.location.reload();
+                            });
                         },
                         error: function (xhr, status, error) {
-                            console.error("Error removing product from wishlist:", error);
-                            swal("Error", "Something went wrong. Please try again later.", "error");
+                            console.error("Error deleting product:", error);
+                            Swal.fire("Error", "Something went wrong. Please try again later.", "error");
                         }
-                    });
-                    Swal.fire({
-                        title: "Deleted!",
-                        text: "Your file has been deleted.",
-                        icon: "success"
                     });
                 }
             });
-
-
         });
     });
 
@@ -256,14 +240,11 @@
         $(document).on('click','#blockprod',function(e){
             e.preventDefault();
             var id = $(this).data('product-id');
-            //var wishId = $(this).data('whishlist-id'); // Corrected variable name to wishId
 
-            // Store reference to $(this) in a variable for use inside AJAX success and error callbacks
             var $this = $(this);
 
             Swal.fire({
                 title: "Do you want to block the Product?",
-               // text: "Do you want to block the Product?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#088178",
@@ -277,49 +258,32 @@
                         contentType: 'application/json',
                         data: JSON.stringify({ id: id }),
                         success: function (productData) {
-                            console.log("ProductBlocked");
-                 
-                           
-                            {
-                                Swal.fire({
-                                    title: 'Product Blocked',
-                                    //text: 'Product Succesfully Blocked!!!',
-                                    icon: 'success',
-                                    confirmButtonText: 'OK'
-                                }).then(()=> window.location.reload())
-                            }
-
-
+                            console.log("Product Blocked");
+                            Swal.fire({
+                                title: 'Product Blocked',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => window.location.reload());
                         },
                         error: function (xhr, status, error) {
-                            console.error("Error removing product from wishlist:", error);
-                            swal("Error", "Something went wrong. Please try again later.", "error");
+                            console.error("Error blocking product:", error);
+                            Swal.fire("Error", "Something went wrong. Please try again later.", "error");
                         }
-                    });
-                    Swal.fire({
-                        title: "Done!",
-                        text: "Your file has been deleted.",
-                        icon: "success"
                     });
                 }
             });
-
-
         });
-    });
+    });
 
     $(document).ready(function () {
         $(document).on('click','#unblockprod',function(e){
             e.preventDefault();
             var id = $(this).data('product-id');
-            //var wishId = $(this).data('whishlist-id'); // Corrected variable name to wishId
 
-            // Store reference to $(this) in a variable for use inside AJAX success and error callbacks
             var $this = $(this);
 
             Swal.fire({
                 title: "Do you want to Unblock the Product?",
-               // text: "Do you want to block the Product?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#088178",
@@ -333,35 +297,21 @@
                         contentType: 'application/json',
                         data: JSON.stringify({ id: id }),
                         success: function (productData) {
-                            console.log("ProductBlocked");
-                 
-                           
-                            {
-                                Swal.fire({
-                                    title: 'Product Succesfully Unblocked!!!',
-                                    //text: 'Product Succesfully Blocked!!!',
-                                    icon: 'success',
-                                    confirmButtonText: 'OK'
-                                }).then(()=> window.location.reload())
-                            }
-
-
+                            console.log("Product Unblocked");
+                            Swal.fire({
+                                title: 'Product Successfully Unblocked!',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => window.location.reload());
                         },
                         error: function (xhr, status, error) {
-                            console.error("Error removing product from wishlist:", error);
-                            swal("Error", "Something went wrong. Please try again later.", "error");
+                            console.error("Error unblocking product:", error);
+                            Swal.fire("Error", "Something went wrong. Please try again later.", "error");
                         }
-                    });
-                    Swal.fire({
-                        title: "Done!",
-                        text: "Your file has been deleted.",
-                        icon: "success"
                     });
                 }
             });
-
-
         });
-    });
+    });
 
 </script>

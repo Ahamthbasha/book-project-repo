@@ -50,7 +50,7 @@
                 </a>
             </li>
             <li class="menu-item">
-                <a class="menu-link" href="/admin/categorys"> <i class="icon material-icons md-comment"></i>
+                <a class="menu-link" href="/admin/categoryOffers"> <i class="icon material-icons md-comment"></i>
                     <span class="text">categoryOffers</span>
                 </a>
             </li>
@@ -135,7 +135,7 @@
                                 </div>
                             </div>
 
-                            <!-- Image Upload Section (Fixed) -->
+                            <!-- Image Upload Section -->
                             <div class="row">
                                 <!-- Image 1 -->
                                 <div class="col-lg-4">
@@ -143,15 +143,11 @@
                                         <label class="form-label">Image 1</label>
                                         <div class="input-group">
                                             <input class="form-control" type="file" name="image" id="input1"
-                                                accept="image/png, image/jpeg, image/jpg, image/avif"
-                                                onchange="viewImage(event, 1)"/>
+                                                accept="image/png, image/jpeg, image/jpg, image/avif, image/webp"
+                                                onchange="previewImage(event, 1)"/>
                                             <label for="input1" id="file-1-preview">
-                                                <img src="/assets/imgs/theme/upload.svg" alt="" id="imgView1">
+                                                <img src="/assets/imgs/theme/upload.svg" alt="" id="imgView1" style="max-width: 150px; max-height: 150px; object-fit: cover;">
                                             </label>
-                                        </div>
-                                        <div class="image-cropper" style="display: none; width: 200px; height: 250px;">
-                                            <img src="" id="croppedImg1" alt="" />
-                                            <button type="button" id="saveButton1" class="btn btn-primary">Save</button>
                                         </div>
                                     </div>
                                 </div>
@@ -162,15 +158,11 @@
                                         <label class="form-label">Image 2</label>
                                         <div class="input-group">
                                             <input class="form-control" type="file" name="image" id="input2"
-                                                accept="image/png, image/jpeg, image/jpg, image/avif"
-                                                onchange="viewImage(event, 2)"/>
+                                                accept="image/png, image/jpeg, image/jpg, image/avif, image/webp"
+                                                onchange="previewImage(event, 2)"/>
                                             <label for="input2" id="file-2-preview">
-                                                <img src="/assets/imgs/theme/upload.svg" alt="" id="imgView2">
+                                                <img src="/assets/imgs/theme/upload.svg" alt="" id="imgView2" style="max-width: 150px; max-height: 150px; object-fit: cover;">
                                             </label>
-                                        </div>
-                                        <div class="image-cropper" style="display: none; width: 200px; height: 250px;">
-                                            <img src="" id="croppedImg2" alt="" />
-                                            <button type="button" id="saveButton2" class="btn btn-primary">Save</button>
                                         </div>
                                     </div>
                                 </div>
@@ -181,15 +173,11 @@
                                         <label class="form-label">Image 3</label>
                                         <div class="input-group">
                                             <input class="form-control" type="file" name="image" id="input3"
-                                                accept="image/png, image/jpeg, image/jpg, image/avif"
-                                                onchange="viewImage(event, 3)"/>
+                                                accept="image/png, image/jpeg, image/jpg, image/avif, image/webp"
+                                                onchange="previewImage(event, 3)"/>
                                             <label for="input3" id="file-3-preview">
-                                                <img src="/assets/imgs/theme/upload.svg" alt="" id="imgView3">
+                                                <img src="/assets/imgs/theme/upload.svg" alt="" id="imgView3" style="max-width: 150px; max-height: 150px; object-fit: cover;">
                                             </label>
-                                        </div>
-                                        <div class="image-cropper" style="display: none; width: 200px; height: 250px;">
-                                            <img src="" id="croppedImg3" alt="" />
-                                            <button type="button" id="saveButton3" class="btn btn-primary">Save</button>
                                         </div>
                                     </div>
                                 </div>
@@ -200,15 +188,11 @@
                                         <label class="form-label">Image 4</label>
                                         <div class="input-group">
                                             <input class="form-control" type="file" name="image" id="input4"
-                                                accept="image/png, image/jpeg, image/jpg, image/avif"
-                                                onchange="viewImage(event, 4)"/>
+                                                accept="image/png, image/jpeg, image/jpg, image/avif, image/webp"
+                                                onchange="previewImage(event, 4)"/>
                                             <label for="input4" id="file-4-preview">
-                                                <img src="/assets/imgs/theme/upload.svg" alt="" id="imgView4">
+                                                <img src="/assets/imgs/theme/upload.svg" alt="" id="imgView4" style="max-width: 150px; max-height: 150px; object-fit: cover;">
                                             </label>
-                                        </div>
-                                        <div class="image-cropper" style="display: none; width: 200px; height: 250px;">
-                                            <img src="" id="croppedImg4" alt="" />
-                                            <button type="button" id="saveButton4" class="btn btn-primary">Save</button>
                                         </div>
                                     </div>
                                 </div>
@@ -219,15 +203,11 @@
                                         <label class="form-label">Image 5</label>
                                         <div class="input-group">
                                             <input class="form-control" type="file" name="image" id="input5"
-                                                accept="image/png, image/jpeg, image/jpg, image/avif"
-                                                onchange="viewImage(event, 5)"/>
+                                                accept="image/png, image/jpeg, image/jpg, image/avif, image/webp"
+                                                onchange="previewImage(event, 5)"/>
                                             <label for="input5" id="file-5-preview">
-                                                <img src="/assets/imgs/theme/upload.svg" alt="" id="imgView5">
+                                                <img src="/assets/imgs/theme/upload.svg" alt="" id="imgView5" style="max-width: 150px; max-height: 150px; object-fit: cover;">
                                             </label>
-                                        </div>
-                                        <div class="image-cropper" style="display: none; width: 200px; height: 250px;">
-                                            <img src="" id="croppedImg5" alt="" />
-                                            <button type="button" id="saveButton5" class="btn btn-primary">Save</button>
                                         </div>
                                     </div>
                                 </div>
@@ -264,13 +244,12 @@
 </main>
 
 <!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    // Unified function for preview + cropper + file validation (handles all 5 images correctly)
-    function viewImage(event, index) {
+    // Simple image preview function without cropper
+    function previewImage(event, index) {
         let input = event.target;
         let file = input.files[0];
 
@@ -285,55 +264,25 @@
         }
 
         // File type validation
-        const allowedExtensions = /\.(jpg|jpeg|png|gif|avif)$/i;
+        const allowedExtensions = /\.(jpg|jpeg|png|gif|avif|webp)$/i;
         if (!allowedExtensions.test(file.name)) {
-            alert('Please upload file having extensions .jpeg/.jpg/.png/.gif/.avif only.');
+            alert('Please upload file having extensions .jpeg/.jpg/.png/.gif/.avif/.webp only.');
             input.value = "";
             return;
         }
 
+        // Preview the image
         let reader = new FileReader();
         reader.onload = function () {
             let dataURL = reader.result;
             let image = document.getElementById('imgView' + index);
             image.src = dataURL;
-
-            // Initialize Cropper.js
-            let cropper = new Cropper(image, {
-                aspectRatio: 1 / 1,
-                viewMode: 1,
-                guides: true,
-                background: false,
-                autoCropArea: 1,
-                zoomable: true
-            });
-
-            // Show cropper container
-            let cropperContainer = document.querySelector('#croppedImg' + index).parentNode;
-            cropperContainer.style.display = 'block';
-
-            // Save cropped image back to input
-            let saveButton = document.getElementById('saveButton' + index);
-            saveButton.onclick = async function () {
-                let croppedCanvas = cropper.getCroppedCanvas();
-                let croppedImage = document.getElementById("croppedImg" + index);
-                croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
-
-                let timestamp = new Date().getTime();
-                let fileName = `cropped-img-${timestamp}-${index}.png`;
-
-                croppedCanvas.toBlob(blob => {
-                    let imgFile = new File([blob], fileName, { type: "image/png" });
-                    const fileList = new DataTransfer();
-                    fileList.items.add(imgFile);
-                    input.files = fileList.files;
-                }, 'image/png');
-            };
+            image.style.display = 'block';
         };
         reader.readAsDataURL(file);
     }
 
-    // Your existing validation and form submission scripts remain unchanged
+    // Form validation
     function Validation() {
         var errors = [];
         var fileInput = document.getElementById('input1');
@@ -344,7 +293,7 @@
 
         let productNameRegex = /^[a-zA-Z0-9\s'-]+$/;
         let number = /^[1-9]\d*$/;
-        let descriptionRegex = /^(?!\s*$)[\s\S]{1,100}$/;
+        let descriptionRegex = /^(?!\s*$)[\s\S]{1,500}$/;
 
         let productNameAlert = document.getElementById("productNameAlert");
         let qtyAlert = document.getElementById("qtyAlert");
@@ -352,21 +301,35 @@
         let longAlert = document.getElementById("longAlert");
         let imgAlert = document.getElementById('imgAlert');
 
-        if (!productName.match(productNameRegex)) errors.push("Name Not Valid");
-        if (!Qty.match(number)) errors.push("Please Check Qty Again");
-        if (!price.match(number)) errors.push("Please Check Price Again");
-        if (!longdescription.match(descriptionRegex)) errors.push("Please Check about Again");
-        if (fileInput.files.length === 0) errors.push("Please choose an image");
+        // Clear previous alerts
+        productNameAlert.innerHTML = "";
+        qtyAlert.innerHTML = "";
+        priceAlert.innerHTML = "";
+        longAlert.innerHTML = "";
+        imgAlert.innerHTML = "";
 
-        if (errors.length > 0) {
-            productNameAlert.innerHTML = errors.includes("Name Not Valid") ? "Name Not Valid" : "";
-            qtyAlert.innerHTML = errors.includes("Please Check Qty Again") ? "Please Check Qty Again" : "";
-            priceAlert.innerHTML = errors.includes("Please Check Price Again") ? "Please Check Price Again" : "";
-            longAlert.innerHTML = errors.includes("Please Check about Again") ? "Please Check about Again" : "";
-            imgAlert.innerHTML = errors.includes("Please choose an image") ? "Please choose an image" : "";
-            return false;
+        if (!productName.match(productNameRegex)) {
+            errors.push("Name Not Valid");
+            productNameAlert.innerHTML = "Name Not Valid";
         }
-        return true;
+        if (!Qty.match(number)) {
+            errors.push("Please Check Qty Again");
+            qtyAlert.innerHTML = "Please Check Qty Again";
+        }
+        if (!price.match(number)) {
+            errors.push("Please Check Price Again");
+            priceAlert.innerHTML = "Please Check Price Again";
+        }
+        if (!longdescription.match(descriptionRegex)) {
+            errors.push("Please Check description Again");
+            longAlert.innerHTML = "Please Check description Again (max 500 characters)";
+        }
+        if (fileInput.files.length === 0) {
+            errors.push("Please choose at least one image");
+            imgAlert.innerHTML = "Please choose at least one image";
+        }
+
+        return errors.length === 0;
     }
 
     $(document).ready(function () {
@@ -393,7 +356,7 @@
         if (Validation(form)) {
             Swal.fire({
                 title: "Are you sure?",
-                text: "Do you want to save ?",
+                text: "Do you want to save?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#088178",
@@ -401,14 +364,17 @@
                 confirmButtonText: "Yes"
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Show loading
+                    Swal.fire({
+                        title: 'Uploading...',
+                        text: 'Please wait while we upload your product images',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
                     form.submit();
                 }
-            }).then(() => {
-                Swal.fire({
-                    title: "Saved",
-                    text: "The Data has been saved",
-                    icon: "success"
-                });
             });
         }
     }

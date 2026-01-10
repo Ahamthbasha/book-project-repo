@@ -478,7 +478,6 @@ const returnOrder = async (req, res) => {
   }
 };
 
-
 const cancelOneProduct = async (req, res) => {
   try {
     const { id, prodId, reason } = req.body; // Get reason from request body
@@ -913,6 +912,7 @@ const getInvoice = async (req, res) => {
     }
   }
 };
+
 const verify=(req,res)=>{
   console.log(req.body.payment,"end")
   const {orderId}=req.body

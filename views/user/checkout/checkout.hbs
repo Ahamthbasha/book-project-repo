@@ -30,7 +30,7 @@
                                     <tbody>
                                         {{#each cart}}
                                         <tr>
-                                            <td class="image product-thumbnail"><img src="/images/products/{{productImage.[0]}}" alt="#"></td>
+                                            <td class="image product-thumbnail"><img src="{{productImage.[0]}}" alt="#"></td>
                                             <td>
                                                 <h5><a href="shop-product-full.html" class="product-name">{{this.productName}}</a></h5> <span class="product-qty">{{this.productPrice}}x {{this.quantity}}</span>
                                             </td>
@@ -590,22 +590,14 @@ const selectedAddress = document.getElementById('selectedAddress').value;
             "amount": (subTotal)* 100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
             "currency": "INR",
             "image": "/images/logo/Logo_CH.png",
-
-            "name": "Basha Book", //your business name
-            /*"description": "Test Transaction",
-            "image": "https://example.com/your_logo",*/
-
-            "order_id":  undefined, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+            "name": "Basha Book", 
+            "order_id":  undefined, 
             "handler": function (response) {
-                //console.log(response.razorpayOrder, status);
-              //  verifyPayment(response.razorpayOrder, status, response.razorpayOrder.id, response.orderId);
                 Cod()
             },
 
         };
         var rzp1 = new Razorpay(options);
-        //rzp1.open();
-        // Handle errors
         rzp1.on('payment.failed', function (response) {
             console.log('payment failed....................................=>')
             paymentStatus = false;
@@ -622,10 +614,8 @@ const selectedAddress = document.getElementById('selectedAddress').value;
             });
 
         })
-
         rzp1.open();
     }
-    
     
 
 const validateCoupon = async () => {

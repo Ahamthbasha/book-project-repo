@@ -26,27 +26,6 @@
                     </a>
                    
                 </li>
-                {{!-- <li class="menu-item has-submenu">
-                    <a class="menu-link" href="page-sellers-cards.html"> <i class="icon material-icons md-store"></i>
-                        <span class="text">Sellers</span>
-                    </a>
-                    <div class="submenu">
-                        <a href="page-sellers-cards.html">Sellers cards</a>
-                        <a href="page-sellers-list.html">Sellers list</a>
-                        <a href="page-seller-detail.html">Seller profile</a>
-                    </div>
-                </li> --}}
-                {{!-- <li class="menu-item has-submenu">
-                    <a class="menu-link" href="page-form-product-1.html"> <i class="icon material-icons md-add_box"></i>
-                        <span class="text">Add product</span>
-                    </a>
-                    <div class="submenu">
-                        <a href="page-form-product-1.html">Add product 1</a>
-                        <a href="page-form-product-2.html">Add product 2</a>
-                        <a href="page-form-product-3.html">Add product 3</a>
-                        <a href="page-form-product-4.html">Add product 4</a>
-                    </div>
-                </li> --}}
                 <li class="menu-item ">
                     <a class="menu-link" href="/admin/category"> <i class="icon material-icons md-category"></i>
                         <span class="text">Category</span>
@@ -128,16 +107,9 @@
                                     <td scope="row" class="text-center">{{this.product.name}}</td>
                                     <td class="text-center">₹{{this.product.price}}</td>
                                     <td class="text-center">{{this.product.quantity}}</td>
-                                    <td class="text-center"><img style="width: 50px; height: auto;" src="/images/products/{{this.product.image}}"
+                                    <td class="text-center"><img style="width: 50px; height: auto;" src="{{this.product.imageUrl.[0]}}"
                                             alt="product image">
                                     </td>
-                                    {{!-- <td>
-                                        {{!-- <a href="my_orders/details?id={{this._id}}" type="button"
-                                            class="btn btn-warning">View
-                                            details</a> --}}
-                                        {{!-- <a href="/order_details/{{this.id}}" type="button"
-                                            class="btn btn-danger">cancel</a>
-                                    </td> --}}
                                 </tr>
                                 {{/each}}
 
@@ -178,20 +150,7 @@
                     </div>
 
                     <div class="d-flex">
-                        {{!-- <form action="/change_status" method="post">
-                            <div class="d-flex">
-                                <div style="width: 100%;" class="p-l-15 ">
-                                    <select class="form-select" aria-label="Default select example">
-                                        <option selected>Change order status</option>
-                                        <option value="1">Shipped</option>
-                                        <option value="2">Delivered</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <button type="submit" class="m-l-5 btn btn-primary">submit</button>
-                                </div>
-                            </div>
-                        </form> --}}
+                        
                         <div class="m-auto mb-20 p-r-15 p-b-15">
                             <a href="/admin/orders" class=" btn btn-primary">Back to orders</a>
                         </div>

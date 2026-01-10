@@ -27,13 +27,13 @@
                                     <div class="product-image-slider">
                                         {{#each proData.imageUrl}}
                                         <figure class="border-radius-10">
-                                            <img src="/images/products/{{this}}" alt="product image">
+                                            <img src="{{this}}" alt="product image">
                                         </figure>
                                         {{/each}}
                                     </div>
                                     <div class="slider-nav-thumbnails pl-15 pr-15">
                                         {{#each proData.imageUrl}}
-                                        <div><img src="/images/products/{{this}}" alt="product image"></div>
+                                        <div><img src="{{this}}" alt="product image"></div>
                                         {{/each}}
                                     </div>
                                 </div>
@@ -62,24 +62,6 @@
                                         </ul>
                                     </div>
                                     <div class="detail-extralink">
-                                        <div class="bt-1 border-color-1 mt-30 mb-30"></div>
-                                        {{!-- <div class="product-extra-link2">
-                                            {{#if outOfStock}}
-                                            <span id="outofstock">
-                                                <button id="outofstock-btn" class="btn btn-md" style="background-color: #dc3545;">Out of stock</button>
-                                            </span>
-                                            {{else}}
-                                            {{#if productExistInCart}}
-                                            <span id="gocart">
-                                                <button id="addcart-btn" onclick="window.location.href='/cart'" class="btn btn-md">Go to cart</button>
-                                            </span>
-                                            {{else}}
-                                            <span id="addcart">
-                                                <button id="addcart-btn" data-product-id="{{proData._id}}" class="button button-add-to-cart">Add to cart</button>
-                                            </span>
-                                            {{/if}}
-                                            {{/if}}
-                                        </div> --}}
                                         <div class="product-extra-link2">
 
                                             {{#if outOfStock}}
@@ -136,8 +118,8 @@
                                         <div class="product-img-action-wrap">
                                             <div class="product-img product-img-zoom">
                                                 <a href="/productview?id={{this._id}}">
-                                                    <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="product image">
-                                                    <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="product image">
+                                                    <img class="default-img" src="{{this.imageUrl.[0]}}" alt="product image">
+                                                    <img class="hover-img" src="{{this.imageUrl.[1]}}" alt="product image">
                                                 </a>
                                             </div>
                                             <div class="product-badges product-badges-position product-badges-mrg">

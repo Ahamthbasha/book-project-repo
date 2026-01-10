@@ -161,8 +161,8 @@
         <div class="product-img-action-wrap">
           <div class="product-img product-img-zoom">
             <a href="/productview?id={{this._id}}">
-              <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="">
-              <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="">
+              <img class="default-img" src="{{this.imageUrl.[0]}}" alt="">
+              <img class="hover-img" src="{{this.imageUrl.[1]}}" alt="">
             </a>
           </div>
           
@@ -175,7 +175,7 @@
           <div class="product-category">
             <a>{{this.category.category}}</a>
           </div>
-          <h2><a href="/productDetails/{{this._id}}">{{name}}</a></h2>
+          <h2><a href="/productview?id={{this._id}}">{{name}}</a></h2>
           <div class="rating-result" title="90%">
             {{#if this.offerAvailable}}  <!-- Only show the offer percentage if the offer exists -->
               <span>{{this.offerPercentage}}% Off</span>
@@ -211,8 +211,8 @@
         <div class="product-img-action-wrap">
           <div class="product-img product-img-zoom">
             <a href="/productview?id={{this._id}}">
-              <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="">
-              <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="">
+              <img class="default-img" src="{{this.imageUrl.[0]}}" alt="">
+              <img class="hover-img" src="{{this.imageUrl.[1]}}" alt="">
             </a>
           </div>
           
@@ -225,7 +225,7 @@
           <div class="product-category">
             <a>{{this.category.category}}</a>
           </div>
-          <h2><a href="/productDetails/{{this._id}}">{{name}}</a></h2>
+          <h2><a href="/productview?id={{this._id}}">{{name}}</a></h2>
           <div class="rating-result">
             <span>
               {{#if this.offerAvailable}}  <!-- Only show the offer percentage if the offer is available -->
@@ -258,9 +258,9 @@
       <div class="product-cart-wrap mb-30">
         <div class="product-img-action-wrap">
           <div class="product-img product-img-zoom">
-            <a href="/productDetails/{{this._id}}">
-              <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="">
-              <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="">
+            <a href="/productview?id=/{{this._id}}">
+              <img class="default-img" src="{{this.imageUrl.[0]}}" alt="">
+              <img class="hover-img" src="{{this.imageUrl.[1]}}" alt="">
             </a>
           </div>
           
@@ -273,7 +273,7 @@
           <div class="product-category">
             <a>{{this.category.category}}</a>
           </div>
-          <h2><a href="/productDetails/{{this._id}}">{{name}}</a></h2>
+          <h2><a href="/productview?id=/{{this._id}}">{{name}}</a></h2>
           <div class="rating-result">
             <span>
               {{#if this.offerAvailable}}  <!-- Only show the offer percentage if the offer is available -->
@@ -307,7 +307,6 @@
         <section class="banner-2 section-padding pb-0">
             <div class="container">
                 <div class="banner-img banner-big wow fadeIn animated f-none">
-                    {{!-- <img src="/images/banners/mario1.jpg" alt=""> --}}
                     <div class="banner-text d-md-block d-none">
                         <h1 class="fw-600 mb-20">We're on Sale <br>Grab the oppurtunity</h1>
                         <a href="/product" class="btn">Shop Now <i class="fi-rs-arrow-right"></i></a>
@@ -345,6 +344,3 @@
 
    
 </body>
-
-
-<!-- Mirrored from wp.alithemes.com/html/evara/evara-frontend// by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:25:49 GMT -->

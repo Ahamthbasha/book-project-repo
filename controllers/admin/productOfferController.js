@@ -1,206 +1,247 @@
-const Product=require("../../models/productModel")
-const ProductOffer=require("../../models/productOfferModel")
-const moment=require("moment")
+const Product = require("../../models/productModel");
+const ProductOffer = require("../../models/productOfferModel");
+const moment = require("moment");
 
-const productOfferPage=async(req,res)=>{
-    try{
-        var page=1
-        if(req.query.page){
-            page=req.query.page
-        }
-        let limit=3
-        //here we take the productOfferData
-        let productOfferData=await ProductOffer.find().skip((page-1)*limit).limit(limit*1).lean()
-        const count=await ProductOffer.find({}).countDocuments()
-        const totalPages=Math.ceil(count/limit)
-      //create a pages array based on the length of the totalPages  
-        const pages=Array.from({length:totalPages},(_,i)=>i+1)
-//here we check the productOffer data has active status based on the start date and end date
-        productOfferData.forEach(async(data)=>{
-const isActive=data.endDate>=new Date() && data.startDate<=new Date()
-              await ProductOffer.updateOne(
-                {_id:data._id},
-                {
-                    $set:{
-                    currentStatus:isActive
-                    }
-                }
-            )
-        })
+const productOfferPage = async (req, res) => {
+    try {
+        let page = parseInt(req.query.page) || 1;
+        const limit = 3;
 
-    console.log("product offer data",productOfferData)
-//here i format the data for the productoffer in a yyyy(year)-mm(month)-day(dd)
-    productOfferData=productOfferData.map((data)=>{
-            data.startDate=moment(data.startDate).format('YYYY-MM-DD')
-            data.endDate=moment(data.endDate).format('YYYY-MM-DD')
-            return data
-        })
+        let productOfferData = await ProductOffer.find()
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .lean();
 
-        console.log("formatted productOffer Data",productOfferData)
-        res.render("admin/productOffer",{layout:"adminlayout",productOfferData,pages})
-    }catch(error){
-        console.log(error)
-    }
-}
+        const count = await ProductOffer.countDocuments();
+        const totalPages = Math.ceil(count / limit);
+        const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-//load the addproductOfferPage with the product data
-const addProductOfferPage=async(req,res)=>{
-    try{
-        const products=await Product.find({}).lean()
-        res.render("admin/addProductOffer",{layout:"adminlayout",products})
-    }catch(error){
-        console.log(error)
-    }
-}
-
-//adding the productOffer
-const addProductOffer=async(req,res)=>{
-    try{
-//destructure the admin entered details in the form
-        const {productName,productOfferPercentage,startDate,endDate}=req.body
-        console.log("received data:",req.body)
-
-        const product=await Product.findOne({name:productName})
-        if(!product){
-            return res.status(404).send("there is no product based on that name")
-        }
-//checking if the product has productOffer already there
-        const existingOffer=await ProductOffer.findOne({
-            productId:product._id,
-            currentStatus:true
-        })
-
-        if(existingOffer){
-            return res.status(400).send("Active product offer already exists for this product")
+        // Update currentStatus for all offers (better to do in background/cron in production)
+        for (const data of productOfferData) {
+            const isActive = data.endDate >= new Date() && data.startDate <= new Date();
+            if (data.currentStatus !== isActive) {
+                await ProductOffer.updateOne(
+                    { _id: data._id },
+                    { $set: { currentStatus: isActive } }
+                );
+            }
         }
 
-        const discount=parseFloat(productOfferPercentage)
+        // Format dates for display
+        productOfferData = productOfferData.map((data) => {
+            data.startDate = moment(data.startDate).format("YYYY-MM-DD");
+            data.endDate = moment(data.endDate).format("YYYY-MM-DD");
+            return data;
+        });
 
-        if(isNaN(discount)||discount <5 ||discount >90){
-            return res.status(400).send("discount is invalid")
+        res.render("admin/productOffer", {
+            layout: "adminlayout",
+            productOfferData,
+            pages,
+            currentPage: page,
+        });
+    } catch (error) {
+        console.error("Product Offer Page Error:", error);
+        res.status(500).send("Server error");
+    }
+};
+
+const addProductOfferPage = async (req, res) => {
+    try {
+        const products = await Product.find({}).lean();
+        res.render("admin/addProductOffer", { layout: "adminlayout", products });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server error");
+    }
+};
+
+const addProductOffer = async (req, res) => {
+    try {
+        const { productName, productOfferPercentage, startDate, endDate } = req.body;
+
+        // 1. Find product
+        const product = await Product.findOne({ name: productName });
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
         }
-//set the productOffer status active or not based on the startDate and endDate
-        const isActive=new Date(endDate) >= new Date() && new Date(startDate) <= new Date()
 
-//here calculate the discount price
-        const discountPrice=product.price - (product.price * discount)/100
-
-//saving the productOffer
-        const proOffer=new ProductOffer({
-            productId:product._id,
-            productName:productName,
-            productOfferPercentage:discount,
-            discountPrice:discountPrice,
-            startDate:new Date(startDate),
-            endDate:new Date(endDate),
-            currentStatus:isActive
-        })
-
-        await proOffer.save()
-        console.log("product offer saved",proOffer)
-
-        product.productOfferId=proOffer._id
-        await product.save()
-
-        console.log("product updated with new offer ID:",product)
-
-        res.redirect("/admin/productOffers")
-    }catch(error){
-        console.log(error)
-    }
-}
-
-const editProductOfferPage=async(req,res)=>{
-    try{
-        const {id}=req.params
-//based on the id take the productOffer details to edit in that page
-        const editProductOfferData=await ProductOffer.findById(id).lean()
-        if(!editProductOfferData){
-            return res.status(404).send("product offer not found")
+        // 2. Validate discount (5% to 90%)
+        const discount = parseFloat(productOfferPercentage);
+        if (isNaN(discount) || discount < 5 || discount > 90) {
+            return res.status(400).json({ error: "Discount must be between 5% and 90%" });
         }
-        const products=await Product.find().lean()
-        console.log("edit product offer Data",editProductOfferData)
 
-        let startDate=moment(editProductOfferData.startDate).format('YYYY-MM-DD')
-        let endDate=moment(editProductOfferData.endDate).format('YYYY-MM-DD')
+        // 3. Validate dates
+        const today = moment().startOf("day");
+        const start = moment(startDate).startOf("day");
+        const end = moment(endDate).startOf("day");
 
-        res.render("admin/editProductOffer",{layout:"adminlayout",editProductOfferData,startDate,endDate,products})
+        if (!start.isValid() || !end.isValid()) {
+            return res.status(400).json({ error: "Invalid date format" });
+        }
 
-    }catch(error){
-        console.log(error.message)
+        // Start date must be today or future
+        if (start.isBefore(today)) {
+            return res.status(400).json({ error: "Start date must be today or a future date" });
+        }
+
+        // End date must be after start date (future from start)
+        if (end.isSameOrBefore(start)) {
+            return res.status(400).json({ error: "End date must be after start date" });
+        }
+
+        // 4. Check existing active offer
+        const existingOffer = await ProductOffer.findOne({
+            productId: product._id,
+            currentStatus: true,
+        });
+
+        if (existingOffer) {
+            return res.status(400).json({ error: "Active product offer already exists for this product" });
+        }
+
+        // 5. Calculate discount price
+        const discountPrice = Math.round(product.price - (product.price * discount) / 100);
+
+        // 6. Determine status
+        const isActive = end.isSameOrAfter(today) && start.isSameOrBefore(today);
+
+        // 7. Create offer
+        const proOffer = new ProductOffer({
+            productId: product._id,
+            productName,
+            productOfferPercentage: discount,
+            discountPrice,
+            startDate: start.toDate(),
+            endDate: end.toDate(),
+            currentStatus: isActive,
+        });
+
+        await proOffer.save();
+
+        // 8. Link to product (optional - depends on your needs)
+        product.productOfferId = proOffer._id;
+        await product.save();
+
+        res.redirect("/admin/productOffers");
+    } catch (error) {
+        console.error("Add Product Offer Error:", error);
+        res.status(500).json({ error: "Server error" });
     }
-}
+};
 
-const editProductOffer=async(req,res)=>{
-    try{
-//destructure the data given in the editProductOffer page form
-       const {offerId, productName,productOfferPercentage,startDate,endDate}=req.body
+const editProductOfferPage = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const editProductOfferData = await ProductOffer.findById(id).lean();
+        if (!editProductOfferData) {
+            return res.status(404).send("Product offer not found");
+        }
 
-       const productOfferData=await ProductOffer.findById(offerId)
+        const products = await Product.find({}).lean();
 
-       if(!productOfferData){
-        res.status(404).send("product offer not found")
-       }
+        const startDate = moment(editProductOfferData.startDate).format("YYYY-MM-DD");
+        const endDate = moment(editProductOfferData.endDate).format("YYYY-MM-DD");
 
-       const product=await Product.findOne({name:productName})
-       if(!product){
-        res.status(404).send("product not found")
-       }
-
-       const discount=parseFloat(productOfferPercentage)
-       if(isNaN(discount)||discount<5||discount>90){
-        res.status(400).send("Invalid discount percentage")
-       }
-
-//checking if the product has offer or not
-       const existingActiveOffer=await ProductOffer.findOne({
-        productId:product._id,
-        _id:{$ne:offerId},
-        currentStatus:true
-       })
-
-       if(existingActiveOffer){
-        return res.status(400).send("An active product offer already exists for this product")
-       }
-
-//checking the status of the offer of the product
-       const isActive=new Date(endDate) >= new Date() && new Date(startDate)<=new Date()
-
-//discount price of the product
-       const discountPrice=product.price - (product.price * discount)/100
-//saving the product offer here
-       productOfferData.productName=productName
-       productOfferData.productOfferPercentage=discount
-       productOfferData.discountPrice=discountPrice
-       productOfferData.startDate=new Date(startDate)
-       productOfferData.endDate=new Date(endDate)
-       productOfferData.currentStatus=isActive
-
-       await productOfferData.save()
-
-       console.log(`product offer updated successfulley:${product.name}`)
-       res.redirect("/admin/productOffers")
-    }catch(error){
-        console.log(error)
+        res.render("admin/editProductOffer", {
+            layout: "adminlayout",
+            editProductOfferData,
+            startDate,
+            endDate,
+            products,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Server error");
     }
-}
+};
 
-//based on the id here i delete the productoffer
-const deleteProductOffer=async(req,res)=>{
-    try{
-        const {id}=req.params
-        await ProductOffer.findByIdAndDelete(id)
-        res.status(200).send("product offer deleted")
-    }catch(error){
-        console.log(error)
+const editProductOffer = async (req, res) => {
+    try {
+        const { offerId, productName, productOfferPercentage, startDate, endDate } = req.body;
+
+        const offer = await ProductOffer.findById(offerId);
+        if (!offer) {
+            return res.status(404).json({ error: "Product offer not found" });
+        }
+
+        const product = await Product.findOne({ name: productName });
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
+        }
+
+        // Discount validation (5% to 90%)
+        const discount = parseFloat(productOfferPercentage);
+        if (isNaN(discount) || discount < 5 || discount > 90) {
+            return res.status(400).json({ error: "Discount must be between 5% and 90%" });
+        }
+
+        // Date validation
+        const today = moment().startOf("day");
+        const start = moment(startDate).startOf("day");
+        const end = moment(endDate).startOf("day");
+
+        // Start date must be today or future
+        if (start.isBefore(today)) {
+            return res.status(400).json({ error: "Start date must be today or a future date" });
+        }
+
+        // End date must be after start date
+        if (end.isSameOrBefore(start)) {
+            return res.status(400).json({ error: "End date must be after start date" });
+        }
+
+        // Check other active offers (except current one)
+        const existingActive = await ProductOffer.findOne({
+            productId: product._id,
+            _id: { $ne: offerId },
+            currentStatus: true,
+        });
+
+        if (existingActive) {
+            return res.status(400).json({ error: "Another active offer already exists for this product" });
+        }
+
+        // Update offer
+        offer.productName = productName;
+        offer.productOfferPercentage = discount;
+        offer.discountPrice = Math.round(product.price - (product.price * discount) / 100);
+        offer.startDate = start.toDate();
+        offer.endDate = end.toDate();
+        offer.currentStatus = end.isSameOrAfter(today) && start.isSameOrBefore(today);
+
+        await offer.save();
+
+        res.redirect("/admin/productOffers");
+    } catch (error) {
+        console.error("Edit Product Offer Error:", error);
+        res.status(500).json({ error: "Server error" });
     }
-}
+};
 
-module.exports={
+const deleteProductOffer = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedOffer = await ProductOffer.findByIdAndDelete(id);
+        
+        if (!deletedOffer) {
+            return res.status(404).json({ success: false, message: "Product offer not found" });
+        }
+        
+        // Return JSON response for AJAX request
+        res.status(200).json({ success: true, message: "Product offer deleted successfully" });
+    } catch (error) {
+        console.error("Delete Product Offer Error:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+module.exports = {
     productOfferPage,
     addProductOfferPage,
     addProductOffer,
     editProductOfferPage,
     editProductOffer,
-    deleteProductOffer
-}
+    deleteProductOffer,
+};

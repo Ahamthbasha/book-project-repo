@@ -11,8 +11,8 @@ const CouponSchema=new Schema({
       discount: {
         type: Number,
         required: true,
-        min: 0,
-        max: 100
+        min: 1,
+        max: 90
       },
     
       expiryDate: {

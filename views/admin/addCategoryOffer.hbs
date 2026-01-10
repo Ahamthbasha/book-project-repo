@@ -10,7 +10,7 @@
     </div>
     <nav>
         <ul class="menu-aside">
-            <li class="menu-item ">
+            <li class="menu-item">
                 <a class="menu-link" href="/admin/home"> <i class="icon material-icons md-home"></i>
                     <span class="text">Dashboard</span>
                 </a>
@@ -19,52 +19,44 @@
                 <a class="menu-link" href="/admin/product"> <i class="icon material-icons md-shopping_bag"></i>
                     <span class="text">Products</span>
                 </a>
-
             </li>
-            <li class="menu-item ">
+            <li class="menu-item">
                 <a class="menu-link" href="/admin/orders"> <i class="icon material-icons md-shopping_cart"></i>
                     <span class="text">Orders</span>
                 </a>
-
             </li>
-            <li class="menu-item ">
+            <li class="menu-item">
                 <a class="menu-link" href="/admin/category"> <i class="icon material-icons md-category"></i>
                     <span class="text">Category</span>
                 </a>
-
             </li>
-            
-
-             <li class="menu-item active">
-                    <a class="menu-link" href="/admin/coupons"><i class="icon fa-solid fa-ticket"></i>
-                        <span class="text">Coupons</span>
-                    </a>
-      </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/coupons"><i class="icon fa-solid fa-ticket"></i>
+                    <span class="text">Coupons</span>
+                </a>
+            </li>
             <li class="menu-item">
                 <a class="menu-link" href="/admin/manage_users"> <i class="icon material-icons md-person"></i>
                     <span class="text">Users</span>
                 </a>
-
             </li>
         </ul>
         <hr>
         <ul class="menu-aside">
-            <ul class="menu-aside">
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/productOffers"> 
-                <i class="icon material-icons md-local_offer"></i>
-                <span class="text">Product Offer</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a class="menu-link" href="/admin/categoryOffers"> 
-                <i class="icon material-icons md-local_offer"></i>
-                <span class="text">Category Offer</span>
-            </a>
-        </li>
             <li class="menu-item">
-                <a class="menu-link btn btn-primary" href="/admin/logout"> <i
-                        class="icon material-icons md-exit_to_app"></i>
+                <a class="menu-link" href="/admin/productOffers"> 
+                    <i class="icon material-icons md-local_offer"></i>
+                    <span class="text">Product Offer</span>
+                </a>
+            </li>
+            <li class="menu-item active">
+                <a class="menu-link" href="/admin/categoryOffers"> 
+                    <i class="icon material-icons md-local_offer"></i>
+                    <span class="text">Category Offer</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link btn btn-primary" href="/admin/logout"> <i class="icon material-icons md-exit_to_app"></i>
                     Logout
                 </a>
             </li>
@@ -77,70 +69,87 @@
 <main class="main-wrap">
     <section class="content-main">
         <div class="row justify-content-center align-items-center">
-            
+            <div class="col-10">
+                <div class="content-header">
+                    <h2 class="content-title">Add Category Offer</h2>
+                </div>
+            </div>
             <div class="col-lg-8 mt-5 justify-content-center">
                 <div class="card">
                     <div class="card-body">
-                        <div class="modal-header">
-                    <h5 class="modal-title" id="addCategoryOfferModalLabel">Add Category Offer</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="addCategoryOfferForm" role="form" action="/admin/addCatOffers" method="post">
-                    <div class="modal-body">
+                        <form id="addCategoryOfferForm" role="form" action="/admin/addCatOffers" method="post">
+                            <div class="modal-body">
 
-                        <div class="input-group mb-3">
-                            <label class="container">
-                                <label for="categoryName" class="mb-2" style="width: 100%";>Category Name: </label>
-                                <select name="categoryName" id="categoryName" class="form-select">
-                                    {{#each category}}
-                                    <option value="{{this.category}}">{{this.category}}</option>
-                                    {{/each}}
-                                </select>
-                            </label>
-                        </div>
+                                <div class="input-group mb-3">
+                                    <label for="categoryName" class="mb-2" style="width: 100%;">Category Name: </label>
+                                    <select name="categoryName" id="categoryName" class="form-select" required>
+                                        {{#each category}}
+                                        <option value="{{this.category}}">{{this.category}}</option>
+                                        {{/each}}
+                                    </select>
+                                </div>
 
-                        <div class="offerPercentageInput p-2">
-                            <label for="categoryOfferPercentage" class="mb-2">Category Offer Percentage: </label>
-                            <div class="input-group">
-                                <input id="categoryOfferPercentage" name="categoryOfferPercentage" class="form-control"
-                                    placeholder="Enter the offer percentage">
+                                <div class="offerPercentageInput p-2">
+                                    <label for="categoryOfferPercentage" class="mb-2">Category Offer Percentage: </label>
+                                    <div class="input-group">
+                                        <input id="categoryOfferPercentage" 
+                                               name="categoryOfferPercentage" 
+                                               class="form-control"
+                                               type="number"
+                                               min="5"
+                                               max="90"
+                                               step="1"
+                                               placeholder="Enter the offer percentage"
+                                               required>
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                    <div class="form-text">Choose a percentage to be discounted. Between 5% and 90%.</div>
+                                    <div id="percentageError" class="text-danger" style="display:none;"></div>
+                                </div>
+
+                                <div class="startDateInput p-2">
+                                    <label for="categoryOfferStartDate">Offer Start Date: </label>
+                                    <div class="input-group">
+                                        <input id="categoryOfferStartDate" 
+                                               name="categoryOfferStartDate" 
+                                               type="date" 
+                                               class="form-control"
+                                               required>
+                                    </div>
+                                    <div class="form-text">Choose a start date for the offer (today or future date).</div>
+                                    <div id="startDateError" class="text-danger" style="display:none;"></div>
+                                </div>
+
+                                <div class="endDateInput p-2">
+                                    <label for="categoryOfferEndDate">Offer Expiry Date: </label>
+                                    <div class="input-group">
+                                        <input id="categoryOfferEndDate" 
+                                               name="categoryOfferEndDate" 
+                                               type="date" 
+                                               class="form-control"
+                                               required>
+                                    </div>
+                                    <div class="form-text">Choose an expiry date for offer (must be after start date).</div>
+                                    <div id="endDateError" class="text-danger" style="display:none;"></div>
+                                </div>
+
                             </div>
-                            <div class="form-text">Choose a percentage to be discounted. Between 5% and 90%.</div>
-                        </div>
-
-                        <div class="startDateInput p-2">
-                            <label for="categoryOfferStartDate">Offer Start Date: </label>
-                            <div class="input-group">
-                                <input id="categoryOfferStartDate" name="categoryOfferStartDate" type="date" class="form-control">
+                            <div class="modal-footer">
+                                <button id="backbutton" type="button" class="btn btn-secondary">Back</button>
+                                <button type="submit" class="btn btn-info">Save changes</button>
                             </div>
-                            <div class="form-text">Choose a start date for the offer to be considered.</div>
-                        </div>
-
-                        <div class="endDateInput p-2">
-                            <label for="categoryOfferEndDate">Offer Expiry Date : </label>
-                            <div class="input-group">
-                                <input id="categoryOfferEndDate" name="categoryOfferEndDate" type="date" class="form-control">
-                            </div>
-                            <div class="form-text">Choose an exipry date for offer to end.</div>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        <button id="backbutton" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
-                        <button type="submit" class="btn btn-info">Save changes</button>
-                    </div>
-                </form>
-            
+                        </form>
                     </div>
                 </div>
             </div>
+        </div>
     </section>
     <footer class="main-footer font-xs">
         <div class="row pb-30 pt-15">
             <div class="col-sm-6">
                 <script>
                     document.write(new Date().getFullYear())
-                </script> ©, MobileBazaar .
+                </script> ©, BashaBook.
             </div>
             <div class="col-sm-6">
                 <div class="text-sm-end">
@@ -151,44 +160,139 @@
     </footer>
 </main>
 
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.10/dist/sweetalert2.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 $(document).ready(function () {
+    // Set minimum date to today for start date
+    const today = new Date().toISOString().split('T')[0];
+    $('#categoryOfferStartDate').attr('min', today);
+    
+    // Update end date minimum when start date changes
+    $('#categoryOfferStartDate').on('change', function() {
+        const startDate = $(this).val();
+        if (startDate) {
+            // End date must be after start date
+            const minEndDate = new Date(startDate);
+            minEndDate.setDate(minEndDate.getDate() + 1);
+            $('#categoryOfferEndDate').attr('min', minEndDate.toISOString().split('T')[0]);
+            
+            // Clear end date if it's before or equal to start date
+            const currentEndDate = $('#categoryOfferEndDate').val();
+            if (currentEndDate && currentEndDate <= startDate) {
+                $('#categoryOfferEndDate').val('');
+            }
+        }
+    });
 
-    // When the form is submitted (Save changes button)
+    // Validate percentage input
+    $('#categoryOfferPercentage').on('input', function() {
+        const value = parseFloat($(this).val());
+        const errorDiv = $('#percentageError');
+        
+        if (isNaN(value) || value < 5 || value > 90) {
+            errorDiv.text('Percentage must be between 5 and 90').show();
+            $(this).addClass('is-invalid');
+        } else {
+            errorDiv.hide();
+            $(this).removeClass('is-invalid');
+        }
+    });
+
+    // Form submission with validation
     $('#addCategoryOfferForm').on('submit', function (e) {
-        e.preventDefault(); // Prevent the default form submission
+        e.preventDefault();
+        let isValid = true;
+        
+        // Validate percentage
+        const percentage = parseFloat($('#categoryOfferPercentage').val());
+        if (isNaN(percentage) || percentage < 5 || percentage > 90) {
+            $('#percentageError').text('Percentage must be between 5 and 90').show();
+            $('#categoryOfferPercentage').addClass('is-invalid');
+            isValid = false;
+        } else {
+            $('#percentageError').hide();
+            $('#categoryOfferPercentage').removeClass('is-invalid');
+        }
+        
+        // Validate dates
+        const startDate = new Date($('#categoryOfferStartDate').val());
+        const endDate = new Date($('#categoryOfferEndDate').val());
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+        
+        // Check start date is today or future
+        if (startDate < todayDate) {
+            $('#startDateError').text('Start date must be today or a future date').show();
+            $('#categoryOfferStartDate').addClass('is-invalid');
+            isValid = false;
+        } else {
+            $('#startDateError').hide();
+            $('#categoryOfferStartDate').removeClass('is-invalid');
+        }
+        
+        // Check end date is after start date
+        if (endDate <= startDate) {
+            $('#endDateError').text('End date must be after start date').show();
+            $('#categoryOfferEndDate').addClass('is-invalid');
+            isValid = false;
+        } else {
+            $('#endDateError').hide();
+            $('#categoryOfferEndDate').removeClass('is-invalid');
+        }
+        
+        if (!isValid) {
+            $('html, body').animate({
+                scrollTop: $('.is-invalid').first().offset().top - 100
+            }, 500);
+            return false;
+        }
 
-        const formData = $(this).serialize(); // Serialize the form data
+        const formData = $(this).serialize();
 
         $.ajax({
             url: '/admin/addCatOffers',
             type: 'POST',
             data: formData,
+            dataType: 'json',
             success: function (response) {
-                // Redirect immediately after saving without showing SweetAlert
-                window.location.href = "/admin/categoryOffers"; 
+                if (response.success) {
+                    Swal.fire({
+                        title: "Success!",
+                        text: response.message || "Category offer created successfully.",
+                        icon: "success",
+                        timer: 1500,
+                        showConfirmButton: false,
+                    });
+                    setTimeout(() => {
+                        window.location.href = "/admin/categoryOffers";
+                    }, 1500);
+                } else {
+                    Swal.fire({
+                        title: "Error!",
+                        text: response.message || "Failed to create category offer.",
+                        icon: "error",
+                    });
+                }
             },
             error: function (xhr) {
-                const errorMessage = xhr.responseJSON?.message || "Something went wrong!";
-                // You can optionally log the error or show some message here
-                console.error(errorMessage);
-                // Redirect even if there's an error (you can choose to stay on the page or not)
-                window.location.href = "/admin/categoryOffers";
+                const errorMessage = xhr.responseJSON?.error || "Something went wrong!";
+                Swal.fire({
+                    title: "Error!",
+                    text: errorMessage,
+                    icon: "error",
+                });
             }
         });
     });
 
-    // When the "Back" button is clicked
+    // Back button
     $('#backbutton').click(function (e) {
-        e.preventDefault(); // Prevent default behavior (closing modal)
-
-        // Directly redirect without SweetAlert confirmation
-        window.location.href = "/admin/categoryOffers";
+        e.preventDefault();
+        if (confirm('Do you really want to leave the page?')) {
+            window.location.href = "/admin/categoryOffers";
+        }
     });
-
 });
 </script>
-

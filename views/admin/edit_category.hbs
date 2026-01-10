@@ -19,55 +19,48 @@
                 <a class="menu-link" href="/admin/product"> <i class="icon material-icons md-shopping_bag"></i>
                     <span class="text">Products</span>
                 </a>
-
             </li>
             <li class="menu-item ">
                 <a class="menu-link" href="/admin/orders"> <i class="icon material-icons md-shopping_cart"></i>
                     <span class="text">Orders</span>
                 </a>
-
             </li>
             <li class="menu-item active">
                 <a class="menu-link" href="/admin/category"> <i class="icon material-icons md-category"></i>
                     <span class="text">Category</span>
                 </a>
+            </li>
             <li class="menu-item">
-                    <a class="menu-link" href="/admin/coupons"><i class="icon fa-solid fa-ticket"></i>
-                        <span class="text">Coupons</span>
-                    </a>
-      </li>
-
+                <a class="menu-link" href="/admin/coupons"><i class="icon fa-solid fa-ticket"></i>
+                    <span class="text">Coupons</span>
+                </a>
             </li>
             <li class="menu-item">
                 <a class="menu-link" href="/admin/manage_users"> <i class="icon material-icons md-person"></i>
                     <span class="text">Users</span>
                 </a>
-
             </li>
-                         <li class="menu-item">
-                    <a class="menu-link" href="/admin/productOffers"> <i class="icon material-icons md-local_offer"></i>
-                        <span class="text"> productOffers </span>
-                    </a>
-                </li>
-                <li class="menu-item ">
-                <a class="menu-link" href="/admin/categoryOffers"> <i class="icon material-icons md-stars"></i>
-                    <span class="text"> categoryOffers </span> </a>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/productOffers"> <i class="icon material-icons md-local_offer"></i>
+                    <span class="text"> productOffers </span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/categoryOffers"> <i class="icon material-icons md-comment"></i>
+                    <span class="text"> categoryOffers </span>
+                </a>
             </li>
         </ul>
         <hr>
         <ul class="menu-aside">
-            <li class="menu-item has-submenu">
+            <li class="menu-item ">
                 <a class="menu-link" href="#"> <i class="icon material-icons md-settings"></i>
                     <span class="text">Settings</span>
                 </a>
-                <div class="submenu">
-                    <a href="page-settings-1.html">Setting sample 1</a>
-                    <a href="page-settings-2.html">Setting sample 2</a>
-                </div>
             </li>
             <li class="menu-item">
-                <a class="menu-link" href="/admin/logout"> <i class="icon material-icons md-exit_to_app"></i>
-                    <span class="text"> Logout </span>
+                <a class="menu-link btn btn-primary" href="/admin/logout"> <i class="icon material-icons md-exit_to_app"></i>
+                    Logout
                 </a>
             </li>
         </ul>
@@ -75,73 +68,80 @@
         <br>
     </nav>
 </aside>
+
 <main class="main-wrap">
     <section class="content-main">
         <div class="content-header">
             <div>
-                <h2 class="content-title card-title">Edit Categories </h2>
-                <p>Edit category</p>
-            </div>
-            <div>
-                <input type="text" placeholder="Search Categories" class="form-control bg-white">
+                <h2 class="content-title card-title">Edit Categories</h2>
+                <p>Edit category details</p>
             </div>
         </div>
 
         <div class="card">
             <div class="card-body">
                 {{#if catSaveMsg}}
-                    <div class="alert alert-success mt-3 alert-dismissible fade {{#if catSaveMsg}}show{{/if}}" role="alert">
-                        {{catSaveMsg}}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
+                <div class="alert alert-success mt-3 alert-dismissible fade show" role="alert">
+                    {{catSaveMsg}}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
                 {{/if}}
 
                 {{#if catExistMsg}}
-                    <div class="alert alert-danger mt-3 alert-dismissible fade {{#if catExistMsg}}show{{/if}}" role="alert">
-                        {{catExistMsg}}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
+                <div class="alert alert-danger mt-3 alert-dismissible fade show" role="alert">
+                    {{catExistMsg}}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {{/if}}
+
+                {{#if error}}
+                <div class="alert alert-danger mt-3 alert-dismissible fade show" role="alert">
+                    {{error}}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
                 {{/if}}
 
                 <div class="row">
                     <div class="col-md-12">
-                        <form action="/admin/update_category/{{catData._id}}" method="post" enctype="multipart/form-data" onsubmit="return Validation()">
+                        <form action="/admin/update_category/{{catData._id}}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
                             <div class="mb-4">
                                 <label for="productName" class="form-label">Category Name:</label>
                                 <input type="text" class="form-control" id="productName" name="name" value="{{catData.category}}">
                                 <div class="error" style="color: red;" id="nameError"></div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="productImage">Category Image:</label>
-                                <br>
-                                <img class="border m-2" style="width: 80px; height: auto;" src="/images/products/{{catData.imageUrl}}" alt="">
-                                <br>
-                                <input type="file" class="form-control-file" name="image" id="productImage">
-                                <div class="error" style="color: red;" id="fileError"></div> <!-- Error message for invalid image file -->
+                            <div class="mb-4">
+                                <label for="productImage" class="form-label">Category Image:</label>
+                                <div class="mb-3">
+                                    <p class="text-muted">Current Image:</p>
+                                    <img class="border p-2" style="width: 150px; height: auto; border-radius: 8px; object-fit: cover;" src="{{catData.imageUrl}}" alt="{{catData.category}}" id="currentImage">
+                                </div>
+                                <input type="file" class="form-control" name="image" id="productImage" accept="image/png, image/jpeg, image/jpg, image/avif, image/webp" onchange="previewImage(event)">
+                                <div class="error" style="color: red;" id="fileError"></div>
+                                <div class="mt-3">
+                                    <img id="imagePreview" src="" alt="" style="max-width: 200px; max-height: 200px; object-fit: cover; display: none; border-radius: 8px; border: 1px solid #ddd;">
+                                </div>
                             </div>
 
                             <div class="d-flex g-2">
                                 <div class="m-2">
-                                    <button type="submit" class="btn btn-primary">Edit Category</button>
+                                    <button type="submit" class="btn btn-primary">Update Category</button>
                                 </div>
                                 <div class="m-2">
-                                    <a href="/admin/Category" type="button" class="btn btn-primary" id="backbutton">Back</a>
+                                    <a href="/admin/category" type="button" class="btn btn-primary" id="backbutton">Back</a>
                                 </div>
                             </div>
                         </form>
                     </div>
-                </div> <!-- .row // -->
-            </div> <!-- card body .// -->
-        </div> <!-- card .// -->
-    </section> <!-- content-main end// -->
+                </div>
+            </div>
+        </div>
+    </section>
 
     <footer class="main-footer font-xs">
         <div class="row pb-30 pt-15">
             <div class="col-sm-6">
-                <script>
-                    document.write(new Date().getFullYear())
-                </script> ©, BashaBook
+                <script>document.write(new Date().getFullYear())</script> ©, Evara - HTML Ecommerce Template
             </div>
             <div class="col-sm-6">
                 <div class="text-sm-end">
@@ -156,62 +156,84 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <script>
-    ////////////back
-    $(document).ready(function () {
-        $('#backbutton').click(function (e) {
-            e.preventDefault();
+function previewImage(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('imagePreview');
+    const currentImage = document.getElementById('currentImage');
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            currentImage.style.opacity = '0.5';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.src = '';
+        preview.style.display = 'none';
+        currentImage.style.opacity = '1';
+    }
+}
 
-            Swal.fire({
-                title: "Leave the page?",
-                text: "The Data will not be saved",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#088178",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "/admin/Category";
-                }
-            });
-        });
-    });
-
-    // Form Validation
-function Validation() {
+function validateForm() {
     let errors = [];
-
-    var name = document.getElementById('productName').value;
+    
+    var name = document.getElementById('productName').value.trim();
     var nameError = document.getElementById('nameError');
     var fileInput = document.getElementById('productImage');
     var fileError = document.getElementById('fileError');
 
-    // Updated regex to ensure the name has at least one letter and is at least 5 characters long
     var categoryPattern = /^(?=.*[a-zA-Z])[a-zA-Z0-9\s\-_&.,!@#$%^()]{5,}$/;
 
-    // Validate the category name
+    // Clear previous errors
+    nameError.innerHTML = "";
+    fileError.innerHTML = "";
+
+    // Validate category name
     if (!name.match(categoryPattern)) {
         errors.push("Name must be at least 5 characters long and must include at least one letter. Special characters, numbers, and spaces are allowed.");
+        nameError.innerHTML = "Name must be at least 5 characters long and must include at least one letter. Special characters, numbers, and spaces are allowed.";
     }
 
-    // Validate uploaded file type
+    // Validate uploaded file if provided
     var file = fileInput.files[0];
     if (file) {
         var fileType = file.type;
-        if (!fileType.startsWith('image/')) {
-            errors.push("Only image files are allowed.");
+        var validImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/avif', 'image/webp'];
+        
+        if (!validImageTypes.includes(fileType)) {
+            errors.push("Only image files are allowed (PNG, JPEG, JPG, AVIF, WebP).");
+            fileError.innerHTML = "Only image files are allowed (PNG, JPEG, JPG, AVIF, WebP).";
+        }
+        
+        // Check file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+            errors.push("File size must be less than 5MB.");
+            fileError.innerHTML = "File size must be less than 5MB.";
         }
     }
 
-    // Handle errors
-    if (errors.length > 0) {
-        nameError.innerHTML = errors.includes("Name must be at least 5 characters long and must include at least one letter. Special characters, numbers, and spaces are allowed.") ? 
-                              "Name must be at least 5 characters long and must include at least one letter. Special characters, numbers, and spaces are allowed." : "";
-        fileError.innerHTML = errors.includes("Only image files are allowed.") ? "Only image files are allowed." : "";
-        return false; // Prevent form submission
-    }
-
-    return true; // Validation passed
+    return errors.length === 0;
 }
 
+$(document).ready(function () {
+    $('#backbutton').click(function (e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: "Leave the page?",
+            text: "The Data will not be saved",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#088178",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "/admin/category";
+            }
+        });
+    });
+});
 </script>

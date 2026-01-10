@@ -258,7 +258,7 @@
       <div class="product-cart-wrap mb-30">
         <div class="product-img-action-wrap">
           <div class="product-img product-img-zoom">
-            <a href="/productview?id=/{{this._id}}">
+            <a href="/productview?id={{this._id}}">
               <img class="default-img" src="{{this.imageUrl.[0]}}" alt="">
               <img class="hover-img" src="{{this.imageUrl.[1]}}" alt="">
             </a>
@@ -273,7 +273,7 @@
           <div class="product-category">
             <a>{{this.category.category}}</a>
           </div>
-          <h2><a href="/productview?id=/{{this._id}}">{{name}}</a></h2>
+          <h2><a href="/productview?id={{this._id}}">{{name}}</a></h2>
           <div class="rating-result">
             <span>
               {{#if this.offerAvailable}}  <!-- Only show the offer percentage if the offer is available -->

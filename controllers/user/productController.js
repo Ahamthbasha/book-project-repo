@@ -1,12 +1,10 @@
-const Category=require('../../models/categoryModel')
-const Product=require('../../models/productModel')
-const User=require('../../models/userModel')
-const Cart=require('../../models/cartModel')
-const mongoose=require("mongoose")
-const Wishlist=require("../../models/wishlistModel")
-const ObjectId=mongoose.Types.ObjectId
-
-//new mongoose.types.ObjectId which is used to convert the string into mongoose object id.
+const Category = require('../../models/categoryModel')
+const Product = require('../../models/productModel')
+const User = require('../../models/userModel')
+const Cart = require('../../models/cartModel')
+const mongoose = require("mongoose")
+const Wishlist = require("../../models/wishlistModel")
+const ObjectId = mongoose.Types.ObjectId
 
 const getProduct = async (req, res) => {
   let userData = false;
@@ -34,7 +32,7 @@ const getProduct = async (req, res) => {
         },
       },
       { 
-      $unwind: { path: "$productOffer", preserveNullAndEmptyArrays: true } 
+        $unwind: { path: "$productOffer", preserveNullAndEmptyArrays: true } 
       },
       {
         $project: {
@@ -47,11 +45,11 @@ const getProduct = async (req, res) => {
           imageUrl: 1,
           productOffer: 1,
           discountedPrice: {
-          $cond: {
-            if: {
+            $cond: {
+              if: {
                 $and: [
                   { $eq: ["$productOffer.currentStatus", true] },
-                { $ne: ["$productOffer.discountPrice", null] },
+                  { $ne: ["$productOffer.discountPrice", null] },
                 ],
               },
               then: "$productOffer.discountPrice",
@@ -78,8 +76,7 @@ const getProduct = async (req, res) => {
       }
     ]);
     
-
-    console.log("load the product data",loadProData); // To debug and check the results of the aggregation
+    console.log("load the product data", loadProData); // To debug and check the results of the aggregation
 
     const count = await Product.countDocuments({ is_blocked: false });
     const totalPages = Math.ceil(count / limit);
@@ -104,191 +101,16 @@ const getProduct = async (req, res) => {
   }
 };
 
-// const searchSortFilter = async (req, res) => {
-//     const { searchQuery, sortOption, categoryFilter, page = 1, limit = 9 } = req.body;
-  
-//     // Match stage based on search query and category filter
-//     const matchStage = { $match: {} };
-//     if (searchQuery) {
-//       matchStage.$match.name = { $regex: searchQuery, $options: "i" }; // Case-insensitive search
-//     }
-//     if (categoryFilter) {
-//       matchStage.$match.category = new mongoose.Types.ObjectId(categoryFilter); // Filter by category
-//     }
-  
-//     // Construct the sort stage
-//     // const sortStage = { $sort: {} };
-//     // switch (sortOption) {
-//     //   case "priceAsc":
-//     //     sortStage.$sort.price = 1;
-//     //     break;
-//     //   case "priceDesc":
-//     //     sortStage.$sort.price = -1;
-//     //     break;
-//     //   case "nameAsc":
-//     //     sortStage.$sort.name = 1;
-//     //     break;
-//     //   case "nameDesc":
-//     //     sortStage.$sort.name = -1;
-//     //     break;
-//     //   case "newArrivals":
-//     //     sortStage.$sort.createdAt = -1;
-//     //     break;
-//     //   case "popularity":
-//     //     sortStage.$sort.popularity = -1;
-//     //     break;
-//     //   default:
-//     //     sortStage.$sort.createdAt = 1; // Default sort by creation date
-//     // }
-
-    
-  
-//     // Pagination: skip and limit
-//     const skipStage = { $skip: (page - 1) * limit }; // Skip records based on the current page
-//     const limitStage = { $limit: limit }; // Limit the number of results per page
-  
-//     // Fetch products with aggregation pipeline
-//     const products = await Product.aggregate([
-//       matchStage,
-//       {
-//         $lookup: {
-//           from: "categories",
-//           localField: "category",
-//           foreignField: "_id",
-//           as: "category",
-//         },
-//       },
-//       {
-//         $unwind: {
-//           path: "$category",
-//           preserveNullAndEmptyArrays: true,
-//         },
-//       },
-//       {
-//         $lookup: {
-//           from: "productoffers",
-//           localField: "_id",
-//           foreignField: "productId",
-//           as: "productOffer",
-//         },
-//       },
-//       {
-//         $unwind: {
-//           path: "$productOffer",
-//           preserveNullAndEmptyArrays: true,
-//         },
-//       },
-//       {
-//         $project: {
-//           _id: 1,
-//           name: 1,
-//           price: 1,
-//           description: 1,
-//           stock: 1,
-//           popularity: 1,
-//           bestSelling: 1,
-//           imageUrl: 1,
-//           category: {
-//             _id: "$category._id",
-//             category: "$category.category",
-//             imageUrl: "$category.imageUrl",
-//             isListed: "$category.isListed",
-//             bestSelling: "$category.bestSelling",
-//           },
-//           productOffer: 1,
-//           discountPrice: {
-//             $cond: {
-//               if: { $eq: ["$productOffer.currentStatus", true] },
-//               then: "$productOffer.discountPrice",
-//               else: "$price",
-//             },
-//           },
-//           offerAvailable: {
-//             $cond: {
-//               if: { $eq: ["$productOffer.currentStatus", true] },
-//               then: true,
-//               else: false,
-//             },
-//           },
-//           offerPercentage: {
-//             $cond: {
-//               if: { $eq: ["$productOffer.currentStatus", true] }, // Check if offer is active
-//               then:
-//                 { 
-//                   $multiply:
-//                     [
-//                       { 
-//                         $divide:
-//                           [
-//                             { $subtract: ["$price", "$productOffer.discountPrice"] }, 
-//                             "$price"
-//                           ] 
-//                       }, 
-//                       100 
-//                     ] 
-//                 }, // Calculate offer percentage
-//               else:
-//                 null, // Set to null if no offer
-//             },
-//           },
-//         },
-//       },
-//       sortStage,
-//       skipStage,
-//       limitStage,
-//     ]);
-  
-//     // Calculate total products count
-//     const totalProducts = await Product.countDocuments(matchStage.$match);
-  
-//     // Calculate total number of pages
-//     const totalPages = Math.ceil(totalProducts / limit);
-  
-//     // Return paginated results along with page details
-//     res.json({
-//       products,
-//       totalProducts,
-//       totalPages, // Total pages
-//       currentPage: page, // Current page
-//       limit,
-//     });
-//   };
-
 const searchSortFilter = async (req, res) => {
   const { searchQuery, sortOption, categoryFilter, page = 1, limit = 9 } = req.body;
 
   // Match stage based on search query and category filter
-  const matchStage = { $match: {} };
+  const matchStage = { $match: { is_blocked: false } };
   if (searchQuery) {
     matchStage.$match.name = { $regex: searchQuery, $options: "i" }; // Case-insensitive search
   }
   if (categoryFilter) {
     matchStage.$match.category = new mongoose.Types.ObjectId(categoryFilter); // Filter by category
-  }
-
-  // Construct the sort stage
-  const sortStage = { $sort: {} };
-  switch (sortOption) {
-    case "priceAsc":
-      sortStage.$sort.price = 1;
-      break;
-    case "priceDesc":
-      sortStage.$sort.price = -1;
-      break;
-    case "nameAsc":
-      sortStage.$sort = { nameLower: 1 };
-      break;
-    case "nameDesc":
-      sortStage.$sort = { nameLower: -1 };
-      break;
-    case "newArrivals":
-      sortStage.$sort.createdAt = -1;
-      break;
-    case "popularity":
-      sortStage.$sort.popularity = -1;
-      break;
-    default:
-      sortStage.$sort.createdAt = 1; // Default sort by creation date
   }
 
   // Pagination: skip and limit
@@ -329,6 +151,19 @@ const searchSortFilter = async (req, res) => {
     {
       $addFields: {
         nameLower: { $toLower: "$name" }, // Add a lowercase version of the name field
+        // Calculate the effective price (considering offers)
+        effectivePrice: {
+          $cond: {
+            if: { 
+              $and: [
+                { $eq: ["$productOffer.currentStatus", true] },
+                { $ne: ["$productOffer.discountPrice", null] }
+              ]
+            },
+            then: "$productOffer.discountPrice",
+            else: "$price",
+          },
+        },
       },
     },
     {
@@ -366,28 +201,45 @@ const searchSortFilter = async (req, res) => {
         offerPercentage: {
           $cond: {
             if: { $eq: ["$productOffer.currentStatus", true] }, // Check if offer is active
-            then:
-              {
-                $multiply:
-                  [
-                    {
-                      $divide:
-                        [
-                          { $subtract: ["$price", "$productOffer.discountPrice"] },
-                          "$price"
-                        ]
-                    },
-                    100
+            then: {
+              $multiply: [
+                {
+                  $divide: [
+                    { $subtract: ["$price", "$productOffer.discountPrice"] },
+                    "$price"
                   ]
-              }, // Calculate offer percentage
-            else:
-              null, // Set to null if no offer
+                },
+                100
+              ]
+            }, // Calculate offer percentage
+            else: null, // Set to null if no offer
           },
         },
         nameLower: 1, // Include the lowercase name field
+        effectivePrice: 1, // Include the effective price for sorting
       },
     },
-    sortStage,
+    // Construct the sort stage based on sortOption
+    {
+      $sort: (() => {
+        switch (sortOption) {
+          case "priceAsc":
+            return { effectivePrice: 1 }; // Sort by effective price (low to high)
+          case "priceDesc":
+            return { effectivePrice: -1 }; // Sort by effective price (high to low)
+          case "nameAsc":
+            return { nameLower: 1 }; // Sort by name A-Z
+          case "nameDesc":
+            return { nameLower: -1 }; // Sort by name Z-A
+          case "newArrivals":
+            return { createdAt: -1 }; // Sort by newest first
+          case "popularity":
+            return { popularity: -1 }; // Sort by popularity
+          default:
+            return { createdAt: 1 }; // Default sort by creation date
+        }
+      })()
+    },
     skipStage,
     limitStage,
   ]);
@@ -407,7 +259,6 @@ const searchSortFilter = async (req, res) => {
     limit,
   });
 };
-
 
 const productView = async (req, res) => {
   try {
@@ -468,11 +319,11 @@ const productView = async (req, res) => {
         userId: userData._id,
         product_Id: proId,
       });
-      console.log("cartProductExist",cartProductExist)
+      console.log("cartProductExist", cartProductExist)
       if (cartProductExist.length > 0) {
         productExistInCart = true;
       }
-      console.log("productExistInCart",productExistInCart)
+      console.log("productExistInCart", productExistInCart)
       // Check if product exists in user's wishlist
       const wishlistProductExist = await Wishlist.find({
         userId: userData._id,
@@ -485,7 +336,7 @@ const productView = async (req, res) => {
         productExistInWishlist = true;
       }
     }
-    console.log("wishlist product exist or not",productExistInWishlist)
+    console.log("wishlist product exist or not", productExistInWishlist)
 
     // Render the product details page with all necessary data
     res.render("user/productview", {
@@ -503,11 +354,8 @@ const productView = async (req, res) => {
   }
 };
 
-
-
-
-module.exports={
-    getProduct,
-    searchSortFilter,
-    productView
+module.exports = {
+  getProduct,
+  searchSortFilter,
+  productView
 }

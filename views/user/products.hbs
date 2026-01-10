@@ -1,18 +1,38 @@
 <style>
 /* CSS for highlighted filter option */
 .highlight {
-    background-color: #A8D5BA; /* Pale green color */
-    color: white; /* Text color */
-    font-weight: bold; /* Make the text bold */
-    padding: 5px 10px; /* Add padding around the text */
-    border-radius: 5px; /* Rounded corners for the background */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Soft shadow to give depth */
-    transition: all 0.3s ease; /* Smooth transition for hover and click */
+    background-color: #A8D5BA;
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
 .highlight:hover {
-    background-color: #8FBC8F; /* Darker green for hover effect */
-    transform: scale(1.05); /* Slight zoom-in effect on hover */
+    background-color: #8FBC8F;
+    transform: scale(1.05);
+}
+
+/* Search bar styling */
+.product-search-wrapper {
+    margin-bottom: 20px;
+}
+
+.product-search-input {
+    width: 100%;
+    padding: 12px 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.product-search-input:focus {
+    outline: none;
+    border-color: #088178;
+    box-shadow: 0 0 5px rgba(8, 129, 120, 0.2);
 }
 </style>
 
@@ -31,6 +51,16 @@
         <div class="container">
             <div class="row flex-row-reverse">
                 <div class="col-lg-9">
+                    <!-- Search Bar -->
+                    <div class="product-search-wrapper">
+                        <input 
+                            type="text" 
+                            id="productSearchInput" 
+                            class="product-search-input" 
+                            placeholder="Search for products..."
+                        >
+                    </div>
+
                     <!-- Product Filter Section -->
                     <div class="shop-product-fillter">
                         <div class="totall-product">
@@ -90,7 +120,7 @@
                                             <span>{{#if this.offerAvailable}}Offer Available{{else}}No Offer{{/if}}</span>
                                         </div>
                                         <div class="product-price">
-                                            <span>₹{{this.discountPrice}}</span>
+                                            <span>₹{{this.discountedPrice}}</span>
                                             {{#if this.offerAvailable}}
                                             <span class="old-price">₹{{this.price}}</span>
                                             {{/if}}
@@ -109,7 +139,7 @@
                             <ul class="pagination justify-content-start" id="paginationList">
                                 {{#each pages}}
                                 <li class="page-item {{#ifEquals this ../currentPage}}active{{/ifEquals}}">
-                                    <a class="page-link" href="javascript:{{../currentFunction}}('{{../catId}}', {{this}}, '{{../currentSort}}');">{{this}}</a>
+                                    <a class="page-link" href="javascript:goToPage({{this}});">{{this}}</a>
                                 </li>
                                 {{/each}}
                             </ul>
@@ -182,6 +212,21 @@
     let searchQuery = '';
     let limit = 9;
 
+    // Search functionality with debouncing
+    let searchTimeout;
+    const productSearchInput = document.getElementById('productSearchInput');
+    
+    if (productSearchInput) {
+        productSearchInput.addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchQuery = e.target.value.trim();
+                currentPage = 1;
+                fetchProducts();
+            }, 500);
+        });
+    }
+
     const fetchProducts = () => {
         $.ajax({
             url: '/search',
@@ -207,20 +252,23 @@
 
     const updateProductList = (products) => {
         const productList = $('#pro_container .row.product-grid-4');
-        productList.empty(); // Clear previous products
+        productList.empty();
 
         if (products.length === 0) {
-            productList.html('<h2 class="m-5">No product available</h2>');
+            productList.html('<div class="col-12"><h2 class="text-center m-5">No products available</h2></div>');
             return;
         }
 
         products.forEach((product) => {
+            const displayPrice = product.discountPrice || product.price;
+            const hasDiscount = product.discountPrice && product.discountPrice < product.price;
+            
             const productHtml = `
                 <div class="col-lg-3 col-md-4 col-12 col-sm-6">
                     <div class="product-cart-wrap mb-30">
                         <div class="product-img-action-wrap">
                             <div class="product-img product-img-zoom">
-                                <a href="/productview/?id=${product._id}">
+                                <a href="/productview?id=${product._id}">
                                     <img class="default-img" src="${product.imageUrl[0] || ''}" alt="${product.name || ''}">
                                     ${product.imageUrl?.[1] ? 
                                         `<img class="hover-img" src="${product.imageUrl[1]}" alt="${product.name || ''} hover">` : 
@@ -228,7 +276,7 @@
                                 </a>
                             </div>
                             <div class="product-action-1">
-                                <a aria-label="Quick view" class="action-btn hover-up" href="/productview/?id=${product._id}" data-bs-target="#quickViewModal">
+                                <a aria-label="Quick view" class="action-btn hover-up" href="/productview?id=${product._id}">
                                     <i class="fi-rs-search"></i>
                                 </a>
                                 <a data-id="${product._id}" aria-label="Add To Wishlist" class="wish action-btn hover-up" href="#">
@@ -236,24 +284,20 @@
                                 </a>
                             </div>
                             <div class="product-badges product-badges-position product-badges-mrg">
-                                ${product.offerAvailable ? `<span class="hot">${product.offerPercentage}% Off</span>` : ''}
+                                ${product.offerAvailable ? `<span class="hot">${Math.round(product.offerPercentage)}% Off</span>` : ''}
                             </div>
                         </div>
                         <div class="product-content-wrap">
                             <div class="product-category">
                                 <a href="#">${product.category?.category || 'Uncategorized'}</a>
                             </div>
-                            <h2><a href="/productview/${product._id}">${product.name}</a></h2>
+                            <h2><a href="/productview?id=${product._id}">${product.name}</a></h2>
                             <div class="rating-result">
-                                ${product.offerAvailable ? `<span>${product.offerPercentage}% Off</span>` : '<span>No Offer</span>'}
+                                ${product.offerAvailable ? `<span>Offer Available</span>` : '<span>No Offer</span>'}
                             </div>
                             <div class="product-price">
-                                ${
-                                    product.discountPrice && product.discountPrice < product.price
-                                        ? `<span>₹${product.discountPrice}</span>
-                                           <span class="old-price">₹${product.price}</span>` 
-                                        : `<span>₹${product.price}</span>`
-                                }
+                                <span>₹${displayPrice}</span>
+                                ${hasDiscount ? `<span class="old-price">₹${product.price}</span>` : ''}
                             </div>
                             <div class="product-action-1 show"></div>
                         </div>
@@ -310,7 +354,7 @@
     }
 
     function sortLowToHigh() {
-        console.log('Sorting: Low to High');
+        console.log('Sorting: Low to High (considering offers)');
         clearHighlights();
         const selectedLink = document.querySelector('a[onclick="sortLowToHigh()"]');
         if (selectedLink) selectedLink.classList.add('highlight');
@@ -320,7 +364,7 @@
     }
 
     function sortHighToLow() {
-        console.log('Sorting: High to Low');
+        console.log('Sorting: High to Low (considering offers)');
         clearHighlights();
         const selectedLink = document.querySelector('a[onclick="sortHighToLow()"]');
         if (selectedLink) selectedLink.classList.add('highlight');
@@ -361,7 +405,13 @@
         currentSort = '';
         currentCategory = '';
         searchQuery = '';
-        limit = 6;
+        limit = 9;
+        
+        // Clear the search input
+        if (productSearchInput) {
+            productSearchInput.value = '';
+        }
+        
         fetchProducts();
     }
 
@@ -370,7 +420,6 @@
 
     // Wishlist action
     $(document).ready(function () {
-        const userId = "";  // ← Make sure this is properly assigned or get it from session/localStorage
         $('#pro_container').on('click', '.wish.action-btn', function (event) {
             event.preventDefault();
             var $button = $(this);
@@ -380,7 +429,7 @@
                 type: 'POST',
                 url: '/addtowishlist',
                 contentType: 'application/json',
-                data: JSON.stringify({ id: id, userId: userId }),
+                data: JSON.stringify({ id: id }),
                 success: function (productData) {
                     if (productData.success) {
                         Swal.fire({

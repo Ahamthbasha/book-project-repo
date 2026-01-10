@@ -1,6 +1,5 @@
 <style>
 /* CSS for highlighted filter option */
-/* CSS for highlighted filter option */
 .highlight {
     background-color: #A8D5BA; /* Pale green color */
     color: white; /* Text color */
@@ -16,9 +15,8 @@
     background-color: #8FBC8F; /* Darker green for hover effect */
     transform: scale(1.05); /* Slight zoom-in effect on hover */
 }
-
-
 </style>
+
 <main class="main">
     <!-- Breadcrumb -->
     <div class="page-header breadcrumb-wrap">
@@ -63,60 +61,58 @@
 
                     <!-- Product List Section -->
                     <div id="pro_container">
-<div class="row product-grid-4">
-  {{#each proData}}
-    <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-      <div class="product-cart-wrap mb-30">
-        <div class="product-img-action-wrap">
-          <div class="product-img product-img-zoom">
-            <a href="/productview?id={{this._id}}">
-              <img class="default-img" src="/images/products/{{this.imageUrl.[0]}}" alt="">
-              <img class="hover-img" src="/images/products/{{this.imageUrl.[1]}}" alt="">
-            </a>
-          </div>
-          
-          <div class="product-badges product-badges-position product-badges-mrg">
-            {{#if this.offerAvailable}}  <!-- Only show the offer percentage if the offer is available -->
-              <span class="hot">{{this.offerPercentage}}% Off</span>
-            {{/if}}  <!-- This part will be omitted if no offer is available -->
-          </div>
-        </div>
-        
-        <div class="product-content-wrap">
-          <div class="product-category">
-            <a>{{this.category.category}}</a>
-          </div>
-          <h2><a href="/productview/{{this._id}}">{{this.name}}</a></h2>
-          <div class="rating-result">
-            <span>{{#if this.offerAvailable}}Offer Available{{else}}No Offer{{/if}}</span>
-          </div>
-          <div class="product-price">
-            <span>₹{{this.discountedPrice}}</span>
-            {{#if this.offerAvailable}}
-              <span class="old-price">₹{{this.price}}</span>
-              <span class="offer-status">Offer Available</span>
-            {{/if}}
-          </div>
-          <div class="product-action-1 show">
-          </div>
-        </div>
-      </div>
-    </div>
-  {{/each}}
-</div>
-
-
+                        <div class="row product-grid-4">
+                            {{#each proData}}
+                            <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                                <div class="product-cart-wrap mb-30">
+                                    <div class="product-img-action-wrap">
+                                        <div class="product-img product-img-zoom">
+                                            <a href="/productview?id={{this._id}}">
+                                                <!-- Updated: Use Cloudinary URL directly -->
+                                                <img class="default-img" src="{{this.imageUrl.[0]}}" alt="{{this.name}}">
+                                                <img class="hover-img" src="{{this.imageUrl.[1]}}" alt="{{this.name}}">
+                                            </a>
+                                        </div>
+                                        
+                                        <div class="product-badges product-badges-position product-badges-mrg">
+                                            {{#if this.offerAvailable}}
+                                            <span class="hot">{{this.offerPercentage}}% Off</span>
+                                            {{/if}}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="product-content-wrap">
+                                        <div class="product-category">
+                                            <a>{{this.category.category}}</a>
+                                        </div>
+                                        <h2><a href="/productview/{{this._id}}">{{this.name}}</a></h2>
+                                        <div class="rating-result">
+                                            <span>{{#if this.offerAvailable}}Offer Available{{else}}No Offer{{/if}}</span>
+                                        </div>
+                                        <div class="product-price">
+                                            <span>₹{{this.discountedPrice}}</span>
+                                            {{#if this.offerAvailable}}
+                                            <span class="old-price">₹{{this.price}}</span>
+                                            <span class="offer-status">Offer Available</span>
+                                            {{/if}}
+                                        </div>
+                                        <div class="product-action-1 show">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{/each}}
+                        </div>
                     </div>
-                    
 
                     <!-- Pagination Section -->
                     <div class="pagination-area mt-15 mb-sm-5 mb-lg-0">
                         <nav aria-label="Page navigation example">
                             <ul class="pagination justify-content-start" id="paginationList">
                                 {{#each pages}}
-                                    <li class="page-item {{#ifEquals this ../currentPage}}active{{/ifEquals}}">
-                                        <a class="page-link" href="javascript:{{../currentFunction}}('{{../catId}}', {{this}}, '{{../currentSort}}');">{{this}}</a>
-                                    </li>
+                                <li class="page-item {{#ifEquals this ../currentPage}}active{{/ifEquals}}">
+                                    <a class="page-link" href="javascript:{{../currentFunction}}('{{../catId}}', {{this}}, '{{../currentSort}}');">{{this}}</a>
+                                </li>
                                 {{/each}}
                             </ul>
                         </nav>
@@ -130,7 +126,7 @@
                         <h5 class="section-title style-1 mb-30 wow fadeIn animated">Category</h5>
                         <ul class="categories">
                             {{#each loadCatData}}
-                                <li><a href="javascript:void(0)" onclick="filterByCategory('{{this._id}}')">{{this.category}}</a></li>
+                            <li><a href="javascript:void(0)" onclick="filterByCategory('{{this._id}}')">{{this.category}}</a></li>
                             {{/each}}
                         </ul>
                     </div>
@@ -149,24 +145,25 @@
                     </div>
 
                     <!-- New Arrivals Section -->
-                    <div class="sidebar-widget product-sidebar  mb-30 p-30 bg-grey border-radius-10">
+                    <div class="sidebar-widget product-sidebar mb-30 p-30 bg-grey border-radius-10">
                         <div class="widget-header position-relative mb-20 pb-10">
                             <h5 class="widget-title mb-10">New arrivals</h5>
                             <div class="bt-1 border-color-1"></div>
                         </div>
                         {{#each newProduct}}
-                            <div class="single-post clearfix" id="newProduct">
-                                <div class="image">
-                                    <img src="/images/products/{{imageUrl.[0]}}" alt="{{name}}">
-                                </div>
-                                <div class="content pt-10">
-                                    <h5><a href="/productview?id={{this._id}}">{{name}}</a></h5>
-                                    <p class="price mb-0 mt-5">₹{{price}}</p>
-                                    <div class="product-rate">
-                                        <div class="product-rating" style="width:90%"></div>
-                                    </div>
+                        <div class="single-post clearfix" id="newProduct">
+                            <div class="image">
+                                <!-- Updated: Use Cloudinary URL directly -->
+                                <img src="{{imageUrl.[0]}}" alt="{{name}}">
+                            </div>
+                            <div class="content pt-10">
+                                <h5><a href="/productview?id={{this._id}}">{{name}}</a></h5>
+                                <p class="price mb-0 mt-5">₹{{price}}</p>
+                                <div class="product-rate">
+                                    <div class="product-rating" style="width:90%"></div>
                                 </div>
                             </div>
+                        </div>
                         {{/each}}
                     </div>
                 </div>
@@ -210,64 +207,67 @@
     };
 
     const updateProductList = (products) => {
-    const productList = $('#pro_container .row.product-grid-4');
-    productList.empty(); // Clear previous products
+        const productList = $('#pro_container .row.product-grid-4');
+        productList.empty();
 
-    if (products.length === 0) {
-        productList.html('<h2 class="m-5">No product available</h2>');
-        return;
-    }
+        if (products.length === 0) {
+            productList.html('<h2 class="m-5">No product available</h2>');
+            return;
+        }
 
-    products.forEach((product) => {
-        const productHtml = `
-            <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-                <div class="product-cart-wrap mb-30">
-                    <div class="product-img-action-wrap">
-                        <div class="product-img product-img-zoom">
-                            <a href="/productview/?id=${product._id}">
-                                <img class="default-img" src="/images/products/${product.imageUrl[0]}" alt="">
-                                <img class="hover-img" src="/images/products/${product.imageUrl[1]}" alt="">
-                            </a>
+        products.forEach((product) => {
+            // Updated: Use Cloudinary URLs directly from product.imageUrl array
+            const defaultImg = product.imageUrl && product.imageUrl[0] ? product.imageUrl[0] : '/assets/imgs/theme/placeholder.jpg';
+            const hoverImg = product.imageUrl && product.imageUrl[1] ? product.imageUrl[1] : defaultImg;
+            
+            const productHtml = `
+                <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                    <div class="product-cart-wrap mb-30">
+                        <div class="product-img-action-wrap">
+                            <div class="product-img product-img-zoom">
+                                <a href="/productview/?id=${product._id}">
+                                    <img class="default-img" src="${defaultImg}" alt="${product.name}">
+                                    <img class="hover-img" src="${hoverImg}" alt="${product.name}">
+                                </a>
+                            </div>
+                            <div class="product-action-1">
+                                <a aria-label="Quick view" class="action-btn hover-up" href="/productview/?id=${product._id}" data-bs-target="#quickViewModal">
+                                    <i class="fi-rs-search"></i>
+                                </a>
+                                <a data-id="${product._id}" aria-label="Add To Wishlist" class="wish action-btn hover-up" href="#">
+                                    <i class="fi-rs-heart"></i>
+                                </a>
+                            </div>
+                            <div class="product-badges product-badges-position product-badges-mrg">
+                                ${product.offerAvailable ? `<span class="hot">${product.offerPercentage}% Off</span>` : '<span class="new">New</span>'}
+                            </div>
                         </div>
-                        <div class="product-action-1">
-                            <a aria-label="Quick view" class="action-btn hover-up" href="/productview/?id=${product._id}" data-bs-target="#quickViewModal">
-                                <i class="fi-rs-search"></i>
-                            </a>
-                            <a data-id="${product._id}" aria-label="Add To Wishlist" class="wish action-btn hover-up" href="#">
-                                <i class="fi-rs-heart"></i>
-                            </a>
+                        <div class="product-content-wrap">
+                            <div class="product-category">
+                                <a href="shop-grid-right.html">${product.category.category}</a>
+                            </div>
+                            <h2><a href="/productview/${product._id}">${product.name}</a></h2>
+                            <div class="rating-result">
+                                ${product.offerAvailable ? `<span>Offer Available</span>` : '<span>No Offer</span>'}
+                            </div>
+                            <div class="product-price">
+                                ${
+                                    product.discountedPrice && product.discountedPrice < product.price
+                                        ? `<span>₹${product.discountedPrice}</span>
+                                           <span class="old-price">₹${product.price}</span>
+                                           <span class="offer-status">Offer Available</span>` 
+                                        : `<span>₹${product.price}</span>`
+                                }
+                            </div>
+                            <div class="product-action-1 show"></div>
                         </div>
-                        <div class="product-badges product-badges-position product-badges-mrg">
-                            <span class="hot">Hot</span>
-                        </div>
-                    </div>
-                    <div class="product-content-wrap">
-                        <div class="product-category">
-                            <a href="shop-grid-right.html">${product.category.category}</a>
-                        </div>
-                        <h2><a href="/productview/${product._id}">${product.name}</a></h2>
-                        <div class="rating-result">
-                            ${product.offerAvailable ? `<span>${product.offerPercentage}% Off</span>` : ''}
-                        </div>
-                        <div class="product-price">
-                            ${
-                                product.discountPrice && product.discountPrice < product.price
-                                    ? `<span>₹${product.discountPrice}</span>
-                                       <span class="old-price">₹${product.price}</span>
-                                       <span>Offer Available</span>` 
-                                    : `<span>₹${product.price}</span>`
-                            }
-                        </div>
-                        <div class="product-action-1 show"></div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
 
-        // Append to product list
-        productList.append(productHtml);
-    });
-};
+            productList.append(productHtml);
+        });
+    };
 
     const updatePagination = (totalProducts) => {
         const paginationList = $('#paginationList');
@@ -299,77 +299,73 @@
         currentPage = 1;
         fetchProducts();
     };
+
     function clearHighlights() {
-    const filterLinks = document.querySelectorAll('.categories li a, .widget-category ul li a');
-    filterLinks.forEach(link => {
-        link.classList.remove('highlight');
-    });
-}
-
-// Function to filter by category
-function filterByCategory(categoryId) {
-    console.log('Filtering by category:', categoryId); // Debugging line
-    clearHighlights(); // Clear previous highlights
-    const selectedLink = document.querySelector(`a[onclick="filterByCategory('${categoryId}')"]`);
-    if (selectedLink) {
-        selectedLink.classList.add('highlight'); // Highlight the selected category
+        const filterLinks = document.querySelectorAll('.categories li a, .widget-category ul li a');
+        filterLinks.forEach(link => {
+            link.classList.remove('highlight');
+        });
     }
-    currentCategory = categoryId; // Set the current category
-    currentPage = 1;
-    fetchProducts(); // Re-fetch the products with the updated filter
-}
 
-// Function to sort low to high
-function sortLowToHigh() {
-    console.log('Sorting: Low to High'); // Debugging line
-    clearHighlights(); // Clear previous highlights
-    const selectedLink = document.querySelector('a[onclick="sortLowToHigh()"]');
-    if (selectedLink) {
-        selectedLink.classList.add('highlight'); // Highlight the selected sort option
+    function filterByCategory(categoryId) {
+        console.log('Filtering by category:', categoryId);
+        clearHighlights();
+        const selectedLink = document.querySelector(`a[onclick="filterByCategory('${categoryId}')"]`);
+        if (selectedLink) {
+            selectedLink.classList.add('highlight');
+        }
+        currentCategory = categoryId;
+        currentPage = 1;
+        fetchProducts();
     }
-    currentSort = 'priceAsc'; // Set the sort option
-    currentPage = 1;
-    fetchProducts(); // Re-fetch the products with the updated sort
-}
 
-// Function to sort high to low
-function sortHighToLow() {
-    console.log('Sorting: High to Low'); // Debugging line
-    clearHighlights(); // Clear previous highlights
-    const selectedLink = document.querySelector('a[onclick="sortHighToLow()"]');
-    if (selectedLink) {
-        selectedLink.classList.add('highlight'); // Highlight the selected sort option
+    function sortLowToHigh() {
+        console.log('Sorting: Low to High');
+        clearHighlights();
+        const selectedLink = document.querySelector('a[onclick="sortLowToHigh()"]');
+        if (selectedLink) {
+            selectedLink.classList.add('highlight');
+        }
+        currentSort = 'priceAsc';
+        currentPage = 1;
+        fetchProducts();
     }
-    currentSort = 'priceDesc'; // Set the sort option
-    currentPage = 1;
-    fetchProducts(); // Re-fetch the products with the updated sort
-}
 
-// Function for A-Z sorting
-function sortAZ() {
-    console.log('Sorting: A - Z'); // Debugging line
-    clearHighlights(); // Clear previous highlights
-    const selectedLink = document.querySelector('a[onclick="sortAZ()"]');
-    if (selectedLink) {
-        selectedLink.classList.add('highlight'); // Highlight the selected sort option
+    function sortHighToLow() {
+        console.log('Sorting: High to Low');
+        clearHighlights();
+        const selectedLink = document.querySelector('a[onclick="sortHighToLow()"]');
+        if (selectedLink) {
+            selectedLink.classList.add('highlight');
+        }
+        currentSort = 'priceDesc';
+        currentPage = 1;
+        fetchProducts();
     }
-    currentSort = 'nameAsc'; // Set the sort option
-    currentPage = 1;
-    fetchProducts(); // Re-fetch the products with the updated sort
-}
 
-// Function for Z-A sorting
-function sortZA() {
-    console.log('Sorting: Z - A'); // Debugging line
-    clearHighlights(); // Clear previous highlights
-    const selectedLink = document.querySelector('a[onclick="sortZA()"]');
-    if (selectedLink) {
-        selectedLink.classList.add('highlight'); // Highlight the selected sort option
+    function sortAZ() {
+        console.log('Sorting: A - Z');
+        clearHighlights();
+        const selectedLink = document.querySelector('a[onclick="sortAZ()"]');
+        if (selectedLink) {
+            selectedLink.classList.add('highlight');
+        }
+        currentSort = 'nameAsc';
+        currentPage = 1;
+        fetchProducts();
     }
-    currentSort = 'nameDesc'; // Set the sort option
-    currentPage = 1;
-    fetchProducts(); // Re-fetch the products with the updated sort
-}
+
+    function sortZA() {
+        console.log('Sorting: Z - A');
+        clearHighlights();
+        const selectedLink = document.querySelector('a[onclick="sortZA()"]');
+        if (selectedLink) {
+            selectedLink.classList.add('highlight');
+        }
+        currentSort = 'nameDesc';
+        currentPage = 1;
+        fetchProducts();
+    }
 
     const limits = (ct) => {
         limit = ct;
@@ -377,68 +373,68 @@ function sortZA() {
         fetchProducts();
     };
 
-   function clearfilter() {
-    clearHighlights(); // Clear all highlights
-    currentPage = 1;
-    currentSort = '';
-    currentCategory = '';
-    searchQuery = '';
-    limit = 6;
-    fetchProducts(); // Re-fetch products without any filters
-}
+    function clearfilter() {
+        clearHighlights();
+        currentPage = 1;
+        currentSort = '';
+        currentCategory = '';
+        searchQuery = '';
+        limit = 6;
+        fetchProducts();
+    }
+
     // Initial call to fetch products when page loads
     fetchProducts();
 
     // Wishlist action
     $(document).ready(function () {
-        const userId = "";  // Make sure this is assigned correctly or removed if not needed
+        const userId = "";
         $('#pro_container').on('click', '.wish.action-btn', function (event) {
-    event.preventDefault();
-    var $button = $(this);
-    var id = $button.data('id');
+            event.preventDefault();
+            var $button = $(this);
+            var id = $button.data('id');
 
-    $.ajax({
-        type: 'POST',
-        url: '/addtowishlist',
-        contentType: 'application/json',
-        data: JSON.stringify({ id: id, userId: userId }),
-        success: function (productData) {
-            if (productData.success) {
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Product Successfully added to Wishlist!!!',
-                    icon: 'success',
-                    confirmButtonText: 'Cool'
-                });
-            } else {
-                if (productData.message) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops',
-                        text: productData.message,
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Login Required',
-                        showCancelButton: true,
-                        confirmButtonText: 'Login',
-                        confirmButtonColor: "#088178",
-                        cancelButtonColor: "#d33",
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '/login';
+            $.ajax({
+                type: 'POST',
+                url: '/addtowishlist',
+                contentType: 'application/json',
+                data: JSON.stringify({ id: id, userId: userId }),
+                success: function (productData) {
+                    if (productData.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Product Successfully added to Wishlist!!!',
+                            icon: 'success',
+                            confirmButtonText: 'Cool'
+                        });
+                    } else {
+                        if (productData.message) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops',
+                                text: productData.message,
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Login Required',
+                                showCancelButton: true,
+                                confirmButtonText: 'Login',
+                                confirmButtonColor: "#088178",
+                                cancelButtonColor: "#d33",
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/login';
+                                }
+                            });
                         }
-                    });
+                    }
+                },
+                error: function (error) {
+                    console.log('Error adding to wishlist', error);
                 }
-            }
-        },
-        error: function (error) {
-            console.log('Error adding to wishlist', error);
-        }
-    });
-});
-
+            });
+        });
     });
 </script>

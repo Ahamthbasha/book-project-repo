@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer')
+const sgMail = require('@sendgrid/mail')
 const argon2 = require('argon2')
 
 let otp
@@ -13,37 +13,34 @@ const verifyEmail = async (email, req) => {
         req.session.otp = otp; 
         req.session.otpTimestamp = otpTimestamp; 
 
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false,
-            requireTLS: true,
-            auth: {
-                user: process.env.USER_EMAIL,
-                pass: process.env.USER_PASSWORD
-            }
-        });
+        // Set SendGrid API key
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-        const mailOptions = {
-            from: process.env.USER_EMAIL,
+        const msg = {
             to: email,
-            subject: "For verify mail",
-            text: otp // Send OTP in email body
+            from: process.env.SENDGRID_VERIFIED_SENDER, // Use your verified sender email
+            subject: "Email Verification OTP",
+            text: `Your OTP for email verification is: ${otp}`,
+            html: `<strong>Your OTP for email verification is: ${otp}</strong>`, // HTML version
         };
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log("Email has been sent");
-            }
-        });
-
+        // Send email using SendGrid
+        await sgMail.send(msg);
+        
+        console.log("Email has been sent successfully");
         console.log("otp", otp); // Log generated OTP
+        
         return { otp, timestamp: otpTimestamp }; // Return both OTP and timestamp
         
     } catch (error) {
-        console.log(error);
+        console.error("SendGrid Error:", error);
+        
+        // More detailed error logging
+        if (error.response) {
+            console.error("SendGrid Response Error:", error.response.body);
+        }
+        
+        throw error; // Re-throw the error for handling in the calling function
     }
 };
 
